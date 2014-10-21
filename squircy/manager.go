@@ -6,8 +6,9 @@ import (
 
 type Manager struct {
 	*martini.ClassicMartini
+	config *Configuration
 }
 
 func NewManager() *Manager {
-	return &Manager{martini.Classic()}
+	return &Manager{martini.Classic(),NewConfiguration("config.json")}
 }
