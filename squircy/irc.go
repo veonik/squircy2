@@ -1,7 +1,6 @@
 package squircy
 
 import (
-	handler "./irc"
 	"github.com/thoj/go-ircevent"
 	"log"
 	"sync"
@@ -37,7 +36,7 @@ func newHandlerCollection(conn *irc.Connection, config *Configuration, l *log.Lo
 	conn.AddCallback("PRIVMSG", matchAndHandle)
 	conn.AddCallback("NOTICE", matchAndHandle)
 
-	c.Add(handler.NewNickservHandler(conn, l, config.Password))
+	c.Add(newNickservHandler(conn, l, c, config))
 
 	return
 }
@@ -56,7 +55,7 @@ func newIrcConnection(config *Configuration, l *log.Logger) (conn *irc.Connectio
 
 func (c *HandlerCollection) Remove(h Handler) {
 	if _, ok := c.handlers[h.Id()]; ok {
-		c.log.Println("Removing handler ", h.Id())
+		c.log.Println("Removing handler", h.Id())
 		delete(c.handlers, h.Id())
 	}
 }

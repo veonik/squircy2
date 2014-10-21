@@ -1,4 +1,4 @@
-package irc
+package squircy
 
 import (
 	"errors"
@@ -33,12 +33,12 @@ func parseCommand(msg string) (string, []string) {
 type NickservHandler struct {
 	conn     *irc.Connection
 	log      *log.Logger
-	password string
-	disabled bool
+	handlers *HandlerCollection
+	config   *Configuration
 }
 
-func NewNickservHandler(conn *irc.Connection, log *log.Logger, password string) (h *NickservHandler) {
-	h = &NickservHandler{conn, log, password, false}
+func newNickservHandler(conn *irc.Connection, log *log.Logger, handlers *HandlerCollection, config *Configuration) (h *NickservHandler) {
+	h = &NickservHandler{conn, log, handlers, config}
 
 	return
 }
@@ -48,11 +48,11 @@ func (h *NickservHandler) Id() string {
 }
 
 func (h *NickservHandler) Matches(e *irc.Event) bool {
-	return !h.disabled && strings.Contains(strings.ToLower(e.Message()), "identify") && e.User == "NickServ"
+	return strings.Contains(strings.ToLower(e.Message()), "identify") && e.User == "NickServ"
 }
 
 func (h *NickservHandler) Handle(e *irc.Event) {
-	h.disabled = true
-	h.conn.Privmsgf("NickServ", "IDENTIFY %s", h.password)
+	h.conn.Privmsgf("NickServ", "IDENTIFY %s", h.config.Password)
 	h.log.Println("Identified with Nickserv")
+	h.handlers.Remove(h)
 }
