@@ -2,6 +2,7 @@ package squircy
 
 import (
 	"github.com/go-martini/martini"
+	"github.com/martini-contrib/render"
 	"log"
 	"os"
 )
@@ -13,10 +14,12 @@ type Manager struct {
 func NewManager() (manager *Manager) {
 	manager = &Manager{martini.Classic()}
 	manager.Map(NewConfiguration("config.json"))
-	manager.Map(log.New(os.Stdout, "[squircy] ", log.Lshortfile))
+	manager.Map(log.New(os.Stdout, "[squircy] ", 0))
 	manager.invokeAndMap(newIrcConnection)
 	manager.invokeAndMap(newHandlerCollection)
 	manager.invokeAndMap(newRedisClient)
+
+	manager.configure()
 
 	return
 }
@@ -27,4 +30,13 @@ func (manager *Manager) invokeAndMap(fn interface{}) {
 		panic(err)
 	}
 	manager.Map(res[0].Interface())
+}
+
+func (manager *Manager) configure() {
+	manager.Use(render.Renderer(render.Options{
+		Directory:  "views",
+		Layout:     "layout",
+		Extensions: []string{".tmpl", ".html"},
+	}))
+	manager.Get("/", indexAction)
 }
