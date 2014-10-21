@@ -3,6 +3,7 @@ package irc
 import (
 	"errors"
 	"github.com/thoj/go-ircevent"
+	"log"
 	"strings"
 )
 
@@ -30,14 +31,15 @@ func parseCommand(msg string) (string, []string) {
 }
 
 type NickservHandler struct {
-	conn *irc.Connection
+	conn     *irc.Connection
+	log      *log.Logger
 	password string
 	disabled bool
 }
 
-func NewNickservHandler(conn *irc.Connection, password string) (h *NickservHandler) {
-	h = &NickservHandler{conn, password, false}
-	
+func NewNickservHandler(conn *irc.Connection, log *log.Logger, password string) (h *NickservHandler) {
+	h = &NickservHandler{conn, log, password, false}
+
 	return
 }
 
@@ -52,4 +54,5 @@ func (h *NickservHandler) Matches(e *irc.Event) bool {
 func (h *NickservHandler) Handle(e *irc.Event) {
 	h.disabled = true
 	h.conn.Privmsgf("NickServ", "IDENTIFY %s", h.password)
+	h.log.Println("Identified with Nickserv")
 }

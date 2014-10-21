@@ -1,10 +1,10 @@
 package squircy
 
 import (
-	"github.com/thoj/go-ircevent"
-	"fmt"
-	"sync"
 	handler "./irc"
+	"github.com/thoj/go-ircevent"
+	"log"
+	"sync"
 )
 
 type Handler interface {
@@ -15,11 +15,12 @@ type Handler interface {
 
 type HandlerCollection struct {
 	handlers map[string]Handler
+	log      *log.Logger
 }
 
-func newHandlerCollection(conn *irc.Connection, config *Configuration) (c *HandlerCollection) {
-	c = &HandlerCollection{make(map[string]Handler)}
-	
+func newHandlerCollection(conn *irc.Connection, config *Configuration, l *log.Logger) (c *HandlerCollection) {
+	c = &HandlerCollection{make(map[string]Handler), l}
+
 	mutex := &sync.Mutex{}
 	matchAndHandle := func(e *irc.Event) {
 		mutex.Lock()
@@ -35,26 +36,27 @@ func newHandlerCollection(conn *irc.Connection, config *Configuration) (c *Handl
 
 	conn.AddCallback("PRIVMSG", matchAndHandle)
 	conn.AddCallback("NOTICE", matchAndHandle)
-	
-	c.Add(handler.NewNickservHandler(conn, config.Password))
-		
+
+	c.Add(handler.NewNickservHandler(conn, l, config.Password))
+
 	return
 }
 
-func newIrcConnection(config *Configuration) (conn *irc.Connection) {
+func newIrcConnection(config *Configuration, l *log.Logger) (conn *irc.Connection) {
 	conn = irc.IRC(config.Nick, config.Username)
+	conn.Log = l
 
 	err := conn.Connect(config.Network)
 	if err != nil {
 		panic(err)
 	}
-	
+
 	return
 }
 
 func (c *HandlerCollection) Remove(h Handler) {
 	if _, ok := c.handlers[h.Id()]; ok {
-		fmt.Println("Removing handler ", h.Id())
+		c.log.Println("Removing handler ", h.Id())
 		delete(c.handlers, h.Id())
 	}
 }
@@ -66,6 +68,6 @@ func (c *HandlerCollection) RemoveId(id string) {
 }
 
 func (c *HandlerCollection) Add(h Handler) {
-	fmt.Println("Adding handler ", h.Id())
+	c.log.Println("Adding handler", h.Id())
 	c.handlers[h.Id()] = h
 }
