@@ -39,4 +39,5 @@ func (manager *Manager) configure() {
 		Extensions: []string{".tmpl", ".html"},
 	}))
 	manager.Get("/", indexAction)
+	manager.Get("/status", statusAction)
 }
