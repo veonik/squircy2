@@ -11,18 +11,17 @@ type Manager struct {
 func NewManager() (manager *Manager) {
 	manager = &Manager{martini.Classic()}
 	manager.Map(NewConfiguration("config.json"))
-	res, err := manager.Invoke(newIrcConnection)
-	if err != nil {
-		panic(err)
-	}
-	conn := res[0].Interface()
-	manager.Map(conn)
-	res, err = manager.Invoke(newHandlerCollection)
-	if err != nil {
-		panic(err)
-	}
-	handlers := res[0].Interface()
-	manager.Map(handlers)
+	manager.invokeAndMap(newIrcConnection)
+	manager.invokeAndMap(newHandlerCollection)
+	manager.invokeAndMap(newRedisClient)
 	
 	return
+}
+
+func (manager *Manager) invokeAndMap(fn interface{}) {
+	res, err := manager.Invoke(fn)
+	if err != nil {
+		panic(err)
+	}
+	manager.Map(res[0].Interface())
 }
