@@ -6,6 +6,7 @@ import (
 
 func main() {
 	mgr := squircy.NewManager()
-	
-	mgr.Run()
+	go mgr.Run()
+
+	mgr.LoopCli()
 }
