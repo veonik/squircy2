@@ -6,14 +6,14 @@ import (
 	"github.com/thoj/go-ircevent"
 	"log"
 	"os"
-	"reflect"
 	"time"
 )
 
 func (man *Manager) LoopCli() {
-	l := man.Injector.Get(reflect.TypeOf((*log.Logger)(nil))).Interface().(*log.Logger)
-	conn := man.Injector.Get(reflect.TypeOf((*irc.Connection)(nil))).Interface().(*irc.Connection)
+	man.Invoke(loopCli)
+}
 
+func loopCli(l *log.Logger, conn *irc.Connection) {
 	bin := bufio.NewReader(os.Stdin)
 	for {
 		switch str, _ := bin.ReadString('\n'); {
