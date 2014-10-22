@@ -33,6 +33,12 @@ func scriptAction(r render.Render, client *redis.Client) {
 	r.HTML(200, "script/index", map[string]interface{}{"scripts": scripts})
 }
 
+func scriptReinitAction(r render.Render, h *ScriptHandler) {
+	h.ReInit()
+
+	r.Redirect("/script", 302)
+}
+
 func newScriptAction(r render.Render) {
 	r.HTML(200, "script/new", nil)
 }

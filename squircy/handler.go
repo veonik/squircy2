@@ -149,43 +149,9 @@ type ScriptHandler struct {
 }
 
 func newScriptHandler(conn *irc.Connection, handlers *HandlerCollection, config *Configuration) *ScriptHandler {
-	luaVm := lua.NewState()
-	luaVm.OpenLibs()
+	h := &ScriptHandler{conn, handlers, config, nil, nil, false, "", make(ScriptDatastore)}
 
-	jsVm := otto.New()
-
-	h := &ScriptHandler{conn, handlers, config, luaVm, jsVm, false, "", make(ScriptDatastore)}
-
-	client := &httpHelper{}
-	cres, _ := h.jsVm.ToValue(client)
-	h.jsVm.Set("Http", cres)
-	db := &dataHelper{make(map[string]interface{})}
-	dres, _ := h.jsVm.ToValue(db)
-	h.jsVm.Set("Data", dres)
-	irc := &ircHelper{h.conn}
-	ires, _ := h.jsVm.ToValue(irc)
-	h.jsVm.Set("Irc", ires)
-
-	h.luaVm.Register("typename", func(vm *lua.State) int {
-		o := vm.Typename(int(vm.Type(1)))
-		h.luaVm.PushString(o)
-		return 1
-	})
-	h.luaVm.Register("setex", func(vm *lua.State) int {
-		key := vm.ToString(1)
-		value := vm.ToString(2)
-		db.Set(key, value)
-		return 0
-	})
-	h.luaVm.Register("getex", func(vm *lua.State) int {
-		key := vm.ToString(1)
-		value := db.Get(key)
-		if value != nil {
-			vm.PushString(value.(string))
-			return 1
-		}
-		return 0
-	})
+	h.init()
 
 	return h
 }
@@ -331,6 +297,53 @@ func (h *ScriptHandler) Handle(e *irc.Event) {
 		h.replType = args[0]
 		h.conn.Privmsgf(replyTarget(e), "%s REPL session started.", replTypePretty(h.replType))
 	}
+}
+
+func (h *ScriptHandler) ReInit() {
+	h.repl = false
+	h.replType = ""
+	h.init()
+}
+
+func (h *ScriptHandler) init() {
+	luaVm := lua.NewState()
+	luaVm.OpenLibs()
+
+	jsVm := otto.New()
+
+	h.luaVm = luaVm
+	h.jsVm = jsVm
+
+	client := &httpHelper{}
+	cres, _ := h.jsVm.ToValue(client)
+	h.jsVm.Set("Http", cres)
+	db := &dataHelper{make(map[string]interface{})}
+	dres, _ := h.jsVm.ToValue(db)
+	h.jsVm.Set("Data", dres)
+	irc := &ircHelper{h.conn}
+	ires, _ := h.jsVm.ToValue(irc)
+	h.jsVm.Set("Irc", ires)
+
+	h.luaVm.Register("typename", func(vm *lua.State) int {
+		o := vm.Typename(int(vm.Type(1)))
+		h.luaVm.PushString(o)
+		return 1
+	})
+	h.luaVm.Register("setex", func(vm *lua.State) int {
+		key := vm.ToString(1)
+		value := vm.ToString(2)
+		db.Set(key, value)
+		return 0
+	})
+	h.luaVm.Register("getex", func(vm *lua.State) int {
+		key := vm.ToString(1)
+		value := db.Get(key)
+		if value != nil {
+			vm.PushString(value.(string))
+			return 1
+		}
+		return 0
+	})
 }
 
 func newJavascriptScript(conn *irc.Connection, vm *otto.Otto, fn string) *JavascriptScript {

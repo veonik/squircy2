@@ -1,0 +1,27 @@
+<script type="text/javascript">
+$(function() {
+	var $appStatus = $('#app-status');
+	(function() {
+		var fn = arguments.callee;
+		$.ajax({
+			url: "/status",
+			dataType: "json",
+			success: function(response) {
+				setTimeout(fn, 30000)
+				if (response.Connected) {
+					if ($appStatus.hasClass('connected')) {
+						return;
+					}
+					$appStatus.addClass('connected');
+				} else {
+					$appStatus.removeClass('connected');
+				}
+			},
+			error: function() {
+				$appStatus.removeClass('connected');
+				setTimeout(fn, 15000)
+			}
+		});
+	})();
+});
+</script>

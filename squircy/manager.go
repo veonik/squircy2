@@ -51,6 +51,7 @@ func (manager *Manager) configure() {
 	manager.Get("/status", statusAction)
 	manager.Group("/script", func(r martini.Router) {
 		r.Get("", scriptAction)
+		r.Post("/reinit", scriptReinitAction)
 		r.Get("/new", newScriptAction)
 		r.Post("/create", createScriptAction)
 		r.Get("/:index/edit", editScriptAction)
