@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./squircy"
+	"squircy2/squircy"
 )
 
 func main() {
