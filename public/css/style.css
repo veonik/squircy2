@@ -2,6 +2,10 @@ body {
 	padding-top: 20px;
 }
 
+.table>thead>tr>th, .table>tbody>tr>th, .table>tfoot>tr>th, .table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td {
+	vertical-align: middle;
+}
+
 #app-status {
 	height: 20px;
 	width: 20px;

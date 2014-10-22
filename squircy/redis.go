@@ -9,11 +9,11 @@ func newRedisClient(config *Configuration) (c *redis.Client) {
 	if err != nil {
 		panic("Error connecting to redis")
 	}
-	
+
 	r := c.Cmd("select", config.RedisDatabase)
 	if r.Err != nil {
 		panic("Error selecting redis database")
 	}
-	
+
 	return
 }
