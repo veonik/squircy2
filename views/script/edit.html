@@ -1,0 +1,25 @@
+<form method="post" class="form form-horizontal" action="/script/{{ .Index }}/update">
+<div class="row">
+	<div class="col-md-4">
+  		<input class="form-control" name="title" placeholder="Title" value="{{ .Script.Title }}">
+	</div>
+	<div class="col-md-4">
+  		<select class="form-control" id="script_type" name="type">
+			<option{{ if eq .Script.Type "Javascript" }} selected{{ end }}>Javascript</script>
+			<option{{ if eq .Script.Type "Lua" }} selected{{ end }}>Lua</script>
+			<option{{ if eq .Script.Type "Lisp" }} selected{{ end }}>Lisp</script>
+		</select>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-12" style="height: 500px">
+  		<div id="editor" style="width: 100%; height: 100%"></div>
+		<input type="hidden" name="body" id="script_body" value="{{ .Script.Body }}">
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-4">
+		<button class="btn btn-primary">Save</button>
+	</div>
+</form>
+{{ template "script/_javascripts" }}

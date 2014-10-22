@@ -1,0 +1,39 @@
+<table class="table table-bordered table-striped">
+	<tr>
+		<th>Title</th>
+		<th>Type</th>
+		<th>Body</th>
+		<th><a href="/script/new" class="btn btn-primary btn-sm">New Script</a></th>
+	</tr>
+{{ range $index, $element := .scripts }}
+	<tr>
+		<td>{{ $element.Title }}</td>
+		<td>{{ $element.Type }}</td>
+		<td>{{ $element.Body }}</td>
+		<td>
+			<div class="btn-group">
+				<a href="/script/{{ $index }}/edit" class="btn btn-sm btn-default">Edit</a>
+				<a href="/script/{{ $index }}/remove" class="remove btn btn-sm btn-warning">Remove</a>
+			</div>
+		</td>
+	</tr>
+{{ end }}
+</table>
+<script type="text/javascript">
+$(function() {
+	$('.remove').on('click', function(e) {
+		e.preventDefault();
+		
+		if (confirm('Are you sure you want to delete this script?')) {
+			var url = $(this).attr('href');
+			$.ajax({
+				url: url,
+				type: 'post',
+				success: function() {
+					window.location.reload();
+				}
+			})
+		}
+	})
+});
+</script>

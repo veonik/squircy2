@@ -1,0 +1,25 @@
+<form method="post" class="form form-horizontal" action="/script/create">
+<div class="row">
+	<div class="col-md-4">
+  		<input class="form-control" name="title" placeholder="Title">
+	</div>
+	<div class="col-md-4">
+  		<select class="form-control" id="script_type" name="type">
+			<option>Javascript</script>
+			<option>Lua</script>
+			<option>Lisp</script>
+		</select>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-12" style="height: 500px">
+  		<div id="editor" style="width: 100%; height: 100%"></div>
+		<input type="hidden" name="body" id="script_body">
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-4">
+		<button class="btn btn-primary">Save</button>
+	</div>
+</form>
+{{ template "script/_javascripts" }}
