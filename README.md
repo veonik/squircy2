@@ -1,7 +1,7 @@
 squIRCy2
 ========
 
-## the scriptable IRC bot
+##### the scriptable IRC bot
 
 squIRCy2 is written in Go and supports Javascript, Lua, and a small dialect of Lisp. 
 
