@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -136,7 +137,41 @@ func (irc *ircHelper) Part(target string) {
 	irc.conn.Part(target)
 }
 
-type ScriptDatastore map[string]string
+type scriptHelper struct {
+	handler *ScriptHandler
+}
+
+func (script *scriptHelper) AddHandler(typeName, fnName string) {
+	switch {
+	case typeName == "js":
+		handler := newJavascriptScript(script.handler.conn, script.handler.jsVm, fnName)
+		script.handler.handlers.Remove(handler)
+		script.handler.handlers.Add(handler)
+
+	case typeName == "lua":
+		handler := newLuaScript(script.handler.conn, script.handler.luaVm, fnName)
+		script.handler.handlers.Remove(handler)
+		script.handler.handlers.Add(handler)
+
+	case typeName == "lisp":
+		handler := newLispScript(script.handler.conn, fnName)
+		script.handler.handlers.Remove(handler)
+		script.handler.handlers.Add(handler)
+	}
+}
+
+func (script *scriptHelper) RemoveHandler(typeName, fnName string) {
+	switch {
+	case typeName == "js":
+		script.handler.handlers.RemoveId("js-" + fnName)
+
+	case typeName == "lua":
+		script.handler.handlers.RemoveId("lua-" + fnName)
+
+	case typeName == "lisp":
+		script.handler.handlers.RemoveId("lisp-" + fnName)
+	}
+}
 
 type ScriptHandler struct {
 	conn     *irc.Connection
@@ -144,14 +179,14 @@ type ScriptHandler struct {
 	config   *Configuration
 	luaVm    *lua.State
 	jsVm     *otto.Otto
+	helper   *scriptHelper
 	client   *redis.Client
 	repl     bool
 	replType string
-	data     ScriptDatastore
 }
 
 func newScriptHandler(conn *irc.Connection, handlers *HandlerCollection, config *Configuration, client *redis.Client) *ScriptHandler {
-	h := &ScriptHandler{conn, handlers, config, nil, nil, client, false, "", make(ScriptDatastore)}
+	h := &ScriptHandler{conn, handlers, config, nil, nil, nil, client, false, ""}
 
 	h.init()
 
@@ -232,22 +267,8 @@ func (h *ScriptHandler) Handle(e *irc.Event) {
 			return
 		}
 
-		switch {
-		case args[0] == "js":
-			handler := newJavascriptScript(h.conn, h.jsVm, args[1])
-			h.handlers.Remove(handler)
-			h.handlers.Add(handler)
-
-		case args[0] == "lua":
-			handler := newLuaScript(h.conn, h.luaVm, args[1])
-			h.handlers.Remove(handler)
-			h.handlers.Add(handler)
-
-		case args[0] == "lisp":
-			handler := newLispScript(h.conn, args[1])
-			h.handlers.Remove(handler)
-			h.handlers.Add(handler)
-		}
+		h.conn.Privmsgf(replyTarget(e), "Registered", replTypePretty(args[0]), "handler", args[1])
+		h.helper.AddHandler(args[0], args[1])
 
 	case command == "unregister":
 		if len(args) != 2 && args[0] != "js" && args[0] != "lua" && args[0] != "lisp" {
@@ -256,19 +277,8 @@ func (h *ScriptHandler) Handle(e *irc.Event) {
 			return
 		}
 
-		switch {
-		case args[0] == "js":
-			h.conn.Privmsgf(replyTarget(e), "Unregistered Javsacript handler "+args[1])
-			h.handlers.RemoveId("js-" + args[1])
-
-		case args[0] == "lua":
-			h.conn.Privmsgf(replyTarget(e), "Unregistered Lua handler "+args[1])
-			h.handlers.RemoveId("lua-" + args[1])
-
-		case args[0] == "lisp":
-			h.conn.Privmsgf(replyTarget(e), "Unregistered Lisp handler "+args[1])
-			h.handlers.RemoveId("lisp-" + args[1])
-		}
+		h.conn.Privmsgf(replyTarget(e), "Unregistered", replTypePretty(args[0]), "handler", args[1])
+		h.helper.RemoveHandler(args[0], args[1])
 
 	case command == "repl":
 		if len(args) != 1 && args[0] != "js" && args[0] != "lua" && args[0] != "lisp" {
@@ -294,8 +304,11 @@ func (h *ScriptHandler) init() {
 
 	jsVm := otto.New()
 
+	helper := &scriptHelper{h}
+
 	h.luaVm = luaVm
 	h.jsVm = jsVm
+	h.helper = helper
 
 	client := &httpHelper{}
 	cres, _ := h.jsVm.ToValue(client)
@@ -306,6 +319,8 @@ func (h *ScriptHandler) init() {
 	irc := &ircHelper{h.conn}
 	ires, _ := h.jsVm.ToValue(irc)
 	h.jsVm.Set("Irc", ires)
+	hres, _ := h.jsVm.ToValue(helper)
+	h.jsVm.Set("Script", hres)
 
 	h.luaVm.Register("typename", func(vm *lua.State) int {
 		o := vm.Typename(int(vm.Type(1)))
@@ -328,6 +343,40 @@ func (h *ScriptHandler) init() {
 		vm.PushNil()
 		return 1
 	})
+	h.luaVm.Register("joinchan", func(vm *lua.State) int {
+		channel := vm.ToString(1)
+		irc.Join(channel)
+		return 0
+	})
+	h.luaVm.Register("partchan", func(vm *lua.State) int {
+		channel := vm.ToString(1)
+		irc.Part(channel)
+		return 0
+	})
+	h.luaVm.Register("privmsg", func(vm *lua.State) int {
+		target := vm.ToString(1)
+		message := vm.ToString(2)
+		irc.Privmsg(target, message)
+		return 0
+	})
+	h.luaVm.Register("httpget", func(vm *lua.State) int {
+		url := vm.ToString(1)
+		res := client.Get(url)
+		vm.PushString(res)
+		return 1
+	})
+	h.luaVm.Register("addhandler", func(vm *lua.State) int {
+		typeName := vm.ToString(1)
+		fnName := vm.ToString(2)
+		helper.AddHandler(typeName, fnName)
+		return 0
+	})
+	h.luaVm.Register("removehandler", func(vm *lua.State) int {
+		typeName := vm.ToString(1)
+		fnName := vm.ToString(2)
+		helper.RemoveHandler(typeName, fnName)
+		return 0
+	})
 
 	lisp.SetHandler("setex", func(vars ...lisp.Value) (lisp.Value, error) {
 		if len(vars) != 2 {
@@ -346,6 +395,57 @@ func (h *ScriptHandler) init() {
 		if val := db.Get(key); val != nil {
 			return lisp.StringValue(val.(string)), nil
 		}
+		return lisp.Nil, nil
+	})
+	lisp.SetHandler("joinchan", func(vars ...lisp.Value) (lisp.Value, error) {
+		if len(vars) != 1 {
+			return lisp.Nil, nil
+		}
+		channel := vars[0].String()
+		irc.Join(channel)
+		return lisp.Nil, nil
+	})
+	lisp.SetHandler("partchan", func(vars ...lisp.Value) (lisp.Value, error) {
+		if len(vars) != 1 {
+			return lisp.Nil, nil
+		}
+		channel := vars[0].String()
+		irc.Part(channel)
+		return lisp.Nil, nil
+	})
+	lisp.SetHandler("privmsg", func(vars ...lisp.Value) (lisp.Value, error) {
+		if len(vars) != 2 {
+			return lisp.Nil, nil
+		}
+		target := vars[0].String()
+		message := vars[1].String()
+		irc.Privmsg(target, message)
+		return lisp.Nil, nil
+	})
+	lisp.SetHandler("httpget", func(vars ...lisp.Value) (lisp.Value, error) {
+		if len(vars) != 1 {
+			return lisp.Nil, nil
+		}
+		url := vars[0].String()
+		res := client.Get(url)
+		return lisp.StringValue(res), nil
+	})
+	lisp.SetHandler("addhandler", func(vars ...lisp.Value) (lisp.Value, error) {
+		if len(vars) != 2 {
+			return lisp.Nil, nil
+		}
+		typeName := vars[0].String()
+		fnName := vars[1].String()
+		helper.AddHandler(typeName, fnName)
+		return lisp.Nil, nil
+	})
+	lisp.SetHandler("removehandler", func(vars ...lisp.Value) (lisp.Value, error) {
+		if len(vars) != 2 {
+			return lisp.Nil, nil
+		}
+		typeName := vars[0].String()
+		fnName := vars[1].String()
+		helper.RemoveHandler(typeName, fnName)
 		return lisp.Nil, nil
 	})
 
@@ -416,7 +516,7 @@ func (h *JavascriptScript) Handle(e *irc.Event) {
 		h.conn.Privmsgf(replyTarget(e), message)
 		return otto.Value{}
 	})
-	_, err := runUnsafeJavascript(h.vm, fmt.Sprintf("%s(\"%s\", \"%s\", \"%s\")", h.fn, e.Arguments[0], e.Nick, e.Message()))
+	_, err := runUnsafeJavascript(h.vm, fmt.Sprintf("%s(\"%s\", \"%s\", %s)", h.fn, e.Arguments[0], e.Nick, strconv.Quote(e.Message())))
 	if err != nil {
 		h.conn.Privmsgf(replyTarget(e), err.Error())
 
@@ -472,7 +572,7 @@ func (h *LuaScript) Handle(e *irc.Event) {
 		h.conn.Privmsgf(replyTarget(e), o)
 		return 0
 	})
-	err := runUnsafeLua(h.vm, fmt.Sprintf("%s(\"%s\", \"%s\", \"%s\")", h.fn, e.Arguments[0], e.Nick, e.Message()))
+	err := runUnsafeLua(h.vm, fmt.Sprintf("%s(\"%s\", \"%s\", %s)", h.fn, e.Arguments[0], e.Nick, strconv.Quote(e.Message())))
 	if err != nil {
 		h.conn.Privmsgf(replyTarget(e), err.Error())
 	}
@@ -521,7 +621,7 @@ func (h *LispScript) Handle(e *irc.Event) {
 		}
 		return lisp.Nil, nil
 	})
-	_, err := runUnsafeLisp(fmt.Sprintf("(%s \"%s\" \"%s\" \"%s\")", h.fn, e.Arguments[0], e.Nick, e.Message()))
+	_, err := runUnsafeLisp(fmt.Sprintf("(%s \"%s\" \"%s\" %s)", h.fn, e.Arguments[0], e.Nick, strconv.Quote(e.Message())))
 
 	if err == halt {
 		panic(err)
