@@ -1,4 +1,11 @@
 {
-    "RedisHost": "127.0.0.1:6379",
-    "RedisDatabase": 5
+	"Network": "weber.freenode.net:6667",
+	"Nick": "squishyj",
+	"Username": "mrjones",
+	"Password": "",
+	"Channel": "#squishyslab",
+	"OwnerNick": "",
+	"OwnerHost": "",
+	"RedisHost": "127.0.0.1:6379",
+	"RedisDatabase": 0
 }
