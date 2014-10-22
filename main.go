@@ -1,7 +1,7 @@
 package main
 
 import (
-	"squircy2/squircy"
+	"github.com/tyler-sommer/squircy2"
 )
 
 func main() {
