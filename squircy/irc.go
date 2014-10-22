@@ -36,8 +36,6 @@ func newHandlerCollection(conn *irc.Connection, config *Configuration, l *log.Lo
 	conn.AddCallback("PRIVMSG", matchAndHandle)
 	conn.AddCallback("NOTICE", matchAndHandle)
 
-	c.Add(newNickservHandler(conn, l, c, config))
-
 	return
 }
 

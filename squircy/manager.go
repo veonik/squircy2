@@ -16,20 +16,29 @@ func NewManager() (manager *Manager) {
 	manager.Map(NewConfiguration("config.json"))
 	manager.Map(log.New(os.Stdout, "[squircy] ", 0))
 	manager.invokeAndMap(newIrcConnection)
-	manager.invokeAndMap(newHandlerCollection)
 	manager.invokeAndMap(newRedisClient)
+	h := manager.invokeAndMap(newHandlerCollection).(*HandlerCollection)
+	nickservHandler := manager.invokeAndMap(newNickservHandler).(*NickservHandler)
+	scriptHandler := manager.invokeAndMap(newScriptHandler).(*ScriptHandler)
+
+	h.Add(nickservHandler)
+	h.Add(scriptHandler)
 
 	manager.configure()
 
 	return
 }
 
-func (manager *Manager) invokeAndMap(fn interface{}) {
+func (manager *Manager) invokeAndMap(fn interface{}) interface{} {
 	res, err := manager.Invoke(fn)
 	if err != nil {
 		panic(err)
 	}
-	manager.Map(res[0].Interface())
+
+	val := res[0].Interface()
+	manager.Map(val)
+
+	return val
 }
 
 func (manager *Manager) configure() {
