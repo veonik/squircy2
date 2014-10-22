@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/aarzilli/golua/lua"
+	"github.com/fzzy/radix/redis"
 	"github.com/robertkrimen/otto"
 	"github.com/thoj/go-ircevent"
 	"github.com/veonik/go-lisp/lisp"
@@ -143,13 +144,14 @@ type ScriptHandler struct {
 	config   *Configuration
 	luaVm    *lua.State
 	jsVm     *otto.Otto
+	client   *redis.Client
 	repl     bool
 	replType string
 	data     ScriptDatastore
 }
 
-func newScriptHandler(conn *irc.Connection, handlers *HandlerCollection, config *Configuration) *ScriptHandler {
-	h := &ScriptHandler{conn, handlers, config, nil, nil, false, "", make(ScriptDatastore)}
+func newScriptHandler(conn *irc.Connection, handlers *HandlerCollection, config *Configuration, client *redis.Client) *ScriptHandler {
+	h := &ScriptHandler{conn, handlers, config, nil, nil, client, false, "", make(ScriptDatastore)}
 
 	h.init()
 
@@ -205,25 +207,6 @@ func (h *ScriptHandler) Handle(e *irc.Event) {
 			lisp.SetHandler("print", func(vars ...lisp.Value) (lisp.Value, error) {
 				if len(vars) == 1 {
 					h.conn.Privmsgf(replyTarget(e), vars[0].String())
-				}
-				return lisp.Nil, nil
-			})
-			lisp.SetHandler("setex", func(vars ...lisp.Value) (lisp.Value, error) {
-				if len(vars) != 2 {
-					return lisp.Nil, nil
-				}
-				key := vars[0].String()
-				value := vars[1].String()
-				h.data[key] = value
-				return lisp.Nil, nil
-			})
-			lisp.SetHandler("getex", func(vars ...lisp.Value) (lisp.Value, error) {
-				if len(vars) != 1 {
-					return lisp.Nil, nil
-				}
-				key := vars[0].String()
-				if val, ok := h.data[key]; ok {
-					return lisp.StringValue(val), nil
 				}
 				return lisp.Nil, nil
 			})
@@ -344,6 +327,42 @@ func (h *ScriptHandler) init() {
 		}
 		return 0
 	})
+
+	lisp.SetHandler("setex", func(vars ...lisp.Value) (lisp.Value, error) {
+		if len(vars) != 2 {
+			return lisp.Nil, nil
+		}
+		key := vars[0].String()
+		value := vars[1].String()
+		db.Set(key, value)
+		return lisp.Nil, nil
+	})
+	lisp.SetHandler("getex", func(vars ...lisp.Value) (lisp.Value, error) {
+		if len(vars) != 1 {
+			return lisp.Nil, nil
+		}
+		key := vars[0].String()
+		if val := db.Get(key); val != nil {
+			return lisp.StringValue(val.(string)), nil
+		}
+		return lisp.Nil, nil
+	})
+
+	repo := scriptRepository{h.client}
+	scripts := repo.Fetch()
+	for _, script := range scripts {
+		fmt.Println("Running", script.Type, "script", script.Title)
+		switch {
+		case script.Type == scriptJavascript:
+			runUnsafeJavascript(h.jsVm, script.Body)
+
+		case script.Type == scriptLua:
+			runUnsafeLua(h.luaVm, script.Body)
+
+		case script.Type == scriptLisp:
+			runUnsafeLisp(script.Body)
+		}
+	}
 }
 
 func newJavascriptScript(conn *irc.Connection, vm *otto.Otto, fn string) *JavascriptScript {

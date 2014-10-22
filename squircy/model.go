@@ -53,11 +53,9 @@ func (repo *scriptRepository) Fetch() []persistentScript {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(data)
 
 	scripts := make([]persistentScript, 0)
 	for _, rawScript := range data {
-		fmt.Println(rawScript)
 		script, err := hydrateScript(rawScript)
 		if err != nil {
 			continue
