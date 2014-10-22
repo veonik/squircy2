@@ -325,7 +325,8 @@ func (h *ScriptHandler) init() {
 			vm.PushString(value.(string))
 			return 1
 		}
-		return 0
+		vm.PushNil()
+		return 1
 	})
 
 	lisp.SetHandler("setex", func(vars ...lisp.Value) (lisp.Value, error) {
@@ -456,7 +457,7 @@ func runUnsafeLua(vm *lua.State, unsafe string) error {
 	vm.SetExecutionLimit(maxExecutionTime * (1 << 26))
 	err := vm.DoString(unsafe)
 
-	if err.Error() == "Lua execution quantum exceeded" {
+	if err != nil && err.Error() == "Lua execution quantum exceeded" {
 		panic(halt)
 	}
 
