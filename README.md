@@ -27,8 +27,9 @@ Once Lua and Redis are ready to go, the easiest way to install squIRCy2 is by ru
 go get github.com/tyler-sommer/squircy2
 ```
 
-> Assets are currently not embedded in the application itself. 
-> *You must run squIRCy2 from the project directory*
+#### Assets are currently not embedded in the application itself. 
+####
+#### You must run squIRCy2 from the project directory
 
 Once squIRCy2 is installed, you'll need to create a configuration file. You can copy defaults as such:
 
