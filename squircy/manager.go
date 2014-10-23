@@ -11,9 +11,9 @@ type Manager struct {
 	*martini.ClassicMartini
 }
 
-func NewManager() (manager *Manager) {
+func NewManager(config *Configuration) (manager *Manager) {
 	manager = &Manager{martini.Classic()}
-	manager.Map(NewConfiguration("config.json"))
+	manager.Map(config)
 	manager.Map(log.New(os.Stdout, "[squircy] ", 0))
 	manager.invokeAndMap(newIrcConnection)
 	manager.invokeAndMap(newRedisClient)
@@ -24,7 +24,7 @@ func NewManager() (manager *Manager) {
 	h.Add(nickservHandler)
 	h.Add(scriptHandler)
 
-	manager.configure()
+	manager.configure(config)
 
 	return
 }
@@ -41,9 +41,10 @@ func (manager *Manager) invokeAndMap(fn interface{}) interface{} {
 	return val
 }
 
-func (manager *Manager) configure() {
+func (manager *Manager) configure(config *Configuration) {
+	manager.Use(martini.Static(config.RootPath + "/public"))
 	manager.Use(render.Renderer(render.Options{
-		Directory:  "views",
+		Directory:  config.RootPath + "/views",
 		Layout:     "layout",
 		Extensions: []string{".tmpl", ".html"},
 	}))
