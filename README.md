@@ -24,7 +24,7 @@ Additionally, squIRCy2 requires access to a Redis server. [See here for more inf
 Once Lua and Redis are ready to go, the easiest way to install squIRCy2 is by running:
 
 ```
-go get https://github.com/tyler-sommer/squircy2
+go get github.com/tyler-sommer/squircy2
 ```
 
 Once squIRCy2 is installed, you'll need to create a configuration file. You can copy defaults as such:
@@ -84,6 +84,17 @@ print(message)
 (addhandler type fnName)
 (removehandler type fnName)
 (print message)
+```
+
+### Chat handlers
+
+Chat handlers can be registered with `Script.AddHandler` in Javascript or `addhandler` in Lua and Lisp. This function takes a type, one of: js, lua, lisp. It also takes the name of a function that should have the following signature:
+
+```js
+function handler(target, nick, message) {
+	// target received the message
+	// nick sent the message
+}
 ```
 
 
