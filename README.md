@@ -8,7 +8,7 @@ squIRCy2 is written in Go and supports Javascript, Lua, and a small dialect of L
 It sports a web management interface for writing scripts and bot management, as well as dynamic script reloading at runtime.
 
 
-> Note: This program exposes scripting languages to IRC and should not be considered safe.
+> This program exposes scripting languages to IRC and should not be considered safe.
 
 
 Installation
@@ -27,13 +27,17 @@ Once Lua and Redis are ready to go, the easiest way to install squIRCy2 is by ru
 go get github.com/tyler-sommer/squircy2
 ```
 
+> Assets are currently not embedded in the application itself. 
+> *You must run squIRCy2 from the project directory*
+
 Once squIRCy2 is installed, you'll need to create a configuration file. You can copy defaults as such:
 
 ```
-cp $GOPATH/src/github.com/tyler-sommer/squircy2/config.json.dist ./config.json
+cd $GOPATH/src/github.com/tyler-sommer/squircy2
+cp config.json.dist config.json
 ```
 
-Then edit config.json to suit your needs.
+Then edit config.json to suit your needs. Then start the bot by running `squircy2`.
 
 
 Configuration
