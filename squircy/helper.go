@@ -53,38 +53,83 @@ func (irc *ircHelper) Part(target string) {
 	irc.conn.Part(target)
 }
 
+type handlerType string
+
+const (
+	handlerJs   handlerType = "js"
+	handlerLua              = "lua"
+	handlerLisp             = "lisp"
+)
+
+type eventType string
+
+const (
+	eventJoin    eventType = "join"
+	eventPart              = "part"
+	eventMessage           = "privmsg"
+	eventNotice            = "notice"
+	eventConnect           = "connect"
+)
+
+var eventMap = map[eventType]string{
+	eventJoin:    "JOIN",
+	eventPart:    "PART",
+	eventMessage: "PRIVMSG",
+	eventNotice:  "NOTICE",
+	eventConnect: "001",
+}
+
 type scriptHelper struct {
 	handler *ScriptHandler
 }
 
-func (script *scriptHelper) AddHandler(typeName, fnName string) {
+// On is exposed by javascript and allows strings instead of typed strings
+func (script *scriptHelper) On(sType string, eType string, fnName string) {
+	script.on(handlerType(sType), eventType(eType), fnName)
+}
+
+func (script *scriptHelper) on(sType handlerType, eType eventType, fnName string) {
+	var driver scriptDriver
 	switch {
-	case typeName == "js":
-		handler := newJavascriptScript(script.handler.conn, script.handler.jsVm, fnName)
-		script.handler.handlers.Remove(handler)
-		script.handler.handlers.Add(handler)
+	case sType == handlerJs:
+		driver = script.handler.jsDriver
 
-	case typeName == "lua":
-		handler := newLuaScript(script.handler.conn, script.handler.luaVm, fnName)
-		script.handler.handlers.Remove(handler)
-		script.handler.handlers.Add(handler)
+	case sType == handlerLua:
+		driver = script.handler.luaDriver
 
-	case typeName == "lisp":
-		handler := newLispScript(script.handler.conn, fnName)
-		script.handler.handlers.Remove(handler)
-		script.handler.handlers.Add(handler)
+	case sType == handlerLisp:
+		driver = script.handler.lispDriver
+
+	default:
+		return
 	}
+
+	handler := newEventListenerScript(driver, eventMap[eType], fnName)
+	script.handler.handlers.Remove(handler)
+	script.handler.handlers.Add(handler)
+}
+
+func (script *scriptHelper) AddHandler(typeName, fnName string) {
+	var driver scriptDriver
+	switch sType := handlerType(typeName); {
+	case sType == handlerJs:
+		driver = script.handler.jsDriver
+
+	case sType == handlerLua:
+		driver = script.handler.luaDriver
+
+	case sType == handlerLisp:
+		driver = script.handler.lispDriver
+
+	default:
+		return
+	}
+
+	handler := newEventListenerScript(driver, eventMap[eventMessage], fnName)
+	script.handler.handlers.Remove(handler)
+	script.handler.handlers.Add(handler)
 }
 
 func (script *scriptHelper) RemoveHandler(typeName, fnName string) {
-	switch {
-	case typeName == "js":
-		script.handler.handlers.RemoveId("js-" + fnName)
-
-	case typeName == "lua":
-		script.handler.handlers.RemoveId("lua-" + fnName)
-
-	case typeName == "lisp":
-		script.handler.handlers.RemoveId("lisp-" + fnName)
-	}
+	script.handler.handlers.RemoveId("listener-" + eventMap[eventMessage] + "-" + fnName)
 }

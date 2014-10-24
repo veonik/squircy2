@@ -17,9 +17,13 @@ type HandlerCollection struct {
 	log      *log.Logger
 }
 
-func newHandlerCollection(conn *irc.Connection, config *Configuration, l *log.Logger) (c *HandlerCollection) {
+func newHandlerCollection(config *Configuration, l *log.Logger) (c *HandlerCollection) {
 	c = &HandlerCollection{make(map[string]Handler), l}
 
+	return
+}
+
+func (c *HandlerCollection) bind(conn *irc.Connection) {
 	mutex := &sync.Mutex{}
 	matchAndHandle := func(e *irc.Event) {
 		mutex.Lock()
@@ -31,12 +35,7 @@ func newHandlerCollection(conn *irc.Connection, config *Configuration, l *log.Lo
 		mutex.Unlock()
 	}
 
-	conn.AddCallback("001", func(e *irc.Event) { conn.Join(config.Channel) })
-
-	conn.AddCallback("PRIVMSG", matchAndHandle)
-	conn.AddCallback("NOTICE", matchAndHandle)
-
-	return
+	conn.AddCallback("*", matchAndHandle)
 }
 
 func newIrcConnection(config *Configuration, l *log.Logger) (conn *irc.Connection) {

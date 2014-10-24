@@ -12,6 +12,12 @@ import (
 	"strings"
 )
 
+var replNames = map[string]string{
+	"lua":  "Lua",
+	"js":   "Javascript",
+	"lisp": "Lisp",
+}
+
 func replyTarget(e *irc.Event) string {
 	if strings.HasPrefix(e.Arguments[0], "#") {
 		return e.Arguments[0]
@@ -59,21 +65,6 @@ func (h *NickservHandler) Handle(e *irc.Event) {
 	h.handlers.Remove(h)
 }
 
-func replTypePretty(replType string) string {
-	switch {
-	case replType == "lua":
-		return "Lua"
-
-	case replType == "js":
-		return "Javascript"
-
-	case replType == "lisp":
-		return "Lisp"
-	}
-
-	return "Unknown"
-}
-
 func scriptRecoveryHandler(conn *irc.Connection, e *irc.Event) {
 	if err := recover(); err != nil {
 		fmt.Println("An error occurred", err)
@@ -83,20 +74,64 @@ func scriptRecoveryHandler(conn *irc.Connection, e *irc.Event) {
 	}
 }
 
+type scriptDriver interface {
+	Handle(e *irc.Event, fnName string)
+}
+
+type javascriptDriver struct {
+	vm *otto.Otto
+}
+
+func (d javascriptDriver) Handle(e *irc.Event, fnName string) {
+	d.vm.Set("replyTarget", func(call otto.FunctionCall) otto.Value {
+		val, _ := otto.ToValue(replyTarget(e))
+		return val
+	})
+	runUnsafeJavascript(d.vm, fmt.Sprintf("%s(\"%s\", \"%s\", %s)", fnName, e.Arguments[0], e.Nick, strconv.Quote(e.Message())))
+}
+
+type luaDriver struct {
+	vm *lua.State
+}
+
+func (d luaDriver) Handle(e *irc.Event, fnName string) {
+	d.vm.Register("replytarget", func(vm *lua.State) int {
+		vm.PushString(replyTarget(e))
+		return 1
+	})
+	runUnsafeLua(d.vm, fmt.Sprintf("%s(\"%s\", \"%s\", %s)", fnName, e.Arguments[0], e.Nick, strconv.Quote(e.Message())))
+}
+
+type lispDriver struct{}
+
+func (d lispDriver) Handle(e *irc.Event, fnName string) {
+	lisp.SetHandler("replytarget", func(vars ...lisp.Value) (lisp.Value, error) {
+		return lisp.StringValue(replyTarget(e)), nil
+	})
+	_, err := runUnsafeLisp(fmt.Sprintf("(%s \"%s\" \"%s\" %s)", fnName, e.Arguments[0], e.Nick, strconv.Quote(e.Message())))
+
+	if err == halt {
+		panic(err)
+	}
+}
+
 type ScriptHandler struct {
-	conn     *irc.Connection
-	handlers *HandlerCollection
-	config   *Configuration
-	luaVm    *lua.State
-	jsVm     *otto.Otto
-	helper   *scriptHelper
-	client   *redis.Client
-	repl     bool
-	replType string
+	conn       *irc.Connection
+	handlers   *HandlerCollection
+	config     *Configuration
+	luaVm      *lua.State
+	jsVm       *otto.Otto
+	helper     *scriptHelper
+	client     *redis.Client
+	repl       bool
+	replType   string
+	jsDriver   javascriptDriver
+	luaDriver  luaDriver
+	lispDriver lispDriver
 }
 
 func newScriptHandler(conn *irc.Connection, handlers *HandlerCollection, config *Configuration, client *redis.Client) *ScriptHandler {
-	h := &ScriptHandler{conn, handlers, config, nil, nil, nil, client, false, ""}
+	h := &ScriptHandler{conn, handlers, config, nil, nil, nil, client, false, "", javascriptDriver{}, luaDriver{}, lispDriver{}}
 
 	h.init()
 
@@ -117,7 +152,7 @@ func (h *ScriptHandler) Handle(e *irc.Event) {
 	if h.repl == true {
 		msg := e.Message()
 		if strings.HasPrefix(msg, "!repl end") {
-			h.conn.Privmsgf(replyTarget(e), "%s REPL session ended.", replTypePretty(h.replType))
+			h.conn.Privmsgf(replyTarget(e), "%s REPL session ended.", replNames[h.replType])
 			h.repl = false
 			h.replType = ""
 			return
@@ -130,6 +165,10 @@ func (h *ScriptHandler) Handle(e *irc.Event) {
 				h.conn.Privmsgf(replyTarget(e), o)
 				return 0
 			})
+			h.luaVm.Register("replytarget", func(vm *lua.State) int {
+				vm.PushString(replyTarget(e))
+				return 1
+			})
 			err := runUnsafeLua(h.luaVm, msg)
 			if err != nil {
 				h.conn.Privmsgf(replyTarget(e), err.Error())
@@ -140,6 +179,10 @@ func (h *ScriptHandler) Handle(e *irc.Event) {
 				message, _ := call.Argument(0).ToString()
 				h.conn.Privmsgf(replyTarget(e), message)
 				return otto.Value{}
+			})
+			h.jsVm.Set("replyTarget", func(call otto.FunctionCall) otto.Value {
+				val, _ := otto.ToValue(replyTarget(e))
+				return val
 			})
 			_, err := runUnsafeJavascript(h.jsVm, msg)
 			if err != nil {
@@ -154,6 +197,9 @@ func (h *ScriptHandler) Handle(e *irc.Event) {
 					h.conn.Privmsgf(replyTarget(e), vars[0].String())
 				}
 				return lisp.Nil, nil
+			})
+			lisp.SetHandler("replytarget", func(vars ...lisp.Value) (lisp.Value, error) {
+				return lisp.StringValue(replyTarget(e)), nil
 			})
 			_, err := runUnsafeLisp(msg)
 			if err != nil {
@@ -177,7 +223,7 @@ func (h *ScriptHandler) Handle(e *irc.Event) {
 			return
 		}
 
-		h.conn.Privmsgf(replyTarget(e), "Registered", replTypePretty(args[0]), "handler", args[1])
+		h.conn.Privmsgf(replyTarget(e), "Registered", replNames[args[0]], "handler", args[1])
 		h.helper.AddHandler(args[0], args[1])
 
 	case command == "unregister":
@@ -187,7 +233,7 @@ func (h *ScriptHandler) Handle(e *irc.Event) {
 			return
 		}
 
-		h.conn.Privmsgf(replyTarget(e), "Unregistered", replTypePretty(args[0]), "handler", args[1])
+		h.conn.Privmsgf(replyTarget(e), "Unregistered", replNames[args[0]], "handler", args[1])
 		h.helper.RemoveHandler(args[0], args[1])
 
 	case command == "repl":
@@ -198,7 +244,7 @@ func (h *ScriptHandler) Handle(e *irc.Event) {
 
 		h.repl = true
 		h.replType = args[0]
-		h.conn.Privmsgf(replyTarget(e), "%s REPL session started.", replTypePretty(h.replType))
+		h.conn.Privmsgf(replyTarget(e), "%s REPL session started.", replNames[h.replType])
 	}
 }
 
@@ -213,6 +259,9 @@ func (h *ScriptHandler) init() {
 	luaVm.OpenLibs()
 
 	jsVm := otto.New()
+
+	h.jsDriver.vm = jsVm
+	h.luaDriver.vm = luaVm
 
 	helper := &scriptHelper{h}
 
@@ -376,106 +425,24 @@ func (h *ScriptHandler) init() {
 	}
 }
 
-func newJavascriptScript(conn *irc.Connection, vm *otto.Otto, fn string) *JavascriptScript {
-	return &JavascriptScript{conn, vm, fn}
+func newEventListenerScript(driver scriptDriver, eventCode string, fn string) *EventListenerScript {
+	return &EventListenerScript{driver, eventCode, fn}
 }
 
-type JavascriptScript struct {
-	conn *irc.Connection
-	vm   *otto.Otto
-	fn   string
+type EventListenerScript struct {
+	driver    scriptDriver
+	eventCode string
+	fn        string
 }
 
-func (h *JavascriptScript) Id() string {
-	return "js-" + h.fn
+func (h *EventListenerScript) Id() string {
+	return "listener-" + h.eventCode + "-" + h.fn
 }
 
-func (h *JavascriptScript) Matches(e *irc.Event) bool {
-	return e.Code == "PRIVMSG"
+func (h *EventListenerScript) Matches(e *irc.Event) bool {
+	return e.Code == h.eventCode
 }
 
-func (h *JavascriptScript) Handle(e *irc.Event) {
-	defer scriptRecoveryHandler(h.conn, e)
-
-	h.vm.Set("print", func(call otto.FunctionCall) otto.Value {
-		message, _ := call.Argument(0).ToString()
-		h.conn.Privmsgf(replyTarget(e), message)
-		return otto.Value{}
-	})
-	_, err := runUnsafeJavascript(h.vm, fmt.Sprintf("%s(\"%s\", \"%s\", %s)", h.fn, e.Arguments[0], e.Nick, strconv.Quote(e.Message())))
-	if err != nil {
-		h.conn.Privmsgf(replyTarget(e), err.Error())
-
-		return
-	}
-}
-
-func newLuaScript(conn *irc.Connection, vm *lua.State, fn string) *LuaScript {
-	return &LuaScript{conn, vm, fn}
-}
-
-type LuaScript struct {
-	conn *irc.Connection
-	vm   *lua.State
-	fn   string
-}
-
-func (h *LuaScript) Id() string {
-	return "lua-" + h.fn
-}
-
-func (h *LuaScript) Matches(e *irc.Event) bool {
-	return e.Code == "PRIVMSG"
-}
-
-func (h *LuaScript) Handle(e *irc.Event) {
-	defer scriptRecoveryHandler(h.conn, e)
-
-	h.vm.Register("print", func(vm *lua.State) int {
-		o := vm.ToString(1)
-		h.conn.Privmsgf(replyTarget(e), o)
-		return 0
-	})
-	err := runUnsafeLua(h.vm, fmt.Sprintf("%s(\"%s\", \"%s\", %s)", h.fn, e.Arguments[0], e.Nick, strconv.Quote(e.Message())))
-	if err != nil {
-		h.conn.Privmsgf(replyTarget(e), err.Error())
-	}
-}
-
-func newLispScript(conn *irc.Connection, fn string) *LispScript {
-	return &LispScript{conn, fn}
-}
-
-type LispScript struct {
-	conn *irc.Connection
-	fn   string
-}
-
-func (h *LispScript) Id() string {
-	return "lisp-" + h.fn
-}
-
-func (h *LispScript) Matches(e *irc.Event) bool {
-	return e.Code == "PRIVMSG"
-}
-
-func (h *LispScript) Handle(e *irc.Event) {
-	defer scriptRecoveryHandler(h.conn, e)
-
-	lisp.SetHandler("print", func(vars ...lisp.Value) (lisp.Value, error) {
-		if len(vars) == 1 {
-			h.conn.Privmsgf(replyTarget(e), vars[0].String())
-		}
-		return lisp.Nil, nil
-	})
-	_, err := runUnsafeLisp(fmt.Sprintf("(%s \"%s\" \"%s\" %s)", h.fn, e.Arguments[0], e.Nick, strconv.Quote(e.Message())))
-
-	if err == halt {
-		panic(err)
-
-	} else if err != nil {
-		h.conn.Privmsgf(replyTarget(e), err.Error())
-
-		return
-	}
+func (h *EventListenerScript) Handle(e *irc.Event) {
+	h.driver.Handle(e, h.fn)
 }
