@@ -36,7 +36,7 @@ func scriptAction(r render.Render, client *redis.Client) {
 func scriptReinitAction(r render.Render, h *ScriptHandler) {
 	h.ReInit()
 
-	r.Redirect("/script", 302)
+	r.JSON(200, nil)
 }
 
 func newScriptAction(r render.Render) {
@@ -81,5 +81,22 @@ func removeScriptAction(r render.Render, client *redis.Client, params martini.Pa
 	repo := scriptRepository{client}
 	repo.Delete(int(index))
 
-	r.Redirect("/script", 302)
+	r.JSON(200, nil)
+}
+
+func connectAction(r render.Render, conn *irc.Connection, config *Configuration, h *HandlerCollection) {
+	err := conn.Connect(config.Network)
+	if err != nil {
+		r.JSON(503, err)
+	}
+
+	h.bind(conn)
+
+	r.JSON(200, nil)
+}
+
+func disconnectAction(r render.Render, conn *irc.Connection) {
+	conn.Quit()
+
+	r.JSON(200, nil)
 }

@@ -43,11 +43,6 @@ func newIrcConnection(config *Configuration, l *log.Logger) (conn *irc.Connectio
 	conn = irc.IRC(config.Nick, config.Username)
 	conn.Log = l
 
-	err := conn.Connect(config.Network)
-	if err != nil {
-		panic(err)
-	}
-
 	return
 }
 

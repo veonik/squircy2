@@ -1,5 +1,7 @@
 <h4>Dashboard</h4>
 <a href="/script/reinit" id="reinit">Re-init Scripts</a>
+<a href="/connect" class="post-action">Connect to IRC</a>
+<a href="/disconnect" class="post-action">Disconnect from IRC</a>
 <script type="text/javascript">
 $(function() {
 	var $reinit = $('#reinit');
@@ -16,6 +18,20 @@ $(function() {
 				}
 			})
 		}
+	});
+	
+	var $postLinks = $('.post-action');
+	$postLinks.on('click', function(e) {
+		e.preventDefault();
+		
+		var url = $(this).attr('href');
+		$.ajax({
+			url: url,
+			type: 'post',
+			success: function() {
+				window.location.reload();
+			}
+		});
 	});
 });
 </script>
