@@ -16,7 +16,7 @@ Installation
 
 As a prerequisite, the Lua 5.1 package must be installed on your system.
 
-[See here for more information on getting Go Bindings for the Lua C API setup](https://github.com/aarzilli/golua/blob/master/README.md)
+[See here for more information](https://github.com/aarzilli/golua/blob/master/README.md) on getting Go Bindings for the Lua C API setup or just visit [the download page](http://www.lua.org/download.html).
 
 Additionally, squIRCy2 requires access to a Redis server. [See here for more info](http://redis.io/)
 
@@ -26,9 +26,6 @@ Once Lua and Redis are ready to go, the easiest way to install squIRCy2 is by ru
 ```
 go get github.com/tyler-sommer/squircy2
 ```
-
-##### Assets are currently not embedded in the application itself. 
-##### You must run squIRCy2 from the project directory
 
 Once squIRCy2 is installed, you'll need to create a configuration file. You can copy defaults as such:
 
