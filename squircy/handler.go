@@ -1,23 +1,16 @@
 package squircy
 
 import (
-	"errors"
 	"fmt"
 	"github.com/aarzilli/golua/lua"
 	"github.com/fzzy/radix/redis"
 	"github.com/robertkrimen/otto"
 	"github.com/thoj/go-ircevent"
 	"github.com/veonik/go-lisp/lisp"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"strconv"
 	"strings"
-	"time"
 )
-
-const maxExecutionTime = 2 // in seconds
-var halt = errors.New("Execution limit exceeded")
 
 func replyTarget(e *irc.Event) string {
 	if strings.HasPrefix(e.Arguments[0], "#") {
@@ -87,89 +80,6 @@ func scriptRecoveryHandler(conn *irc.Connection, e *irc.Event) {
 		if err == halt {
 			conn.Privmsgf(replyTarget(e), "Script halted")
 		}
-	}
-}
-
-type httpHelper struct{}
-
-func (client *httpHelper) Get(url string) string {
-	resp, err := http.Get(url)
-	if err != nil {
-		return ""
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return ""
-	}
-	return string(body)
-}
-
-type dataHelper struct {
-	d map[string]interface{}
-}
-
-func (db *dataHelper) Get(key string) interface{} {
-	if val, ok := db.d[key]; ok {
-		return val
-	}
-
-	return nil
-}
-
-func (db *dataHelper) Set(key string, val interface{}) {
-	db.d[key] = val
-}
-
-type ircHelper struct {
-	conn *irc.Connection
-}
-
-func (irc *ircHelper) Privmsg(target, message string) {
-	irc.conn.Privmsg(target, message)
-}
-
-func (irc *ircHelper) Join(target string) {
-	irc.conn.Join(target)
-}
-
-func (irc *ircHelper) Part(target string) {
-	irc.conn.Part(target)
-}
-
-type scriptHelper struct {
-	handler *ScriptHandler
-}
-
-func (script *scriptHelper) AddHandler(typeName, fnName string) {
-	switch {
-	case typeName == "js":
-		handler := newJavascriptScript(script.handler.conn, script.handler.jsVm, fnName)
-		script.handler.handlers.Remove(handler)
-		script.handler.handlers.Add(handler)
-
-	case typeName == "lua":
-		handler := newLuaScript(script.handler.conn, script.handler.luaVm, fnName)
-		script.handler.handlers.Remove(handler)
-		script.handler.handlers.Add(handler)
-
-	case typeName == "lisp":
-		handler := newLispScript(script.handler.conn, fnName)
-		script.handler.handlers.Remove(handler)
-		script.handler.handlers.Add(handler)
-	}
-}
-
-func (script *scriptHelper) RemoveHandler(typeName, fnName string) {
-	switch {
-	case typeName == "js":
-		script.handler.handlers.RemoveId("js-" + fnName)
-
-	case typeName == "lua":
-		script.handler.handlers.RemoveId("lua-" + fnName)
-
-	case typeName == "lisp":
-		script.handler.handlers.RemoveId("lisp-" + fnName)
 	}
 }
 
@@ -481,31 +391,7 @@ func (h *JavascriptScript) Id() string {
 }
 
 func (h *JavascriptScript) Matches(e *irc.Event) bool {
-	return true
-}
-
-func runUnsafeJavascript(vm *otto.Otto, unsafe string) (otto.Value, error) {
-	start := time.Now()
-	defer func() {
-		duration := time.Since(start)
-		if err := recover(); err != nil {
-			if err == halt {
-				fmt.Println("Some code took too long! Stopping after: ", duration)
-			}
-			panic(err)
-		}
-	}()
-
-	vm.Interrupt = make(chan func(), 1)
-
-	go func() {
-		time.Sleep(maxExecutionTime * time.Second)
-		vm.Interrupt <- func() {
-			panic(halt)
-		}
-	}()
-
-	return vm.Run(unsafe)
+	return e.Code == "PRIVMSG"
 }
 
 func (h *JavascriptScript) Handle(e *irc.Event) {
@@ -539,29 +425,7 @@ func (h *LuaScript) Id() string {
 }
 
 func (h *LuaScript) Matches(e *irc.Event) bool {
-	return true
-}
-
-func runUnsafeLua(vm *lua.State, unsafe string) error {
-	start := time.Now()
-	defer func() {
-		duration := time.Since(start)
-		if err := recover(); err != nil {
-			if err == halt {
-				fmt.Println("Some code took too long! Stopping after: ", duration)
-			}
-			panic(err)
-		}
-	}()
-
-	vm.SetExecutionLimit(maxExecutionTime * (1 << 26))
-	err := vm.DoString(unsafe)
-
-	if err != nil && err.Error() == "Lua execution quantum exceeded" {
-		panic(halt)
-	}
-
-	return err
+	return e.Code == "PRIVMSG"
 }
 
 func (h *LuaScript) Handle(e *irc.Event) {
@@ -592,24 +456,7 @@ func (h *LispScript) Id() string {
 }
 
 func (h *LispScript) Matches(e *irc.Event) bool {
-	return true
-}
-
-func runUnsafeLisp(unsafe string) (lisp.Value, error) {
-	start := time.Now()
-	defer func() {
-		duration := time.Since(start)
-		if err := recover(); err != nil {
-			if err.(error).Error() == "Execution limit exceeded" {
-				fmt.Println("Some code took too long! Stopping after: ", duration)
-				panic(halt)
-			}
-			panic(err)
-		}
-	}()
-
-	lisp.SetExecutionLimit(maxExecutionTime * (1 << 15))
-	return lisp.EvalString(unsafe)
+	return e.Code == "PRIVMSG"
 }
 
 func (h *LispScript) Handle(e *irc.Event) {
