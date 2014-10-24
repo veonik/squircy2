@@ -32,7 +32,6 @@ Once squIRCy2 is installed, you can run it immediately with a default configurat
 Alternatively, you can create and specify your own configuration file:
 
 ```
-cd $GOPATH/src/github.com/tyler-sommer/squircy2
 cp $GOPATH/src/github.com/tyler-sommer/squircy2/config.json.dist ./config.json
 ```
 
