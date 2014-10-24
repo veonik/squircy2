@@ -27,20 +27,28 @@ Once Lua and Redis are ready to go, the easiest way to install squIRCy2 is by ru
 go get github.com/tyler-sommer/squircy2
 ```
 
-Once squIRCy2 is installed, you'll need to create a configuration file. You can copy defaults as such:
+Once squIRCy2 is installed, you can run it immediately with a default configuration. It will connect to irc.freenode.org and join #squishyslab.
+
+Alternatively, you can create and specify your own configuration file:
 
 ```
 cd $GOPATH/src/github.com/tyler-sommer/squircy2
-cp config.json.dist config.json
+cp $GOPATH/src/github.com/tyler-sommer/squircy2/config.json.dist ./config.json
 ```
 
-Then edit config.json to suit your needs. Then start the bot by running `squircy2`.
+Edit config.json to suit your needs and start the bot:
+
+```
+squircy2 --config=config.json
+```
 
 
 Configuration
 -------------
 
-Once the bot is up and running, you can access the web management interface via `localhost:3000`
+Once the bot is up and running, you can access the web management interface via `localhost:3000`.
+
+From here, you can add and edit scripts and reload the scripting handlers.
 
 
 Exposed API
