@@ -1,9 +1,7 @@
 package squircy
 
 import (
-	"encoding/json"
 	"go/build"
-	"os"
 )
 
 const basePkg = "github.com/tyler-sommer/squircy2"
@@ -20,23 +18,6 @@ type Configuration struct {
 	RedisHost     string
 	RedisDatabase int
 	RootPath      string
-}
-
-func NewConfiguration(fname string) (config *Configuration) {
-	config = &Configuration{}
-
-	file, err := os.Open(fname)
-	if err != nil {
-		panic("Could not open configuration: " + err.Error())
-	}
-
-	decoder := json.NewDecoder(file)
-
-	if err := decoder.Decode(config); err != nil {
-		panic("Could not decode configuration: " + err.Error())
-	}
-	compile(config)
-	return
 }
 
 func NewDefaultConfiguration() (config *Configuration) {
