@@ -95,12 +95,13 @@ print(message)
 (print message)
 ```
 
-### Chat handlers
+### IRC event handlers
 
 Chat handlers can be registered with `Script.AddHandler` in Javascript or `addhandler` in Lua and Lisp. This function takes a type, one of: js, lua, lisp. It also takes the name of a function that should have the following signature:
 
 ```js
-function handler(target, nick, message) {
+function handler(code, target, nick, message) {
+	// code is the irc event code, like PRIVMSG, NOTICE, or 001
 	// target received the message
 	// nick sent the message
 }
