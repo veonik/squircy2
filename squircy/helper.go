@@ -131,5 +131,5 @@ func (script *scriptHelper) AddHandler(typeName, fnName string) {
 }
 
 func (script *scriptHelper) RemoveHandler(typeName, fnName string) {
-	script.handler.handlers.RemoveId("listener-" + eventMap[eventMessage] + "-" + fnName)
+	script.handler.handlers.RemoveId("listener-" + eventMap[eventMessage] + "-" + typeName + "-" + fnName)
 }

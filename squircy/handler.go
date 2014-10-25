@@ -76,6 +76,7 @@ func scriptRecoveryHandler(conn *irc.Connection, e *irc.Event) {
 
 type scriptDriver interface {
 	Handle(e *irc.Event, fnName string)
+	String() string
 }
 
 type javascriptDriver struct {
@@ -87,7 +88,13 @@ func (d javascriptDriver) Handle(e *irc.Event, fnName string) {
 		val, _ := otto.ToValue(replyTarget(e))
 		return val
 	})
-	runUnsafeJavascript(d.vm, fmt.Sprintf("%s(\"%s\", \"%s\", %s)", fnName, e.Arguments[0], e.Nick, strconv.Quote(e.Message())))
+
+	d.vm.Interrupt = make(chan func(), 1)
+	d.vm.Call(fnName, otto.NullValue(), e.Arguments[0], e.Nick, e.Message(), e.Code)
+}
+
+func (d javascriptDriver) String() string {
+	return "js"
 }
 
 type luaDriver struct {
@@ -99,7 +106,17 @@ func (d luaDriver) Handle(e *irc.Event, fnName string) {
 		vm.PushString(replyTarget(e))
 		return 1
 	})
-	runUnsafeLua(d.vm, fmt.Sprintf("%s(\"%s\", \"%s\", %s)", fnName, e.Arguments[0], e.Nick, strconv.Quote(e.Message())))
+
+	d.vm.GetGlobal(fnName)
+	d.vm.PushString(e.Arguments[0])
+	d.vm.PushString(e.Nick)
+	d.vm.PushString(e.Message())
+	d.vm.PushString(e.Code)
+	d.vm.Call(4, 0)
+}
+
+func (d luaDriver) String() string {
+	return "lua"
 }
 
 type lispDriver struct{}
@@ -108,11 +125,15 @@ func (d lispDriver) Handle(e *irc.Event, fnName string) {
 	lisp.SetHandler("replytarget", func(vars ...lisp.Value) (lisp.Value, error) {
 		return lisp.StringValue(replyTarget(e)), nil
 	})
-	_, err := runUnsafeLisp(fmt.Sprintf("(%s \"%s\" \"%s\" %s)", fnName, e.Arguments[0], e.Nick, strconv.Quote(e.Message())))
+	_, err := runUnsafeLisp(fmt.Sprintf("(%s \"%s\" \"%s\" %s \"%s\")", fnName, e.Arguments[0], e.Nick, strconv.Quote(e.Message()), e.Code))
 
 	if err == halt {
 		panic(err)
 	}
+}
+
+func (d lispDriver) String() string {
+	return "lisp"
 }
 
 type ScriptHandler struct {
@@ -264,22 +285,18 @@ func (h *ScriptHandler) init() {
 	h.luaDriver.vm = luaVm
 
 	helper := &scriptHelper{h}
+	client := &httpHelper{}
+	db := &dataHelper{make(map[string]interface{})}
+	irc := &ircHelper{h.conn}
 
 	h.luaVm = luaVm
 	h.jsVm = jsVm
 	h.helper = helper
 
-	client := &httpHelper{}
-	cres, _ := h.jsVm.ToValue(client)
-	h.jsVm.Set("Http", cres)
-	db := &dataHelper{make(map[string]interface{})}
-	dres, _ := h.jsVm.ToValue(db)
-	h.jsVm.Set("Data", dres)
-	irc := &ircHelper{h.conn}
-	ires, _ := h.jsVm.ToValue(irc)
-	h.jsVm.Set("Irc", ires)
-	hres, _ := h.jsVm.ToValue(helper)
-	h.jsVm.Set("Script", hres)
+	h.jsVm.Set("Http", client)
+	h.jsVm.Set("Data", db)
+	h.jsVm.Set("Irc", irc)
+	h.jsVm.Set("Script", helper)
 
 	h.luaVm.Register("typename", func(vm *lua.State) int {
 		o := vm.Typename(int(vm.Type(1)))
@@ -436,7 +453,7 @@ type EventListenerScript struct {
 }
 
 func (h *EventListenerScript) Id() string {
-	return "listener-" + h.eventCode + "-" + h.fn
+	return "listener-" + h.eventCode + "-" + h.driver.String() + "-" + h.fn
 }
 
 func (h *EventListenerScript) Matches(e *irc.Event) bool {
