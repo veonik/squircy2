@@ -90,7 +90,7 @@ func (d javascriptDriver) Handle(e *irc.Event, fnName string) {
 	})
 
 	d.vm.Interrupt = make(chan func(), 1)
-	d.vm.Call(fnName, otto.NullValue(), e.Arguments[0], e.Nick, e.Message(), e.Code)
+	d.vm.Call(fnName, otto.NullValue(), e.Code, e.Arguments[0], e.Nick, e.Message())
 }
 
 func (d javascriptDriver) String() string {
@@ -108,10 +108,10 @@ func (d luaDriver) Handle(e *irc.Event, fnName string) {
 	})
 
 	d.vm.GetGlobal(fnName)
+	d.vm.PushString(e.Code)
 	d.vm.PushString(e.Arguments[0])
 	d.vm.PushString(e.Nick)
 	d.vm.PushString(e.Message())
-	d.vm.PushString(e.Code)
 	d.vm.Call(4, 0)
 }
 
@@ -125,7 +125,7 @@ func (d lispDriver) Handle(e *irc.Event, fnName string) {
 	lisp.SetHandler("replytarget", func(vars ...lisp.Value) (lisp.Value, error) {
 		return lisp.StringValue(replyTarget(e)), nil
 	})
-	_, err := runUnsafeLisp(fmt.Sprintf("(%s \"%s\" \"%s\" %s \"%s\")", fnName, e.Arguments[0], e.Nick, strconv.Quote(e.Message()), e.Code))
+	_, err := runUnsafeLisp(fmt.Sprintf("(%s \"%s\" \"%s\" \"%s\" %s)", fnName, e.Code, e.Arguments[0], e.Nick, strconv.Quote(e.Message())))
 
 	if err == halt {
 		panic(err)
