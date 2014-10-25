@@ -21,5 +21,30 @@
 	<div class="col-md-4">
 		<button class="btn btn-primary">Save</button>
 	</div>
+	<div class="col-md-4">
+		<a id="execute" href="/script/{{ .Index }}/execute" class="btn btn-default">Execute</a>
+	</div>
 </form>
+<div class="row">
+	<div class="col-md-12" id="output">
+	
+	</div>
+</div>
 {{ template "script/_javascripts" }}
+<script type="text/javascript">
+$(function() {
+	var $execute = $('#execute');
+	var $output  = $('#output');
+	
+	$execute.on('click', function(e) {
+		e.preventDefault();
+		
+		$.ajax({
+			url: $execute.attr('href'),
+			success: function(response) {
+				$output.html('<pre>' + JSON.stringify(response) + '</pre>')
+			}
+		});
+	});
+});
+</script>

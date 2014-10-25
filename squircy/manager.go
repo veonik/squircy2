@@ -60,5 +60,6 @@ func (manager *Manager) configure(config *Configuration) {
 		r.Get("/:index/edit", editScriptAction)
 		r.Post("/:index/update", updateScriptAction)
 		r.Post("/:index/remove", removeScriptAction)
+		r.Get("/:index/execute", executeScriptAction)
 	})
 }

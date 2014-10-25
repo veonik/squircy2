@@ -84,6 +84,27 @@ func removeScriptAction(r render.Render, client *redis.Client, params martini.Pa
 	r.JSON(200, nil)
 }
 
+func executeScriptAction(r render.Render, client *redis.Client, handler *ScriptHandler, params martini.Params) {
+	index, _ := strconv.ParseInt(params["index"], 0, 32)
+
+	repo := scriptRepository{client}
+	script := repo.FetchIndex(int(index))
+
+	switch {
+	case script.Type == scriptJavascript:
+		res, err := runUnsafeJavascript(handler.jsVm, script.Body)
+		exres, _ := res.Export()
+		r.JSON(200, map[string]interface{}{
+			"res": exres,
+			"err": err,
+		})
+
+	default:
+		r.JSON(503, "Unsupported script type")
+	}
+
+}
+
 func connectAction(r render.Render, conn *irc.Connection, config *Configuration, h *HandlerCollection) {
 	err := conn.Connect(config.Network)
 	if err != nil {
