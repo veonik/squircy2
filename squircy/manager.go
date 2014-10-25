@@ -62,4 +62,8 @@ func (manager *Manager) configure(config *Configuration) {
 		r.Post("/:index/remove", removeScriptAction)
 		r.Get("/:index/execute", executeScriptAction)
 	})
+	manager.Group("/repl", func(r martini.Router) {
+		r.Get("", replAction)
+		r.Post("/execute", replExecuteAction)
+	})
 }

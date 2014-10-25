@@ -105,6 +105,21 @@ func executeScriptAction(r render.Render, client *redis.Client, handler *ScriptH
 
 }
 
+func replAction(r render.Render) {
+	r.HTML(200, "repl/index", nil)
+}
+
+func replExecuteAction(r render.Render, handler *ScriptHandler, request *http.Request) {
+	script := request.FormValue("script")
+
+	res, err := runUnsafeJavascript(handler.jsVm, script)
+	exres, _ := res.Export()
+	r.JSON(200, map[string]interface{}{
+		"res": exres,
+		"err": err,
+	})
+}
+
 func connectAction(r render.Render, conn *irc.Connection, config *Configuration, h *HandlerCollection) {
 	err := conn.Connect(config.Network)
 	if err != nil {
