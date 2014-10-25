@@ -2,11 +2,8 @@ package squircy
 
 import (
 	"encoding/json"
-	"fmt"
-	"github.com/fzzy/radix/redis"
+	"github.com/HouzuoGuo/tiedot/db"
 )
-
-const deleteRecord = "<<delete>>"
 
 type scriptType string
 
@@ -17,6 +14,7 @@ const (
 )
 
 type persistentScript struct {
+	ID      int
 	Type    scriptType
 	Title   string
 	Body    string
@@ -24,66 +22,73 @@ type persistentScript struct {
 }
 
 type scriptRepository struct {
-	client *redis.Client
+	database *db.DB
 }
 
-func hydrateScript(rawScript string) (persistentScript, error) {
+func hydrateScript(rawScript map[string]interface{}) persistentScript {
 	script := persistentScript{}
-	err := json.Unmarshal(([]byte(rawScript)), &script)
-	if err != nil {
-		fmt.Println(err)
-		return script, err
-	}
 
-	return script, nil
-}
-
-func flattenScript(script persistentScript) (string, error) {
-	str, err := json.Marshal(&script)
-	if err != nil {
-		fmt.Println(err)
-		return "", nil
-	}
-
-	return string(str[0:len(str)]), nil
-}
-
-func (repo *scriptRepository) Fetch() []persistentScript {
-	data, err := repo.client.Cmd("lrange", "scripts", 0, -1).List()
-	if err != nil {
-		panic(err)
-	}
-
-	scripts := make([]persistentScript, 0)
-	for _, rawScript := range data {
-		script, err := hydrateScript(rawScript)
-		if err != nil {
-			continue
-		}
-
-		scripts = append(scripts, script)
-	}
-
-	return scripts
-}
-
-func (repo *scriptRepository) FetchIndex(index int) persistentScript {
-	rawScript := repo.client.Cmd("lindex", "scripts", index).String()
-	script, _ := hydrateScript(rawScript)
+	script.Title = rawScript["Title"].(string)
+	script.Enabled = rawScript["Enabled"].(bool)
+	script.Type = rawScript["Type"].(scriptType)
+	script.Body = rawScript["Body"].(string)
 
 	return script
 }
 
-func (repo *scriptRepository) Save(index int, script persistentScript) {
-	data, _ := flattenScript(script)
-	if index < 0 {
-		repo.client.Cmd("rpush", "scripts", data)
+func flattenScript(script persistentScript) map[string]interface{} {
+	rawScript := make(map[string]interface{})
+
+	rawScript["Title"] = script.Title
+	rawScript["Enabled"] = script.Enabled
+	rawScript["Type"] = script.Type
+	rawScript["Body"] = script.Body
+
+	return rawScript
+}
+
+func (repo *scriptRepository) FetchAll() []persistentScript {
+	col := repo.database.Use("Scripts")
+	scripts := make([]persistentScript, 0)
+	col.ForEachDoc(func(id int, doc []byte) (moveOn bool) {
+		moveOn = true
+
+		script := persistentScript{}
+		json.Unmarshal(doc, &script)
+		script.ID = id
+
+		scripts = append(scripts, script)
+
+		return
+	})
+
+	return scripts
+}
+
+func (repo *scriptRepository) Fetch(id int) persistentScript {
+	col := repo.database.Use("Scripts")
+
+	rawScript, _ := col.Read(id)
+	script := hydrateScript(rawScript)
+	script.ID = id
+
+	return script
+}
+
+func (repo *scriptRepository) Save(script persistentScript) {
+	col := repo.database.Use("Scripts")
+	data := flattenScript(script)
+
+	if script.ID <= 0 {
+		id, _ := col.Insert(data)
+		script.ID = id
+
 	} else {
-		repo.client.Cmd("lset", "scripts", index, data)
+		col.Update(script.ID, data)
 	}
 }
 
-func (repo *scriptRepository) Delete(index int) {
-	repo.client.Cmd("lset", "scripts", index, deleteRecord)
-	repo.client.Cmd("lrem", "scripts", 0, deleteRecord)
+func (repo *scriptRepository) Delete(id int) {
+	col := repo.database.Use("Scripts")
+	col.Delete(id)
 }

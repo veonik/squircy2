@@ -3,7 +3,6 @@ package squircy
 import (
 	"fmt"
 	"github.com/aarzilli/golua/lua"
-	"github.com/fzzy/radix/redis"
 	"github.com/robertkrimen/otto"
 	"github.com/thoj/go-ircevent"
 	"github.com/veonik/go-lisp/lisp"
@@ -143,7 +142,7 @@ type ScriptHandler struct {
 	luaVm      *lua.State
 	jsVm       *otto.Otto
 	helper     *scriptHelper
-	client     *redis.Client
+	repo       scriptRepository
 	repl       bool
 	replType   string
 	jsDriver   javascriptDriver
@@ -151,8 +150,8 @@ type ScriptHandler struct {
 	lispDriver lispDriver
 }
 
-func newScriptHandler(conn *irc.Connection, handlers *HandlerCollection, config *Configuration, client *redis.Client) *ScriptHandler {
-	h := &ScriptHandler{conn, handlers, config, nil, nil, nil, client, false, "", javascriptDriver{}, luaDriver{}, lispDriver{}}
+func newScriptHandler(conn *irc.Connection, handlers *HandlerCollection, config *Configuration, repo scriptRepository) *ScriptHandler {
+	h := &ScriptHandler{conn, handlers, config, nil, nil, nil, repo, false, "", javascriptDriver{}, luaDriver{}, lispDriver{}}
 
 	h.init()
 
@@ -425,8 +424,7 @@ func (h *ScriptHandler) init() {
 		return lisp.Nil, nil
 	})
 
-	repo := scriptRepository{h.client}
-	scripts := repo.Fetch()
+	scripts := h.repo.FetchAll()
 	for _, script := range scripts {
 		fmt.Println("Running", script.Type, "script", script.Title)
 		switch {

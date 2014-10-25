@@ -11,12 +11,17 @@ type Manager struct {
 	*martini.ClassicMartini
 }
 
-func NewManager(config *Configuration) (manager *Manager) {
+func NewManager() (manager *Manager) {
+	config := NewDefaultConfiguration()
+	db := newDatabaseConnection(config)
+	loadConfig(db, config)
+
 	manager = &Manager{martini.Classic()}
+	manager.Map(db)
 	manager.Map(config)
 	manager.Map(log.New(os.Stdout, "[squircy] ", 0))
 	manager.invokeAndMap(newIrcConnection)
-	manager.invokeAndMap(newRedisClient)
+	manager.Map(scriptRepository{db})
 	h := manager.invokeAndMap(newHandlerCollection).(*HandlerCollection)
 	nickservHandler := manager.invokeAndMap(newNickservHandler).(*NickservHandler)
 	scriptHandler := manager.invokeAndMap(newScriptHandler).(*ScriptHandler)
@@ -50,6 +55,8 @@ func (manager *Manager) configure(config *Configuration) {
 	}))
 	manager.Get("/", indexAction)
 	manager.Get("/status", statusAction)
+	manager.Get("/manage", manageAction)
+	manager.Post("/manage/update", manageUpdateAction)
 	manager.Post("/connect", connectAction)
 	manager.Post("/disconnect", disconnectAction)
 	manager.Group("/script", func(r martini.Router) {

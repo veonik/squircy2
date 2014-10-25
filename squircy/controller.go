@@ -1,7 +1,7 @@
 package squircy
 
 import (
-	"github.com/fzzy/radix/redis"
+	"github.com/HouzuoGuo/tiedot/db"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
 	"github.com/thoj/go-ircevent"
@@ -26,9 +26,8 @@ func statusAction(r render.Render, conn *irc.Connection) {
 	r.JSON(200, appStatus{status})
 }
 
-func scriptAction(r render.Render, client *redis.Client) {
-	repo := scriptRepository{client}
-	scripts := repo.Fetch()
+func scriptAction(r render.Render, repo scriptRepository) {
+	scripts := repo.FetchAll()
 
 	r.HTML(200, "script/index", map[string]interface{}{"scripts": scripts})
 }
@@ -43,52 +42,47 @@ func newScriptAction(r render.Render) {
 	r.HTML(200, "script/new", nil)
 }
 
-func createScriptAction(r render.Render, client *redis.Client, request *http.Request) {
+func createScriptAction(r render.Render, repo scriptRepository, request *http.Request) {
 	sType := request.FormValue("type")
 	title := request.FormValue("title")
 	body := request.FormValue("body")
 
-	repo := scriptRepository{client}
-	repo.Save(-1, persistentScript{scriptType(sType), title, body, true})
+	repo.Save(persistentScript{0, scriptType(sType), title, body, true})
 
 	r.Redirect("/script", 302)
 }
 
-func editScriptAction(r render.Render, client *redis.Client, params martini.Params) {
+func editScriptAction(r render.Render, repo scriptRepository, params martini.Params) {
 	index, _ := strconv.ParseInt(params["index"], 0, 32)
 
-	repo := scriptRepository{client}
-	script := repo.FetchIndex(int(index))
+	script := repo.Fetch(int(index))
 
-	r.HTML(200, "script/edit", map[string]interface{}{"Index": index, "Script": script})
+	r.HTML(200, "script/edit", map[string]interface{}{"Index": script.ID, "Script": script})
 }
 
-func updateScriptAction(r render.Render, client *redis.Client, params martini.Params, request *http.Request) {
+func updateScriptAction(r render.Render, repo scriptRepository, params martini.Params, request *http.Request) {
 	index, _ := strconv.ParseInt(params["index"], 0, 32)
 	sType := request.FormValue("type")
 	title := request.FormValue("title")
 	body := request.FormValue("body")
 
-	repo := scriptRepository{client}
-	repo.Save(int(index), persistentScript{scriptType(sType), title, body, true})
+	repo.Save(persistentScript{int(index), scriptType(sType), title, body, true})
 
 	r.Redirect("/script", 302)
 }
 
-func removeScriptAction(r render.Render, client *redis.Client, params martini.Params) {
+func removeScriptAction(r render.Render, repo scriptRepository, params martini.Params) {
 	index, _ := strconv.ParseInt(params["index"], 0, 32)
 
-	repo := scriptRepository{client}
 	repo.Delete(int(index))
 
 	r.JSON(200, nil)
 }
 
-func executeScriptAction(r render.Render, client *redis.Client, handler *ScriptHandler, params martini.Params) {
+func executeScriptAction(r render.Render, repo scriptRepository, handler *ScriptHandler, params martini.Params) {
 	index, _ := strconv.ParseInt(params["index"], 0, 32)
 
-	repo := scriptRepository{client}
-	script := repo.FetchIndex(int(index))
+	script := repo.Fetch(int(index))
 
 	switch {
 	case script.Type == scriptJavascript:

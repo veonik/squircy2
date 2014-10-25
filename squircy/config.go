@@ -9,6 +9,7 @@ import (
 const basePkg = "github.com/tyler-sommer/squircy2"
 
 type Configuration struct {
+	ID            int
 	Network       string
 	Nick          string
 	Username      string
@@ -40,6 +41,7 @@ func NewConfiguration(fname string) (config *Configuration) {
 
 func NewDefaultConfiguration() (config *Configuration) {
 	config = &Configuration{
+		-1,
 		"irc.freenode.net:6667",
 		"mrsquishy",
 		"mrjones",
