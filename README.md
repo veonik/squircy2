@@ -57,16 +57,16 @@ squIRCy2 exposes a small API to each scripting language.
 
 ### Javascript API
 
-```
-Irc.Join(channel)
-Irc.Part(channel)
-Irc.Privmsg(target, message)
-Data.Get(key)
-Data.Set(key, val)
-Script.AddHandler(type, fnName)
-Script.RemoveHandler(type, fnName)
-print(message)
-```
+- `Irc.Join(channel)` - Joins the given channel
+- `Irc.Part(channel)` - Parts the given channel
+- `Irc.Privmsg(target, message)` - Messages target with message
+- `Data.Get(key)` - Gets a value with the given from the cross-vm storage
+- `Data.Set(key, val)` - Sets a value with the given key in the cross-vm storage
+- `Script.AddHandler(type, fnName)` - Add a PRIVMSG handler of the given type ("js", "lua", or "lisp") and function name
+- `Script.RemoveHandler(type, fnName)` - Removes a PRIVMSG handler of the given type and function name
+- `replyTarget()` - The current reply target. If the current message was received in a channel, this will be the channel name. Otherwise it will be a nickname
+- `print(message)` Replies to the current reply target with the given message
+
 
 ### Lua API
 
