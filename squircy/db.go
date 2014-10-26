@@ -1,7 +1,6 @@
 package squircy
 
 import (
-	"encoding/json"
 	"github.com/HouzuoGuo/tiedot/db"
 )
 
@@ -36,52 +35,12 @@ func initDatabase(database *db.DB) {
 }
 
 func loadConfig(database *db.DB, config *Configuration) {
-	col := database.Use("Settings")
-
-	var settings []byte
-	var identifier int
-	col.ForEachDoc(func(id int, doc []byte) (moveOn bool) {
-		moveOn = false
-
-		settings = doc
-		identifier = id
-
-		return
-	})
-
-	if len(settings) == 0 {
-		// Persist existing settings and return
-		identifier, err := col.Insert(map[string]interface{}{
-			"Network":   config.Network,
-			"Nick":      config.Nick,
-			"Username":  config.Username,
-			"Password":  config.Password,
-			"OwnerNick": config.OwnerNick,
-			"OwnerHost": config.OwnerHost,
-		})
-
-		config.ID = identifier
-
-		if err != nil {
-			panic(err)
-		}
-
-		return
-	}
-
-	json.Unmarshal(settings, config)
-	config.ID = identifier
+	repo := configRepository{database}
+	repo.FetchInto(config)
+	saveConfig(database, config)
 }
 
 func saveConfig(database *db.DB, config *Configuration) {
-	col := database.Use("Settings")
-
-	col.Update(config.ID, map[string]interface{}{
-		"Network":   config.Network,
-		"Nick":      config.Nick,
-		"Username":  config.Username,
-		"Password":  config.Password,
-		"OwnerNick": config.OwnerNick,
-		"OwnerHost": config.OwnerHost,
-	})
+	repo := configRepository{database}
+	repo.Save(config)
 }
