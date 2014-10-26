@@ -8,7 +8,7 @@ squIRCy2 is written in Go and supports Javascript, Lua, and a small dialect of L
 It sports a web management interface for writing scripts and bot management, as well as dynamic script reloading at runtime.
 
 
-> This program exposes scripting languages to IRC and should not be considered safe.
+> This program exposes scripting languages to IRC. Take care to set the Owner nickname and hostname settings properly.
 
 
 Installation
@@ -34,7 +34,13 @@ Configuration
 
 Once the bot is up and running, you can access the web management interface via `localhost:3000`.
 
-From here, you can add and edit scripts and reload the scripting handlers.
+The Settings page allows you to modify squishy's nickname, username, and which server he connects to. Configure the Owner nickname and hostname to your information.
+
+> The Owner Nickname and Hostname settings limit in-IRC REPL to that user. Ensure these are configured properly.
+
+From the Scripts page, you can add and edit scripts.
+
+From the Dashboard page, you can re-initialize scripts and connect or disconnect from IRC.
 
 
 Exposed API
@@ -96,6 +102,22 @@ function handler(code, target, nick, message) {
 ```
 
 Additionally, exposed to the Javascript VM is `Script.On` which takes a script type, an event type, and a function name. The signature of the function is the same as a chat handler.
+
+
+In-IRC REPL
+-----------
+
+squIRCy2 comes with an in-IRC REPL, though the print functionality needs to be explicitly called. A REPL session can be started by messaging squIRCy2, either in channel or private message: `!repl js`. Replace "js" with "lua" or "lisp" to start a session of that type. Message `!repl end` to end the REPL session.
+
+```
+<squishyj> Javascript REPL session started.
+<veonik> function test(x, y) { print(x * y) }
+<veonik> test(10, 5)
+<squishyj> 50
+<veonik> !repl end
+<squishyj> Javascript REPL session ended.
+```
+
 
 Additional Info
 ---------------
