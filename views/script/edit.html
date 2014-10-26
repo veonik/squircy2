@@ -1,4 +1,4 @@
-<form method="post" class="form form-horizontal" action="/script/{{ .Index }}/update">
+<form method="post" class="form form-horizontal" action="/script/{{ .Script.ID }}/update">
 <div class="row">
 	<div class="col-md-4">
   		<input class="form-control" name="title" placeholder="Title" value="{{ .Script.Title }}">
@@ -22,7 +22,7 @@
 		<button class="btn btn-primary">Save</button>
 	</div>
 	<div class="col-md-4">
-		<a id="execute" href="/script/{{ .Index }}/execute" class="btn btn-default">Execute</a>
+		<a id="execute" href="/script/{{ .Script.ID }}/execute" class="btn btn-default">Execute</a>
 	</div>
 </form>
 <div class="row">

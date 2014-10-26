@@ -53,34 +53,34 @@ func createScriptAction(r render.Render, repo scriptRepository, request *http.Re
 }
 
 func editScriptAction(r render.Render, repo scriptRepository, params martini.Params) {
-	index, _ := strconv.ParseInt(params["index"], 0, 32)
+	id, _ := strconv.ParseInt(params["id"], 0, 64)
 
-	script := repo.Fetch(int(index))
+	script := repo.Fetch(int(id))
 
-	r.HTML(200, "script/edit", map[string]interface{}{"Index": script.ID, "Script": script})
+	r.HTML(200, "script/edit", map[string]interface{}{"Script": script})
 }
 
 func updateScriptAction(r render.Render, repo scriptRepository, params martini.Params, request *http.Request) {
-	index, _ := strconv.ParseInt(params["index"], 0, 32)
+	id, _ := strconv.ParseInt(params["id"], 0, 64)
 	sType := request.FormValue("type")
 	title := request.FormValue("title")
 	body := request.FormValue("body")
 
-	repo.Save(persistentScript{int(index), scriptType(sType), title, body, true})
+	repo.Save(persistentScript{int(id), scriptType(sType), title, body, true})
 
 	r.Redirect("/script", 302)
 }
 
 func removeScriptAction(r render.Render, repo scriptRepository, params martini.Params) {
-	index, _ := strconv.ParseInt(params["index"], 0, 32)
+	id, _ := strconv.ParseInt(params["id"], 0, 64)
 
-	repo.Delete(int(index))
+	repo.Delete(int(id))
 
 	r.JSON(200, nil)
 }
 
 func executeScriptAction(r render.Render, repo scriptRepository, handler *ScriptHandler, params martini.Params) {
-	index, _ := strconv.ParseInt(params["index"], 0, 32)
+	index, _ := strconv.ParseInt(params["id"], 0, 64)
 
 	script := repo.Fetch(int(index))
 

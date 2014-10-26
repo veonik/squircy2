@@ -30,7 +30,7 @@ func hydrateScript(rawScript map[string]interface{}) persistentScript {
 
 	script.Title = rawScript["Title"].(string)
 	script.Enabled = rawScript["Enabled"].(bool)
-	script.Type = rawScript["Type"].(scriptType)
+	script.Type = scriptType(rawScript["Type"].(string))
 	script.Body = rawScript["Body"].(string)
 
 	return script
@@ -68,7 +68,10 @@ func (repo *scriptRepository) FetchAll() []persistentScript {
 func (repo *scriptRepository) Fetch(id int) persistentScript {
 	col := repo.database.Use("Scripts")
 
-	rawScript, _ := col.Read(id)
+	rawScript, err := col.Read(id)
+	if err != nil {
+		panic(err)
+	}
 	script := hydrateScript(rawScript)
 	script.ID = id
 
