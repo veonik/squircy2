@@ -7,17 +7,14 @@ import (
 const basePkg = "github.com/tyler-sommer/squircy2"
 
 type Configuration struct {
-	ID            int
-	Network       string
-	Nick          string
-	Username      string
-	Password      string
-	Channel       string
-	OwnerNick     string
-	OwnerHost     string
-	RedisHost     string
-	RedisDatabase int
-	RootPath      string
+	ID        int
+	Network   string
+	Nick      string
+	Username  string
+	Password  string
+	OwnerNick string
+	OwnerHost string
+	RootPath  string
 }
 
 func NewDefaultConfiguration() (config *Configuration) {
@@ -27,11 +24,8 @@ func NewDefaultConfiguration() (config *Configuration) {
 		"mrsquishy",
 		"mrjones",
 		"",
-		"#squishyslab",
 		"",
 		"",
-		"127.0.0.1:6379",
-		0,
 		"",
 	}
 	compile(config)

@@ -130,3 +130,21 @@ func disconnectAction(r render.Render, conn *irc.Connection) {
 
 	r.JSON(200, nil)
 }
+
+func manageAction(r render.Render, config *Configuration) {
+	r.HTML(200, "manage/edit", map[string]interface{}{
+		"Config": config,
+	})
+}
+
+func manageUpdateAction(r render.Render, database *db.DB, config *Configuration, request *http.Request) {
+	config.Network = request.FormValue("network")
+	config.Nick = request.FormValue("nick")
+	config.Username = request.FormValue("username")
+	config.OwnerNick = request.FormValue("owner_nick")
+	config.OwnerHost = request.FormValue("owner_host")
+
+	saveConfig(database, config)
+
+	r.Redirect("/manage", 302)
+}

@@ -52,14 +52,12 @@ func loadConfig(database *db.DB, config *Configuration) {
 	if len(settings) == 0 {
 		// Persist existing settings and return
 		identifier, err := col.Insert(map[string]interface{}{
-			"Network":       config.Network,
-			"Nick":          config.Nick,
-			"Username":      config.Username,
-			"Password":      config.Password,
-			"OwnerNick":     config.OwnerNick,
-			"OwnerHost":     config.OwnerHost,
-			"RedisHost":     config.RedisHost,
-			"RedisDatabase": config.RedisDatabase,
+			"Network":   config.Network,
+			"Nick":      config.Nick,
+			"Username":  config.Username,
+			"Password":  config.Password,
+			"OwnerNick": config.OwnerNick,
+			"OwnerHost": config.OwnerHost,
 		})
 
 		config.ID = identifier
@@ -79,13 +77,11 @@ func saveConfig(database *db.DB, config *Configuration) {
 	col := database.Use("Settings")
 
 	col.Update(config.ID, map[string]interface{}{
-		"Network":       config.Network,
-		"Nick":          config.Nick,
-		"Username":      config.Username,
-		"Password":      config.Password,
-		"OwnerNick":     config.OwnerNick,
-		"OwnerHost":     config.OwnerHost,
-		"RedisHost":     config.RedisHost,
-		"RedisDatabase": config.RedisDatabase,
+		"Network":   config.Network,
+		"Nick":      config.Nick,
+		"Username":  config.Username,
+		"Password":  config.Password,
+		"OwnerNick": config.OwnerNick,
+		"OwnerHost": config.OwnerHost,
 	})
 }
