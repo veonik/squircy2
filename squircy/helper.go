@@ -53,42 +53,18 @@ func (irc *ircHelper) Part(target string) {
 	irc.conn.Part(target)
 }
 
-type handlerType string
-
 const (
-	handlerJs   handlerType = "js"
-	handlerLua              = "lua"
-	handlerLisp             = "lisp"
+	handlerJs   string = "js"
+	handlerLua         = "lua"
+	handlerLisp        = "lisp"
 )
-
-type eventType string
-
-const (
-	eventJoin    eventType = "join"
-	eventPart              = "part"
-	eventMessage           = "privmsg"
-	eventNotice            = "notice"
-	eventConnect           = "connect"
-)
-
-var eventMap = map[eventType]string{
-	eventJoin:    "JOIN",
-	eventPart:    "PART",
-	eventMessage: "PRIVMSG",
-	eventNotice:  "NOTICE",
-	eventConnect: "001",
-}
 
 type scriptHelper struct {
 	handler *ScriptHandler
 }
 
-// On is exposed by javascript and allows strings instead of typed strings
+// On adds a handler of the given script type for the given event type
 func (script *scriptHelper) On(sType string, eType string, fnName string) {
-	script.on(handlerType(sType), eventType(eType), fnName)
-}
-
-func (script *scriptHelper) on(sType handlerType, eType eventType, fnName string) {
 	var driver scriptDriver
 	switch {
 	case sType == handlerJs:
@@ -104,14 +80,15 @@ func (script *scriptHelper) on(sType handlerType, eType eventType, fnName string
 		return
 	}
 
-	handler := newEventListenerScript(driver, eventMap[eType], fnName)
+	handler := newEventListenerScript(driver, eType, fnName)
 	script.handler.handlers.Remove(handler)
 	script.handler.handlers.Add(handler)
 }
 
-func (script *scriptHelper) AddHandler(typeName, fnName string) {
+// AddHandler adds a PRIVMSG handler of the gien script type
+func (script *scriptHelper) AddHandler(sType, fnName string) {
 	var driver scriptDriver
-	switch sType := handlerType(typeName); {
+	switch {
 	case sType == handlerJs:
 		driver = script.handler.jsDriver
 
@@ -125,11 +102,12 @@ func (script *scriptHelper) AddHandler(typeName, fnName string) {
 		return
 	}
 
-	handler := newEventListenerScript(driver, eventMap[eventMessage], fnName)
+	handler := newEventListenerScript(driver, "PRIVMSG", fnName)
 	script.handler.handlers.Remove(handler)
 	script.handler.handlers.Add(handler)
 }
 
-func (script *scriptHelper) RemoveHandler(typeName, fnName string) {
-	script.handler.handlers.RemoveId("listener-" + eventMap[eventMessage] + "-" + typeName + "-" + fnName)
+// RemoveHandler removes a PRIVMSG handler
+func (script *scriptHelper) RemoveHandler(sType, fnName string) {
+	script.handler.handlers.RemoveId("listener-PRIVMSG-" + sType + "-" + fnName)
 }

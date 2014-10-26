@@ -11,7 +11,6 @@ type Configuration struct {
 	Network   string
 	Nick      string
 	Username  string
-	Password  string
 	OwnerNick string
 	OwnerHost string
 	RootPath  string
@@ -23,7 +22,6 @@ func NewDefaultConfiguration() (config *Configuration) {
 		"irc.freenode.net:6667",
 		"mrsquishy",
 		"mrjones",
-		"",
 		"",
 		"",
 		"",

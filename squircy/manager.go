@@ -23,10 +23,8 @@ func NewManager() (manager *Manager) {
 	manager.invokeAndMap(newIrcConnection)
 	manager.Map(scriptRepository{db})
 	h := manager.invokeAndMap(newHandlerCollection).(*HandlerCollection)
-	nickservHandler := manager.invokeAndMap(newNickservHandler).(*NickservHandler)
 	scriptHandler := manager.invokeAndMap(newScriptHandler).(*ScriptHandler)
 
-	h.Add(nickservHandler)
 	h.Add(scriptHandler)
 
 	manager.configure(config)

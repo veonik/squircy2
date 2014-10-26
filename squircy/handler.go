@@ -6,7 +6,6 @@ import (
 	"github.com/robertkrimen/otto"
 	"github.com/thoj/go-ircevent"
 	"github.com/veonik/go-lisp/lisp"
-	"log"
 	"strconv"
 	"strings"
 )
@@ -35,33 +34,6 @@ func parseCommand(msg string) (string, []string) {
 	args := fields[1:]
 
 	return command, args
-}
-
-type NickservHandler struct {
-	conn     *irc.Connection
-	log      *log.Logger
-	handlers *HandlerCollection
-	config   *Configuration
-}
-
-func newNickservHandler(conn *irc.Connection, log *log.Logger, handlers *HandlerCollection, config *Configuration) (h *NickservHandler) {
-	h = &NickservHandler{conn, log, handlers, config}
-
-	return
-}
-
-func (h *NickservHandler) Id() string {
-	return "nickserv"
-}
-
-func (h *NickservHandler) Matches(e *irc.Event) bool {
-	return strings.Contains(strings.ToLower(e.Message()), "identify") && e.User == "NickServ"
-}
-
-func (h *NickservHandler) Handle(e *irc.Event) {
-	h.conn.Privmsgf("NickServ", "IDENTIFY %s", h.config.Password)
-	h.log.Println("Identified with Nickserv")
-	h.handlers.Remove(h)
 }
 
 func scriptRecoveryHandler(conn *irc.Connection, e *irc.Event) {
@@ -340,6 +312,13 @@ func (h *ScriptHandler) init() {
 		vm.PushString(res)
 		return 1
 	})
+	h.luaVm.Register("on", func(vm *lua.State) int {
+		typeName := vm.ToString(1)
+		eventType := vm.ToString(2)
+		fnName := vm.ToString(3)
+		helper.On(typeName, eventType, fnName)
+		return 0
+	})
 	h.luaVm.Register("addhandler", func(vm *lua.State) int {
 		typeName := vm.ToString(1)
 		fnName := vm.ToString(2)
@@ -404,6 +383,16 @@ func (h *ScriptHandler) init() {
 		url := vars[0].String()
 		res := client.Get(url)
 		return lisp.StringValue(res), nil
+	})
+	lisp.SetHandler("on", func(vars ...lisp.Value) (lisp.Value, error) {
+		if len(vars) != 3 {
+			return lisp.Nil, nil
+		}
+		typeName := vars[0].String()
+		eventType := vars[1].String()
+		fnName := vars[2].String()
+		helper.On(typeName, eventType, fnName)
+		return lisp.Nil, nil
 	})
 	lisp.SetHandler("addhandler", func(vars ...lisp.Value) (lisp.Value, error) {
 		if len(vars) != 2 {
