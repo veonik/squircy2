@@ -110,6 +110,7 @@ In-IRC REPL
 squIRCy2 comes with an in-IRC REPL, though the print functionality needs to be explicitly called. A REPL session can be started by messaging squIRCy2, either in channel or private message: `!repl js`. Replace "js" with "lua" or "lisp" to start a session of that type. Message `!repl end` to end the REPL session.
 
 ```
+<veonik> !repl js
 <squishyj> Javascript REPL session started.
 <veonik> function test(x, y) { print(x * y) }
 <veonik> test(10, 5)
