@@ -4,7 +4,6 @@ import (
 	"github.com/HouzuoGuo/tiedot/db"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
-	"github.com/thoj/go-ircevent"
 	"net/http"
 	"strconv"
 )
@@ -17,13 +16,8 @@ type appStatus struct {
 	Connected bool
 }
 
-func statusAction(r render.Render, conn *irc.Connection) {
-	status := false
-	if conn.GetNick() != "" {
-		status = true
-	}
-
-	r.JSON(200, appStatus{status})
+func statusAction(r render.Render, mgr *IrcConnectionManager) {
+	r.JSON(200, appStatus{mgr.Connected()})
 }
 
 func scriptAction(r render.Render, repo scriptRepository) {
@@ -114,19 +108,14 @@ func replExecuteAction(r render.Render, handler *ScriptHandler, request *http.Re
 	})
 }
 
-func connectAction(r render.Render, conn *irc.Connection, config *Configuration, h *HandlerCollection) {
-	err := conn.Connect(config.Network)
-	if err != nil {
-		r.JSON(503, err)
-	}
-
-	h.bind(conn)
+func connectAction(r render.Render, mgr *IrcConnectionManager) {
+	mgr.Connect()
 
 	r.JSON(200, nil)
 }
 
-func disconnectAction(r render.Render, conn *irc.Connection) {
-	conn.Quit()
+func disconnectAction(r render.Render, mgr *IrcConnectionManager) {
+	mgr.Quit()
 
 	r.JSON(200, nil)
 }

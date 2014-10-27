@@ -17,15 +17,12 @@ func NewManager() (manager *Manager) {
 	loadConfig(db, config)
 
 	manager = &Manager{martini.Classic()}
+	manager.Map(manager)
 	manager.Map(db)
 	manager.Map(config)
 	manager.Map(log.New(os.Stdout, "[squircy] ", 0))
-	manager.invokeAndMap(newIrcConnection)
+	manager.invokeAndMap(newIrcConnectionManager)
 	manager.Map(scriptRepository{db})
-	h := manager.invokeAndMap(newHandlerCollection).(*HandlerCollection)
-	scriptHandler := manager.invokeAndMap(newScriptHandler).(*ScriptHandler)
-
-	h.Add(scriptHandler)
 
 	manager.configure(config)
 

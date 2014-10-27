@@ -3,8 +3,60 @@ package squircy
 import (
 	"github.com/thoj/go-ircevent"
 	"log"
+	"reflect"
 	"sync"
 )
+
+type IrcConnectionManager struct {
+	manager   *Manager
+	conn      *irc.Connection
+	connected bool
+}
+
+func newIrcConnectionManager(manager *Manager) (mgr *IrcConnectionManager) {
+	mgr = &IrcConnectionManager{manager, nil, false}
+
+	res, _ := mgr.manager.Invoke(newIrcConnection)
+	mgr.conn = res[0].Interface().(*irc.Connection)
+
+	mgr.manager.Map(mgr.conn)
+
+	return
+}
+
+func (mgr *IrcConnectionManager) Connect() {
+	if mgr.conn == nil {
+		mgr.conn = mgr.manager.invokeAndMap(newIrcConnection).(*irc.Connection)
+	}
+
+	config := mgr.manager.Injector.Get(reflect.TypeOf((*Configuration)(nil))).Interface().(*Configuration)
+
+	h := mgr.manager.invokeAndMap(newHandlerCollection).(*HandlerCollection)
+	scriptHandler := mgr.manager.invokeAndMap(newScriptHandler).(*ScriptHandler)
+
+	h.Add(scriptHandler)
+
+	mgr.conn.AddCallback("001", func(e *irc.Event) {
+		mgr.connected = true
+	})
+
+	h.bind(mgr.conn)
+
+	mgr.conn.Connect(config.Network)
+}
+
+func (mgr *IrcConnectionManager) Quit() {
+	mgr.connected = false
+	if mgr.conn != nil {
+		mgr.conn.Quit()
+	}
+
+	mgr.conn = nil
+}
+
+func (mgr *IrcConnectionManager) Connected() bool {
+	return mgr.connected
+}
 
 type Handler interface {
 	Id() string
