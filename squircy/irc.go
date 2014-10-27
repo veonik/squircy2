@@ -8,13 +8,14 @@ import (
 )
 
 type IrcConnectionManager struct {
-	manager   *Manager
-	conn      *irc.Connection
-	connected bool
+	manager    *Manager
+	conn       *irc.Connection
+	connected  bool
+	connecting bool
 }
 
 func newIrcConnectionManager(manager *Manager) (mgr *IrcConnectionManager) {
-	mgr = &IrcConnectionManager{manager, nil, false}
+	mgr = &IrcConnectionManager{manager, nil, false, false}
 
 	res, _ := mgr.manager.Invoke(newIrcConnection)
 	mgr.conn = res[0].Interface().(*irc.Connection)
@@ -37,15 +38,18 @@ func (mgr *IrcConnectionManager) Connect() {
 	h.Add(scriptHandler)
 
 	mgr.conn.AddCallback("001", func(e *irc.Event) {
+		mgr.connecting = false
 		mgr.connected = true
 	})
 
 	h.bind(mgr.conn)
 
+	mgr.connecting = true
 	mgr.conn.Connect(config.Network)
 }
 
 func (mgr *IrcConnectionManager) Quit() {
+	mgr.connecting = false
 	mgr.connected = false
 	if mgr.conn != nil {
 		mgr.conn.Quit()
@@ -56,6 +60,10 @@ func (mgr *IrcConnectionManager) Quit() {
 
 func (mgr *IrcConnectionManager) Connected() bool {
 	return mgr.connected
+}
+
+func (mgr *IrcConnectionManager) Connecting() bool {
+	return mgr.connecting
 }
 
 type Handler interface {
