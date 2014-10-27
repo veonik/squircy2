@@ -120,6 +120,31 @@ squIRCy2 comes with an in-IRC REPL, though the print functionality needs to be e
 ```
 
 
+Example Scripts
+---------------
+
+### Join channels on connect (Javascript example)
+
+```js
+function handleWelcome(code, target, nick, message) {
+    Irc.Join('#squishyslab')
+}
+Script.On("js", "001", "handleWelcome");
+```
+
+### Identify with Nickserv (Javascript example)
+
+```js
+function handleNickserv(code, target, nick, message) {
+    if (nick == "NickServ" && message.indexOf("identify") >= 0) {
+        Irc.Privmsg("NickServ", "IDENTIFY superlongandsecurepassword");
+        console.log("Identified with Nickserv");
+    }
+}
+Script.On("js", "NOTICE", "handleNickserv");
+```
+
+
 Additional Info
 ---------------
 
