@@ -1,13 +1,23 @@
 <script type="text/javascript">
 $(function() {
 	var $appStatus = $('#app-status');
-	(function() {
-		var fn = arguments.callee;
-		$.ajax({
+	var statusReq;
+	var statusTimeout;
+	function updateStatus() {
+		if (statusReq) {
+			statusReq.abort();
+		}
+		
+		if (statusTimeout) {
+			clearTimeout(statusTimeout);
+			statusTimeout = null;
+		}
+		
+		statusReq = $.ajax({
 			url: "/status",
 			dataType: "json",
 			success: function(response) {
-				setTimeout(fn, 30000)
+				statusTimeout = setTimeout(updateStatus, 30000)
 				if (response.Connected) {
 					if ($appStatus.hasClass('connected')) {
 						return;
@@ -19,9 +29,14 @@ $(function() {
 			},
 			error: function() {
 				$appStatus.removeClass('connected');
-				setTimeout(fn, 15000)
+				statusTimeout = setTimeout(updateStatus, 15000)
+			},
+			complete: function() {
+				statusReq = null;
 			}
 		});
-	})();
+	}
+	
+	updateStatus();
 });
 </script>
