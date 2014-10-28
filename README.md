@@ -16,17 +16,41 @@ Installation
 
 As a prerequisite, the Lua 5.1 package must be installed on your system.
 
-[See here for more information](https://github.com/aarzilli/golua/blob/master/README.md) on getting Go Bindings for the Lua C API setup or just visit [the download page](http://www.lua.org/download.html).
+[See here for more information](https://github.com/aarzilli/golua/blob/master/README.md) on getting Go Bindings for the Lua C API setup or just visit [the Lua download page](http://www.lua.org/download.html).
 
 
-Once Lua is ready to go, the easiest way to install squIRCy2 is by running:
+**Installing Lua 5.1 on Ubuntu or Debian**
+
+Lua 5.1 is available on either platform by default. Install them with aptitude by running:
 
 ```
-go get github.com/tyler-sommer/squircy2
+sudo apt-get install lua5.1 lua5.1-dev
 ```
+
+**Installing Lua 5.1 on CentOS**
+
+Some versions of CentOS comes with Lua. Ensure it is installed by running:
+
+```
+sudo yum install lua lua-devel
+```
+
+**Installing Lua 5.1 on Mac OSX**
+
+[Download the prebuilt binary](http://luabinaries.sourceforge.net/download.html) and put it in `/usr/local/lib`
+
+
+### Installing squIRCy2
+
+Once Lua is ready to go, installing squIRCy2 is as easy as running:
+
+```
+go get -u github.com/tyler-sommer/squircy2
+```
+
+> On some platforms, like RHEL, you may need to specify `-tags llua` on the command line to properly locate the library.
 
 With squIRCy2 is installed, you can run it immediately with `squircy2` and a default configuration will be initialized.
-
 
 
 Configuration
@@ -73,6 +97,7 @@ getex(key)
 setex(key, value)
 addhandler(type, fnName)
 removehandler(type, fnName)
+on(type, event, fnName)
 print(message)
 ```
 
@@ -86,6 +111,7 @@ print(message)
 (setex key value)
 (addhandler type fnName)
 (removehandler type fnName)
+(on type event fnName)
 (print message)
 ```
 
