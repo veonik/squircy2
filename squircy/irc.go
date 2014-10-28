@@ -44,7 +44,8 @@ func (mgr *IrcConnectionManager) Connect() {
 
 	mgr.conn.AddCallback("ERROR", func(e *irc.Event) {
 		l.Println("Disconnected")
-		if mgr.Connected() {
+		l.Println(e.Message())
+		if mgr.Connected() || mgr.Connecting() {
 			mgr.Quit()
 		}
 	})

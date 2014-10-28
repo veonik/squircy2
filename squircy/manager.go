@@ -3,12 +3,36 @@ package squircy
 import (
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
+	"io"
 	"log"
 	"os"
+	"strings"
 )
 
 type Manager struct {
 	*martini.ClassicMartini
+}
+
+type logHistory struct {
+	limit int
+	data  []string
+}
+
+func (hist *logHistory) Write(p []byte) (n int, err error) {
+	n = len(p)
+	err = nil
+
+	if len(hist.data) >= hist.limit {
+		hist.data = hist.data[1:]
+	}
+
+	hist.data = append(hist.data, string(p))
+
+	return
+}
+
+func (hist *logHistory) ReadAll() string {
+	return strings.Join(hist.data, "")
 }
 
 func NewManager() (manager *Manager) {
@@ -16,11 +40,15 @@ func NewManager() (manager *Manager) {
 	db := newDatabaseConnection(config)
 	loadConfig(db, config)
 
+	hist := &logHistory{200, make([]string, 0)}
+	out := io.MultiWriter(os.Stdout, hist)
+
 	manager = &Manager{martini.Classic()}
 	manager.Map(manager)
 	manager.Map(db)
 	manager.Map(config)
-	manager.Map(log.New(os.Stdout, "[squircy] ", 0))
+	manager.Map(log.New(out, "[squircy] ", 0))
+	manager.Map(hist)
 	manager.invokeAndMap(newIrcConnectionManager)
 	manager.Map(scriptRepository{db})
 
@@ -42,12 +70,15 @@ func (manager *Manager) invokeAndMap(fn interface{}) interface{} {
 }
 
 func (manager *Manager) configure(config *Configuration) {
-	manager.Use(martini.Static(config.RootPath + "/public"))
-	manager.Use(render.Renderer(render.Options{
-		Directory:  config.RootPath + "/views",
-		Layout:     "layout",
-		Extensions: []string{".tmpl", ".html"},
-	}))
+	manager.Handlers(
+		martini.Static(config.RootPath+"/public", martini.StaticOptions{
+			SkipLogging: true,
+		}),
+		render.Renderer(render.Options{
+			Directory:  config.RootPath + "/views",
+			Layout:     "layout",
+			Extensions: []string{".tmpl", ".html"},
+		}))
 	manager.Get("/", indexAction)
 	manager.Get("/status", statusAction)
 	manager.Group("/manage", func(r martini.Router) {

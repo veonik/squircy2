@@ -8,8 +8,10 @@ import (
 	"strconv"
 )
 
-func indexAction(r render.Render) {
-	r.HTML(200, "index", nil)
+func indexAction(r render.Render, hist *logHistory) {
+	r.HTML(200, "index", map[string]interface{}{
+		"history": hist.ReadAll(),
+	})
 }
 
 type appStatus struct {
