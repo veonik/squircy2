@@ -1,15 +1,18 @@
-package squircy
+package script
 
 import (
 	"errors"
 	"fmt"
 	"github.com/aarzilli/golua/lua"
 	"github.com/robertkrimen/otto"
+	//"github.com/thoj/go-ircevent"
 	"github.com/veonik/go-lisp/lisp"
 	"time"
 )
 
-var unknownScriptType = errors.New("Unknown script type")
+const maxExecutionTime = 2 // in seconds
+var Halt = errors.New("Execution limit exceeded")
+var UnknownScriptType = errors.New("Unknown script type")
 
 type ScriptType string
 
@@ -20,8 +23,34 @@ const (
 )
 
 type ScriptManager struct {
-	jsVm  *otto.Otto
-	luaVm *lua.State
+	jsVm         *otto.Otto
+	jsDriver     javascriptDriver
+	luaVm        *lua.State
+	luaDriver    luaDriver
+	lispDriver   lispDriver
+	httpHelper   httpHelper
+	ircHelper    ircHelper
+	dataHelper   dataHelper
+	scriptHelper scriptHelper
+	repo         ScriptRepository
+}
+
+func NewScriptManager(repo ScriptRepository) *ScriptManager {
+	mgr := &ScriptManager{
+		nil,
+		javascriptDriver{},
+		nil,
+		luaDriver{},
+		lispDriver{},
+		httpHelper{},
+		ircHelper{nil},
+		dataHelper{make(map[string]interface{})},
+		scriptHelper{},
+		repo,
+	}
+	mgr.init()
+
+	return mgr
 }
 
 func (m *ScriptManager) RunUnsafe(t ScriptType, code string) (result interface{}, err error) {
@@ -49,21 +78,18 @@ func (m *ScriptManager) RunUnsafe(t ScriptType, code string) (result interface{}
 		result = res.Inspect()
 
 	default:
-		err = unknownScriptType
+		err = UnknownScriptType
 	}
 
 	return
 }
-
-const maxExecutionTime = 2 // in seconds
-var halt = errors.New("Execution limit exceeded")
 
 func runUnsafeJavascript(vm *otto.Otto, unsafe string) (otto.Value, error) {
 	start := time.Now()
 	defer func() {
 		duration := time.Since(start)
 		if err := recover(); err != nil {
-			if err == halt {
+			if err == Halt {
 				fmt.Println("Some code took too long! Stopping after: ", duration)
 			}
 			panic(err)
@@ -75,7 +101,7 @@ func runUnsafeJavascript(vm *otto.Otto, unsafe string) (otto.Value, error) {
 	go func() {
 		time.Sleep(maxExecutionTime * time.Second)
 		vm.Interrupt <- func() {
-			panic(halt)
+			panic(Halt)
 		}
 	}()
 
@@ -87,7 +113,7 @@ func runUnsafeLua(vm *lua.State, unsafe string) error {
 	defer func() {
 		duration := time.Since(start)
 		if err := recover(); err != nil {
-			if err == halt {
+			if err == Halt {
 				fmt.Println("Some code took too long! Stopping after: ", duration)
 			}
 			panic(err)
@@ -98,7 +124,7 @@ func runUnsafeLua(vm *lua.State, unsafe string) error {
 	err := vm.DoString(unsafe)
 
 	if err != nil && err.Error() == "Lua execution quantum exceeded" {
-		panic(halt)
+		panic(Halt)
 	}
 
 	return err
@@ -111,7 +137,7 @@ func runUnsafeLisp(unsafe string) (lisp.Value, error) {
 		if err := recover(); err != nil {
 			if err.(error).Error() == "Execution limit exceeded" {
 				fmt.Println("Some code took too long! Stopping after: ", duration)
-				panic(halt)
+				panic(Halt)
 			}
 			panic(err)
 		}
@@ -119,4 +145,20 @@ func runUnsafeLisp(unsafe string) (lisp.Value, error) {
 
 	lisp.SetExecutionLimit(maxExecutionTime * (1 << 15))
 	return lisp.EvalString(unsafe)
+}
+
+func (m *ScriptManager) init() {
+	luaVm := lua.NewState()
+	luaVm.OpenLibs()
+
+	jsVm := otto.New()
+
+	m.luaVm = luaVm
+	m.jsVm = jsVm
+
+	scripts := m.repo.FetchAll()
+	for _, script := range scripts {
+		fmt.Println("Running", script.Type, "script", script.Title)
+		m.RunUnsafe(script.Type, script.Body)
+	}
 }

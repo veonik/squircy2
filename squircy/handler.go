@@ -5,6 +5,7 @@ import (
 	"github.com/aarzilli/golua/lua"
 	"github.com/robertkrimen/otto"
 	"github.com/thoj/go-ircevent"
+	"github.com/tyler-sommer/squircy2/squircy/config"
 	"github.com/veonik/go-lisp/lisp"
 	"strconv"
 	"strings"
@@ -110,11 +111,11 @@ func (d lispDriver) String() string {
 type ScriptHandler struct {
 	conn       *irc.Connection
 	handlers   *HandlerCollection
-	config     *Configuration
+	config     *config.Configuration
 	luaVm      *lua.State
 	jsVm       *otto.Otto
 	helper     *scriptHelper
-	repo       scriptRepository
+	repo       ScriptRepository
 	repl       bool
 	replType   string
 	jsDriver   javascriptDriver
@@ -122,8 +123,8 @@ type ScriptHandler struct {
 	lispDriver lispDriver
 }
 
-func newScriptHandler(conn *irc.Connection, handlers *HandlerCollection, config *Configuration, repo scriptRepository) *ScriptHandler {
-	h := &ScriptHandler{conn, handlers, config, nil, nil, nil, repo, false, "", javascriptDriver{}, luaDriver{}, lispDriver{}}
+func newScriptHandler(conn *irc.Connection, config *config.Configuration, repo ScriptRepository) *ScriptHandler {
+	h := &ScriptHandler{conn, nil, config, nil, nil, nil, repo, false, "", javascriptDriver{}, luaDriver{}, lispDriver{}}
 
 	h.init()
 
@@ -247,186 +248,7 @@ func (h *ScriptHandler) ReInit() {
 }
 
 func (h *ScriptHandler) init() {
-	luaVm := lua.NewState()
-	luaVm.OpenLibs()
-
-	jsVm := otto.New()
-
-	h.jsDriver.vm = jsVm
-	h.luaDriver.vm = luaVm
-
-	helper := &scriptHelper{h}
-	client := &httpHelper{}
-	db := &dataHelper{make(map[string]interface{})}
-	irc := &ircHelper{h.conn}
-
-	h.luaVm = luaVm
-	h.jsVm = jsVm
-	h.helper = helper
-
-	h.jsVm.Set("Http", client)
-	h.jsVm.Set("Data", db)
-	h.jsVm.Set("Irc", irc)
-	h.jsVm.Set("Script", helper)
-
-	h.luaVm.Register("typename", func(vm *lua.State) int {
-		o := vm.Typename(int(vm.Type(1)))
-		h.luaVm.PushString(o)
-		return 1
-	})
-	h.luaVm.Register("setex", func(vm *lua.State) int {
-		key := vm.ToString(1)
-		value := vm.ToString(2)
-		db.Set(key, value)
-		return 0
-	})
-	h.luaVm.Register("getex", func(vm *lua.State) int {
-		key := vm.ToString(1)
-		value := db.Get(key)
-		if value != nil {
-			vm.PushString(value.(string))
-			return 1
-		}
-		vm.PushNil()
-		return 1
-	})
-	h.luaVm.Register("joinchan", func(vm *lua.State) int {
-		channel := vm.ToString(1)
-		irc.Join(channel)
-		return 0
-	})
-	h.luaVm.Register("partchan", func(vm *lua.State) int {
-		channel := vm.ToString(1)
-		irc.Part(channel)
-		return 0
-	})
-	h.luaVm.Register("privmsg", func(vm *lua.State) int {
-		target := vm.ToString(1)
-		message := vm.ToString(2)
-		irc.Privmsg(target, message)
-		return 0
-	})
-	h.luaVm.Register("httpget", func(vm *lua.State) int {
-		url := vm.ToString(1)
-		res := client.Get(url)
-		vm.PushString(res)
-		return 1
-	})
-	h.luaVm.Register("on", func(vm *lua.State) int {
-		typeName := vm.ToString(1)
-		eventType := vm.ToString(2)
-		fnName := vm.ToString(3)
-		helper.On(typeName, eventType, fnName)
-		return 0
-	})
-	h.luaVm.Register("addhandler", func(vm *lua.State) int {
-		typeName := vm.ToString(1)
-		fnName := vm.ToString(2)
-		helper.AddHandler(typeName, fnName)
-		return 0
-	})
-	h.luaVm.Register("removehandler", func(vm *lua.State) int {
-		typeName := vm.ToString(1)
-		fnName := vm.ToString(2)
-		helper.RemoveHandler(typeName, fnName)
-		return 0
-	})
-
-	lisp.SetHandler("setex", func(vars ...lisp.Value) (lisp.Value, error) {
-		if len(vars) != 2 {
-			return lisp.Nil, nil
-		}
-		key := vars[0].String()
-		value := vars[1].String()
-		db.Set(key, value)
-		return lisp.Nil, nil
-	})
-	lisp.SetHandler("getex", func(vars ...lisp.Value) (lisp.Value, error) {
-		if len(vars) != 1 {
-			return lisp.Nil, nil
-		}
-		key := vars[0].String()
-		if val := db.Get(key); val != nil {
-			return lisp.StringValue(val.(string)), nil
-		}
-		return lisp.Nil, nil
-	})
-	lisp.SetHandler("joinchan", func(vars ...lisp.Value) (lisp.Value, error) {
-		if len(vars) != 1 {
-			return lisp.Nil, nil
-		}
-		channel := vars[0].String()
-		irc.Join(channel)
-		return lisp.Nil, nil
-	})
-	lisp.SetHandler("partchan", func(vars ...lisp.Value) (lisp.Value, error) {
-		if len(vars) != 1 {
-			return lisp.Nil, nil
-		}
-		channel := vars[0].String()
-		irc.Part(channel)
-		return lisp.Nil, nil
-	})
-	lisp.SetHandler("privmsg", func(vars ...lisp.Value) (lisp.Value, error) {
-		if len(vars) != 2 {
-			return lisp.Nil, nil
-		}
-		target := vars[0].String()
-		message := vars[1].String()
-		irc.Privmsg(target, message)
-		return lisp.Nil, nil
-	})
-	lisp.SetHandler("httpget", func(vars ...lisp.Value) (lisp.Value, error) {
-		if len(vars) != 1 {
-			return lisp.Nil, nil
-		}
-		url := vars[0].String()
-		res := client.Get(url)
-		return lisp.StringValue(res), nil
-	})
-	lisp.SetHandler("on", func(vars ...lisp.Value) (lisp.Value, error) {
-		if len(vars) != 3 {
-			return lisp.Nil, nil
-		}
-		typeName := vars[0].String()
-		eventType := vars[1].String()
-		fnName := vars[2].String()
-		helper.On(typeName, eventType, fnName)
-		return lisp.Nil, nil
-	})
-	lisp.SetHandler("addhandler", func(vars ...lisp.Value) (lisp.Value, error) {
-		if len(vars) != 2 {
-			return lisp.Nil, nil
-		}
-		typeName := vars[0].String()
-		fnName := vars[1].String()
-		helper.AddHandler(typeName, fnName)
-		return lisp.Nil, nil
-	})
-	lisp.SetHandler("removehandler", func(vars ...lisp.Value) (lisp.Value, error) {
-		if len(vars) != 2 {
-			return lisp.Nil, nil
-		}
-		typeName := vars[0].String()
-		fnName := vars[1].String()
-		helper.RemoveHandler(typeName, fnName)
-		return lisp.Nil, nil
-	})
-
-	scripts := h.repo.FetchAll()
-	for _, script := range scripts {
-		fmt.Println("Running", script.Type, "script", script.Title)
-		switch {
-		case script.Type == scriptJavascript:
-			runUnsafeJavascript(h.jsVm, script.Body)
-
-		case script.Type == scriptLua:
-			runUnsafeLua(h.luaVm, script.Body)
-
-		case script.Type == scriptLisp:
-			runUnsafeLisp(script.Body)
-		}
-	}
+	
 }
 
 func newEventListenerScript(driver scriptDriver, eventCode string, fn string) *EventListenerScript {

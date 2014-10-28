@@ -4,6 +4,9 @@ import (
 	"github.com/HouzuoGuo/tiedot/db"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
+	"github.com/tyler-sommer/squircy2/squircy/config"
+	"github.com/tyler-sommer/squircy2/squircy/irc"
+	"github.com/tyler-sommer/squircy2/squircy/script"
 	"net/http"
 	"strconv"
 )
@@ -15,22 +18,21 @@ func indexAction(r render.Render, hist *logHistory) {
 }
 
 type appStatus struct {
-	Connected  bool
-	Connecting bool
+	Status irc.ConnectionStatus
 }
 
-func statusAction(r render.Render, mgr *IrcConnectionManager) {
-	r.JSON(200, appStatus{mgr.Connected(), mgr.Connecting()})
+func statusAction(r render.Render, mgr *irc.IrcConnectionManager) {
+	r.JSON(200, appStatus{mgr.Status()})
 }
 
-func scriptAction(r render.Render, repo scriptRepository) {
+func scriptAction(r render.Render, repo script.ScriptRepository) {
 	scripts := repo.FetchAll()
 
 	r.HTML(200, "script/index", map[string]interface{}{"scripts": scripts})
 }
 
-func scriptReinitAction(r render.Render, h *ScriptHandler) {
-	h.ReInit()
+func scriptReinitAction(r render.Render) {
+	// TODO: Make this work
 
 	r.JSON(200, nil)
 }
@@ -39,17 +41,17 @@ func newScriptAction(r render.Render) {
 	r.HTML(200, "script/new", nil)
 }
 
-func createScriptAction(r render.Render, repo scriptRepository, request *http.Request) {
+func createScriptAction(r render.Render, repo script.ScriptRepository, request *http.Request) {
 	sType := request.FormValue("type")
 	title := request.FormValue("title")
 	body := request.FormValue("body")
 
-	repo.Save(persistentScript{0, scriptType(sType), title, body, true})
+	repo.Save(script.Script{0, script.ScriptType(sType), title, body, true})
 
 	r.Redirect("/script", 302)
 }
 
-func editScriptAction(r render.Render, repo scriptRepository, params martini.Params) {
+func editScriptAction(r render.Render, repo script.ScriptRepository, params martini.Params) {
 	id, _ := strconv.ParseInt(params["id"], 0, 64)
 
 	script := repo.Fetch(int(id))
@@ -57,18 +59,18 @@ func editScriptAction(r render.Render, repo scriptRepository, params martini.Par
 	r.HTML(200, "script/edit", map[string]interface{}{"Script": script})
 }
 
-func updateScriptAction(r render.Render, repo scriptRepository, params martini.Params, request *http.Request) {
+func updateScriptAction(r render.Render, repo script.ScriptRepository, params martini.Params, request *http.Request) {
 	id, _ := strconv.ParseInt(params["id"], 0, 64)
 	sType := request.FormValue("type")
 	title := request.FormValue("title")
 	body := request.FormValue("body")
 
-	repo.Save(persistentScript{int(id), scriptType(sType), title, body, true})
+	repo.Save(script.Script{int(id), script.ScriptType(sType), title, body, true})
 
 	r.Redirect("/script", 302)
 }
 
-func removeScriptAction(r render.Render, repo scriptRepository, params martini.Params) {
+func removeScriptAction(r render.Render, repo script.ScriptRepository, params martini.Params) {
 	id, _ := strconv.ParseInt(params["id"], 0, 64)
 
 	repo.Delete(int(id))
@@ -80,61 +82,43 @@ func replAction(r render.Render) {
 	r.HTML(200, "repl/index", nil)
 }
 
-func replExecuteAction(r render.Render, handler *ScriptHandler, request *http.Request) {
-	script := request.FormValue("script")
-	sType := scriptType(request.FormValue("scriptType"))
+func replExecuteAction(r render.Render, manager *script.ScriptManager, request *http.Request) {
+	code := request.FormValue("script")
+	sType := script.ScriptType(request.FormValue("scriptType"))
 
-	switch {
-	case sType == scriptJavascript:
-		res, err := runUnsafeJavascript(handler.jsVm, script)
-		exres, _ := res.Export()
-		r.JSON(200, map[string]interface{}{
-			"res": exres,
-			"err": err,
-		})
-
-	case sType == scriptLua:
-		err := runUnsafeLua(handler.luaVm, script)
-		r.JSON(200, map[string]interface{}{
-			"err": err,
-		})
-
-	case sType == scriptLisp:
-		res, err := runUnsafeLisp(script)
-		exres := res.Inspect()
-		r.JSON(200, map[string]interface{}{
-			"res": exres,
-			"err": err,
-		})
-	}
+	res, err := manager.RunUnsafe(sType, code)
+	r.JSON(200, map[string]interface{}{
+		"res": res,
+		"err": err,
+	})
 }
 
-func connectAction(r render.Render, mgr *IrcConnectionManager) {
+func connectAction(r render.Render, mgr *irc.IrcConnectionManager) {
 	mgr.Connect()
 
 	r.JSON(200, nil)
 }
 
-func disconnectAction(r render.Render, mgr *IrcConnectionManager) {
+func disconnectAction(r render.Render, mgr *irc.IrcConnectionManager) {
 	mgr.Quit()
 
 	r.JSON(200, nil)
 }
 
-func manageAction(r render.Render, config *Configuration) {
+func manageAction(r render.Render, config *config.Configuration) {
 	r.HTML(200, "manage/edit", map[string]interface{}{
 		"Config": config,
 	})
 }
 
-func manageUpdateAction(r render.Render, database *db.DB, config *Configuration, request *http.Request) {
-	config.Network = request.FormValue("network")
-	config.Nick = request.FormValue("nick")
-	config.Username = request.FormValue("username")
-	config.OwnerNick = request.FormValue("owner_nick")
-	config.OwnerHost = request.FormValue("owner_host")
+func manageUpdateAction(r render.Render, database *db.DB, conf *config.Configuration, request *http.Request) {
+	conf.Network = request.FormValue("network")
+	conf.Nick = request.FormValue("nick")
+	conf.Username = request.FormValue("username")
+	conf.OwnerNick = request.FormValue("owner_nick")
+	conf.OwnerHost = request.FormValue("owner_host")
 
-	saveConfig(database, config)
+	config.SaveConfig(database, conf)
 
 	r.Redirect("/manage", 302)
 }

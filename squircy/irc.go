@@ -2,6 +2,7 @@ package squircy
 
 import (
 	"github.com/thoj/go-ircevent"
+	"github.com/tyler-sommer/squircy2/squircy/config"
 	"log"
 	"reflect"
 	"sync"
@@ -30,7 +31,7 @@ func (mgr *IrcConnectionManager) Connect() {
 		mgr.conn = mgr.manager.invokeAndMap(newIrcConnection).(*irc.Connection)
 	}
 
-	config := mgr.manager.Injector.Get(reflect.TypeOf((*Configuration)(nil))).Interface().(*Configuration)
+	config := mgr.manager.Injector.Get(reflect.TypeOf((*config.Configuration)(nil))).Interface().(*config.Configuration)
 	l := mgr.manager.Injector.Get(reflect.TypeOf((*log.Logger)(nil))).Interface().(*log.Logger)
 
 	h := mgr.manager.invokeAndMap(newHandlerCollection).(*HandlerCollection)
@@ -86,7 +87,7 @@ type HandlerCollection struct {
 	log      *log.Logger
 }
 
-func newHandlerCollection(config *Configuration, l *log.Logger) (c *HandlerCollection) {
+func newHandlerCollection(config *config.Configuration, l *log.Logger) (c *HandlerCollection) {
 	c = &HandlerCollection{make(map[string]Handler), l}
 
 	return
@@ -107,8 +108,8 @@ func (c *HandlerCollection) bind(conn *irc.Connection) {
 	conn.AddCallback("*", matchAndHandle)
 }
 
-func newIrcConnection(config *Configuration, l *log.Logger) (conn *irc.Connection) {
-	conn = irc.IRC(config.Nick, config.Username)
+func newIrcConnection(conf *config.Configuration, l *log.Logger) (conn *irc.Connection) {
+	conn = irc.IRC(conf.Nick, conf.Username)
 	conn.Log = l
 
 	return

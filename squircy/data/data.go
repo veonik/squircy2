@@ -1,11 +1,11 @@
-package squircy
+package data
 
 import (
 	"github.com/HouzuoGuo/tiedot/db"
 )
 
-func newDatabaseConnection(config *Configuration) (database *db.DB) {
-	dir := config.RootPath + "/data"
+func NewDatabaseConnection(rootPath string) (database *db.DB) {
+	dir := rootPath + "/data"
 	database, err := db.OpenDB(dir)
 	if err != nil {
 		panic(err)
@@ -32,15 +32,4 @@ func initDatabase(database *db.DB) {
 			panic(err)
 		}
 	}
-}
-
-func loadConfig(database *db.DB, config *Configuration) {
-	repo := configRepository{database}
-	repo.FetchInto(config)
-	saveConfig(database, config)
-}
-
-func saveConfig(database *db.DB, config *Configuration) {
-	repo := configRepository{database}
-	repo.Save(config)
 }

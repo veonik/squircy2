@@ -1,21 +1,13 @@
-package squircy
+package script
 
 import (
 	"encoding/json"
 	"github.com/HouzuoGuo/tiedot/db"
 )
 
-type scriptType string
-
-const (
-	scriptJavascript scriptType = "Javascript"
-	scriptLua                   = "Lua"
-	scriptLisp                  = "Lisp"
-)
-
-type persistentScript struct {
+type Script struct {
 	ID      int
-	Type    scriptType
+	Type    ScriptType
 	Title   string
 	Body    string
 	Enabled bool
@@ -25,18 +17,22 @@ type ScriptRepository struct {
 	database *db.DB
 }
 
-func hydrateScript(rawScript map[string]interface{}) persistentScript {
-	script := persistentScript{}
+func NewScriptRepository(database *db.DB) ScriptRepository {
+	return ScriptRepository{database}
+}
+
+func hydrateScript(rawScript map[string]interface{}) Script {
+	script := Script{}
 
 	script.Title = rawScript["Title"].(string)
 	script.Enabled = rawScript["Enabled"].(bool)
-	script.Type = scriptType(rawScript["Type"].(string))
+	script.Type = ScriptType(rawScript["Type"].(string))
 	script.Body = rawScript["Body"].(string)
 
 	return script
 }
 
-func flattenScript(script persistentScript) map[string]interface{} {
+func flattenScript(script Script) map[string]interface{} {
 	rawScript := make(map[string]interface{})
 
 	rawScript["Title"] = script.Title
@@ -47,13 +43,13 @@ func flattenScript(script persistentScript) map[string]interface{} {
 	return rawScript
 }
 
-func (repo *ScriptRepository) FetchAll() []persistentScript {
+func (repo *ScriptRepository) FetchAll() []Script {
 	col := repo.database.Use("Scripts")
-	scripts := make([]persistentScript, 0)
+	scripts := make([]Script, 0)
 	col.ForEachDoc(func(id int, doc []byte) (moveOn bool) {
 		moveOn = true
 
-		script := persistentScript{}
+		script := Script{}
 		json.Unmarshal(doc, &script)
 		script.ID = id
 
@@ -65,7 +61,7 @@ func (repo *ScriptRepository) FetchAll() []persistentScript {
 	return scripts
 }
 
-func (repo *ScriptRepository) Fetch(id int) persistentScript {
+func (repo *ScriptRepository) Fetch(id int) Script {
 	col := repo.database.Use("Scripts")
 
 	rawScript, err := col.Read(id)
@@ -78,7 +74,7 @@ func (repo *ScriptRepository) Fetch(id int) persistentScript {
 	return script
 }
 
-func (repo *ScriptRepository) Save(script persistentScript) {
+func (repo *ScriptRepository) Save(script Script) {
 	col := repo.database.Use("Scripts")
 	data := flattenScript(script)
 

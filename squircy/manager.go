@@ -3,6 +3,11 @@ package squircy
 import (
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
+	"github.com/tyler-sommer/squircy2/squircy/config"
+	"github.com/tyler-sommer/squircy2/squircy/data"
+	"github.com/tyler-sommer/squircy2/squircy/event"
+	"github.com/tyler-sommer/squircy2/squircy/irc"
+	"github.com/tyler-sommer/squircy2/squircy/script"
 	"io"
 	"log"
 	"os"
@@ -36,23 +41,30 @@ func (hist *logHistory) ReadAll() string {
 }
 
 func NewManager() (manager *Manager) {
-	config := NewDefaultConfiguration()
-	db := newDatabaseConnection(config)
-	loadConfig(db, config)
+	conf := config.NewDefaultConfiguration()
+	database := data.NewDatabaseConnection(conf.RootPath)
+	config.LoadConfig(database, conf)
 
-	hist := &logHistory{200, make([]string, 0)}
+	hist := &logHistory{25, make([]string, 0)}
 	out := io.MultiWriter(os.Stdout, hist)
 
 	manager = &Manager{martini.Classic()}
 	manager.Map(manager)
-	manager.Map(db)
-	manager.Map(config)
+	manager.Map(&manager.Injector)
+
+	manager.Map(database)
+	manager.Map(script.NewScriptRepository(database))
+	manager.Map(conf)
+
+	// Additional managers
+	manager.invokeAndMap(event.NewEventManager)
+	manager.invokeAndMap(irc.NewIrcConnectionManager)
+	manager.invokeAndMap(script.NewScriptManager)
+
 	manager.Map(log.New(out, "[squircy] ", 0))
 	manager.Map(hist)
-	manager.invokeAndMap(newIrcConnectionManager)
-	manager.Map(scriptRepository{db})
 
-	manager.configure(config)
+	manager.configure(conf)
 
 	return
 }
@@ -69,13 +81,13 @@ func (manager *Manager) invokeAndMap(fn interface{}) interface{} {
 	return val
 }
 
-func (manager *Manager) configure(config *Configuration) {
+func (manager *Manager) configure(conf *config.Configuration) {
 	manager.Handlers(
-		martini.Static(config.RootPath+"/public", martini.StaticOptions{
+		martini.Static(conf.RootPath+"/public", martini.StaticOptions{
 			SkipLogging: true,
 		}),
 		render.Renderer(render.Options{
-			Directory:  config.RootPath + "/views",
+			Directory:  conf.RootPath + "/views",
 			Layout:     "layout",
 			Extensions: []string{".tmpl", ".html"},
 		}))

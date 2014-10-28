@@ -1,6 +1,7 @@
-package squircy
+package config
 
 import (
+	"github.com/HouzuoGuo/tiedot/db"
 	"go/build"
 )
 
@@ -43,4 +44,15 @@ func resolveRoot() string {
 		panic(err)
 	}
 	return p.Dir
+}
+
+func LoadConfig(database *db.DB, config *Configuration) {
+	repo := configRepository{database}
+	repo.FetchInto(config)
+	SaveConfig(database, config)
+}
+
+func SaveConfig(database *db.DB, config *Configuration) {
+	repo := configRepository{database}
+	repo.Save(config)
 }

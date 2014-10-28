@@ -20,6 +20,7 @@ type EventHandler interface{}
 type EventManager interface {
 	Bind(eventName EventType, handler EventHandler)
 	Trigger(eventName EventType, data map[string]interface{})
+	Clear(eventName EventType)
 }
 
 type eventManager struct {
@@ -42,6 +43,10 @@ func (e *eventManager) Bind(eventName EventType, handler EventHandler) {
 	}
 
 	e.events[eventName] = append(handlers, handler)
+}
+
+func (e *eventManager) Clear(eventName EventType) {
+	e.events[eventName] = make([]EventHandler, 0)
 }
 
 func (e *eventManager) Trigger(eventName EventType, data map[string]interface{}) {
