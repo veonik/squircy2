@@ -7,20 +7,6 @@ body {
 	vertical-align: middle;
 }
 
-#app-status {
-	height: 20px;
-	width: 20px;
-	margin: auto;
-	border-radius: 100%;
-	background-color: #B3162B;
-	float: right;
-	margin-left: 10px;
-}
-
-#app-status.connected {
-	background-color: #00B30A;
-}
-
 .code-preview {
 	font-family: Menlo,Monaco,Consolas,monospace;
 	max-width: 300px; 
@@ -29,4 +15,9 @@ body {
 	overflow: hidden; 
 	font-size: 13px;
 	color: #333;
+}
+
+#editor {
+	border: 1px solid #ccc;
+	border-radius: 4px;
 }

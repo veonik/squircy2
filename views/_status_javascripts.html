@@ -1,6 +1,8 @@
 <script type="text/javascript">
 $(function() {
-	var $appStatus = $('#app-status');
+	var $connectBtn = $('#connect-button');
+	var $disconnectBtn = $('#disconnect-button');
+	var $connectingBtn = $('#connecting-button');
 	var statusReq;
 	var statusTimeout;
 	function updateStatus() {
@@ -17,19 +19,22 @@ $(function() {
 			url: "/status",
 			dataType: "json",
 			success: function(response) {
-				statusTimeout = setTimeout(updateStatus, 30000)
+				statusTimeout = setTimeout(updateStatus, 5000)
 				if (response.Connected) {
-					if ($appStatus.hasClass('connected')) {
-						return;
-					}
-					$appStatus.addClass('connected');
+					$disconnectBtn.show();
+					$connectBtn.add($connectingBtn).hide();
+				} else if (response.Connecting) {
+					$connectingBtn.show();
+					$disconnectBtn.add($connectBtn).hide();
 				} else {
-					$appStatus.removeClass('connected');
+					$connectBtn.show();
+					$disconnectBtn.add($connectingBtn).hide();
 				}
 			},
 			error: function() {
-				$appStatus.removeClass('connected');
-				statusTimeout = setTimeout(updateStatus, 15000)
+				$connectBtn.show();
+				$disconnectBtn.add($connectingBtn).hide();
+				statusTimeout = setTimeout(updateStatus, 5000)
 			},
 			complete: function() {
 				statusReq = null;
@@ -38,5 +43,37 @@ $(function() {
 	}
 	
 	updateStatus();
+	
+	var $postLinks = $('.post-action');
+	$postLinks.on('click', function(e) {
+		e.preventDefault();
+		
+		var url = $(this).attr('href');
+		$.ajax({
+			url: url,
+			type: 'post',
+			success: function() {
+				window.location.reload();
+			}
+		});
+	});
+	
+	var $reinit = $('#reinit').tooltip({
+		container: 'body'
+	});
+	$reinit.on('click', function(e) {
+		e.preventDefault();
+		
+		if (confirm('Are you sure you want to reinitialize all scripts?')) {
+			var url = $(this).attr('href');
+			$.ajax({
+				url: url,
+				type: 'post',
+				success: function() {
+					window.location.reload();
+				}
+			})
+		}
+	});
 });
 </script>

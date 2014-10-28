@@ -1,17 +1,20 @@
 <div class="row">
-	<div class="col-md-12" style="height: 300px">
+	<div class="col-md-8" style="height: 300px">
+		<h4>Javascript REPL</h4>
   		<div id="editor" style="width: 100%; height: 100%"></div>
+		<a class="form-control btn btn-primary" id="execute" href="/repl/execute">Execute</a>
+	</div>
+	<div class="col-md-4">
+		<h5>Output</h5>
+		<pre id="output">
+		</pre>
 	</div>
 </div>
 <div class="row">
-	<div class="col-md-4">
-		<a id="execute" href="/repl/execute" class="btn btn-default">Execute</a>
-	</div>
+	
 </form>
 <div class="row">
-	<div class="col-md-12" id="output">
 	
-	</div>
 </div>
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/ace.js"></script>
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/ext-searchbox.js"></script>
@@ -42,7 +45,7 @@ $(function() {
 				script: editor.getValue()
 			},
 			success: function(response) {
-				$output.html('<pre>' + JSON.stringify(response, null, '\t') + '</pre>')
+				$output.html(JSON.stringify(response, null, '\t'))
 			}
 		});
 	});

@@ -6,22 +6,14 @@
   <script src="//cdn.jsdelivr.net/bootstrap/3.2.0/js/bootstrap.min.js"></script>
   <script src="//cdn.jsdelivr.net/momentjs/2.8.1/moment.min.js"></script>
   <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/fontawesome/4.2.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 
 <body>
 	<div id="main-container" class="container">
 		<div class="row">
-			<div class="col-md-3 well well-sm">
-				<ul class="nav nav-list">
-					<li><a href="/">Dashboard</a></li>
-					<li><a href="/script">Scripts</a></li>
-					<li><a href="/manage">Settings</a></li>
-					<li class="divider">&nbsp;</li>
-					<li><a href="/repl">Javascript REPL</a></li>
-				</ul>
-			</div>
-			<div class="col-md-9">
+			<div class="col-md-12">
 			{{ yield }}
 			</div>
 		</div>
@@ -30,14 +22,21 @@
 	<nav id="main-nav" class="navbar navbar-default navbar-fixed-bottom" role="navigation">
 	  	<div class="container">
 			<div class="navbar-header">
-				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#main-nav">
-					<span class="sr-only">Toggle navigation</span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-				</button>
-				<a class="navbar-brand" href="#">squIRCy <div id="app-status" class="connected"></div></a>
+				<a class="navbar-brand" href="https://github.com/tyler-sommer/squircy2">squIRCy2</a>
         	</div>
+			<ul class="nav navbar-nav">
+				<li><a href="/">Dashboard</a></li>
+				<li><a href="/script">Scripts</a></li>
+				<li><a href="/manage">Settings</a></li>
+				<li class="divider">&nbsp;</li>
+				<li><a href="/repl">Javascript REPL</a></li>
+			</ul>
+			<ul class="nav navbar-nav pull-right">
+				<li><a class="post-action" id="reinit" title="Re-initialize scripts" href="/script/reinit"><i class="fa fa-refresh"></i></a></li>
+		        <li><a class="post-action" id="connect-button" href="/connect"><i class="fa fa-power-off"></i> Connect</a></li>
+				<li><a class="post-action" id="disconnect-button" style="display: none" href="/disconnect"><i class="fa fa-power-off"></i> Disconnect</a></li>
+				<li><a class="post-action" id="connecting-button" style="display: none" href="/disconnect"><i class="fa fa-power-off"></i> Connecting...</a></li>
+		      </ul>
 	  	</div>
 	</nav>
 	

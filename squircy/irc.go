@@ -36,8 +36,6 @@ func (mgr *IrcConnectionManager) Connect() {
 	h := mgr.manager.invokeAndMap(newHandlerCollection).(*HandlerCollection)
 	scriptHandler := mgr.manager.invokeAndMap(newScriptHandler).(*ScriptHandler)
 
-	h.Add(scriptHandler)
-
 	mgr.conn.AddCallback("001", func(e *irc.Event) {
 		l.Println("Connected")
 		mgr.connecting = false
@@ -51,6 +49,7 @@ func (mgr *IrcConnectionManager) Connect() {
 		}
 	})
 
+	h.Add(scriptHandler)
 	h.bind(mgr.conn)
 
 	mgr.connecting = true

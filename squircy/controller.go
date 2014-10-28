@@ -13,11 +13,12 @@ func indexAction(r render.Render) {
 }
 
 type appStatus struct {
-	Connected bool
+	Connected  bool
+	Connecting bool
 }
 
 func statusAction(r render.Render, mgr *IrcConnectionManager) {
-	r.JSON(200, appStatus{mgr.Connected()})
+	r.JSON(200, appStatus{mgr.Connected(), mgr.Connecting()})
 }
 
 func scriptAction(r render.Render, repo scriptRepository) {
