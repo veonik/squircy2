@@ -23,6 +23,21 @@ func getConnectionManager(manager *Manager) *IrcConnectionManager {
 }
 
 func loopCli(l *log.Logger, manager *Manager) {
+	help := func() {
+		fmt.Println(`Commands:
+
+exit		Quits IRC, if connected, and exits the program
+debug		Toggles debug on or off`)
+		mgr := getConnectionManager(manager)
+		if mgr.Connected() || mgr.Connecting() {
+			fmt.Println("disconnect	Disconnect from IRC\n")
+		} else {
+			fmt.Println("connect		Connect to IRC\n")
+		}
+	}
+
+	help()
+
 	bin := bufio.NewReader(os.Stdin)
 	for {
 		switch str, _ := bin.ReadString('\n'); {
@@ -55,16 +70,8 @@ func loopCli(l *log.Logger, manager *Manager) {
 			}
 
 		default:
-			fmt.Println(`Unknown input. Commands:
-
-exit		Quits IRC, if connected, and exits the program
-debug		Toggles debug on or off`)
-			mgr := getConnectionManager(manager)
-			if mgr.Connected() || mgr.Connecting() {
-				fmt.Println("disconnect	Disconnect from IRC\n")
-			} else {
-				fmt.Println("connect		Connect to IRC\n")
-			}
+			fmt.Print("Unknown input. ")
+			help()
 		}
 	}
 }
