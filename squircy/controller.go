@@ -74,39 +74,37 @@ func removeScriptAction(r render.Render, repo scriptRepository, params martini.P
 	r.JSON(200, nil)
 }
 
-func executeScriptAction(r render.Render, repo scriptRepository, handler *ScriptHandler, params martini.Params) {
-	index, _ := strconv.ParseInt(params["id"], 0, 64)
-
-	script := repo.Fetch(int(index))
-
-	switch {
-	case script.Type == scriptJavascript:
-		res, err := runUnsafeJavascript(handler.jsVm, script.Body)
-		exres, _ := res.Export()
-		r.JSON(200, map[string]interface{}{
-			"res": exres,
-			"err": err,
-		})
-
-	default:
-		r.JSON(503, "Unsupported script type")
-	}
-
-}
-
 func replAction(r render.Render) {
 	r.HTML(200, "repl/index", nil)
 }
 
 func replExecuteAction(r render.Render, handler *ScriptHandler, request *http.Request) {
 	script := request.FormValue("script")
+	sType := scriptType(request.FormValue("scriptType"))
 
-	res, err := runUnsafeJavascript(handler.jsVm, script)
-	exres, _ := res.Export()
-	r.JSON(200, map[string]interface{}{
-		"res": exres,
-		"err": err,
-	})
+	switch {
+	case sType == scriptJavascript:
+		res, err := runUnsafeJavascript(handler.jsVm, script)
+		exres, _ := res.Export()
+		r.JSON(200, map[string]interface{}{
+			"res": exres,
+			"err": err,
+		})
+
+	case sType == scriptLua:
+		err := runUnsafeLua(handler.luaVm, script)
+		r.JSON(200, map[string]interface{}{
+			"err": err,
+		})
+
+	case sType == scriptLisp:
+		res, err := runUnsafeLisp(script)
+		exres := res.Inspect()
+		r.JSON(200, map[string]interface{}{
+			"res": exres,
+			"err": err,
+		})
+	}
 }
 
 func connectAction(r render.Render, mgr *IrcConnectionManager) {

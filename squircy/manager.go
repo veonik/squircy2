@@ -50,8 +50,10 @@ func (manager *Manager) configure(config *Configuration) {
 	}))
 	manager.Get("/", indexAction)
 	manager.Get("/status", statusAction)
-	manager.Get("/manage", manageAction)
-	manager.Post("/manage/update", manageUpdateAction)
+	manager.Group("/manage", func(r martini.Router) {
+		r.Get("", manageAction)
+		r.Post("/update", manageUpdateAction)
+	})
 	manager.Post("/connect", connectAction)
 	manager.Post("/disconnect", disconnectAction)
 	manager.Group("/script", func(r martini.Router) {
@@ -62,7 +64,6 @@ func (manager *Manager) configure(config *Configuration) {
 		r.Get("/:id/edit", editScriptAction)
 		r.Post("/:id/update", updateScriptAction)
 		r.Post("/:id/remove", removeScriptAction)
-		r.Get("/:id/execute", executeScriptAction)
 	})
 	manager.Group("/repl", func(r martini.Router) {
 		r.Get("", replAction)

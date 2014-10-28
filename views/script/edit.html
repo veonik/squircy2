@@ -11,40 +11,17 @@
 		</select>
 	</div>
 </div>
+<br>
 <div class="row">
-	<div class="col-md-12" style="height: 500px">
+	<div class="col-md-12" style="height: 400px">
   		<div id="editor" style="width: 100%; height: 100%"></div>
 		<input type="hidden" name="body" id="script_body" value="{{ .Script.Body }}">
 	</div>
 </div>
+<br>
 <div class="row">
 	<div class="col-md-4">
-		<button class="btn btn-primary">Save</button>
-	</div>
-	<div class="col-md-4">
-		<a id="execute" href="/script/{{ .Script.ID }}/execute" class="btn btn-default">Execute</a>
+		<button class="form-control btn btn-primary">Save</button>
 	</div>
 </form>
-<div class="row">
-	<div class="col-md-12" id="output">
-	
-	</div>
-</div>
 {{ template "script/_javascripts" }}
-<script type="text/javascript">
-$(function() {
-	var $execute = $('#execute');
-	var $output  = $('#output');
-	
-	$execute.on('click', function(e) {
-		e.preventDefault();
-		
-		$.ajax({
-			url: $execute.attr('href'),
-			success: function(response) {
-				$output.html('<pre>' + JSON.stringify(response) + '</pre>')
-			}
-		});
-	});
-});
-</script>

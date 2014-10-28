@@ -1,7 +1,15 @@
 <div class="row">
 	<div class="col-md-8" style="height: 300px">
-		<h4>Javascript REPL</h4>
+		<h4>REPL</h4>
+		<select class="form-control" id="script_type" name="scriptType">
+			<option>Javascript</script>
+			<option>Lua</script>
+			<option>Lisp</script>
+		</select>
+		<br>
+		<div class="alert alert-warning" id="lua-warning" style="display: none">The Lua REPL currently does not support the important "print" aspect of REPL</div>
   		<div id="editor" style="width: 100%; height: 100%"></div>
+		<br>
 		<a class="form-control btn btn-primary" id="execute" href="/repl/execute">Execute</a>
 	</div>
 	<div class="col-md-4">
@@ -9,12 +17,6 @@
 		<pre id="output">
 		</pre>
 	</div>
-</div>
-<div class="row">
-	
-</form>
-<div class="row">
-	
 </div>
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/ace.js"></script>
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/ext-searchbox.js"></script>
@@ -27,10 +29,25 @@
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/worker-javascript.js"></script>
 <script type="text/javascript">
 $(function() {
+	var modeMap = {
+		"Javascript": "ace/mode/javascript",
+		"Lua": "ace/mode/lua",
+		"Lisp": "ace/mode/lisp"
+	};
+	var $typeField = $('#script_type');
+	var $luaWarning = $('#lua-warning');
 	var editor = ace.edit("editor");
     editor.setTheme("ace/theme/textmate");
-    editor.getSession().setMode("ace/mode/javascript");
 	editor.resize();
+	
+	$typeField.on('change', function() {
+		if ($typeField.val() == "Lua") {
+			$luaWarning.slideDown();
+		} else {
+			$luaWarning.slideUp();
+		}
+		editor.getSession().setMode(modeMap[$typeField.val()]);
+	}).change();
 	
 	var $execute = $('#execute');
 	var $output  = $('#output');
@@ -42,7 +59,8 @@ $(function() {
 			url: $execute.attr('href'),
 			type: 'post',
 			data: {
-				script: editor.getValue()
+				script: editor.getValue(),
+				scriptType: $typeField.val()
 			},
 			success: function(response) {
 				$output.html(JSON.stringify(response, null, '\t'))
