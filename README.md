@@ -76,43 +76,49 @@ squIRCy2 exposes a small API to each scripting language.
 
 | Method | Description |
 | ------ | ----------- |
-| `Irc.Join(channel)` | Joins the given channel |
-| `Irc.Part(channel)` | Parts the given channel |
-| `Irc.Privmsg(target, message)` | Messages target with message. Target can be a user or a channel |
-| `Data.Get(key)` | Gets a value with the given from the cross-vm storage |
-| `Data.Set(key, val)` | Sets a value with the given key in the cross-vm storage |
-| `Script.AddHandler(type, fnName)` | Add a PRIVMSG handler of the given type ("js", "lua", or "lisp") and function name |
-| `Script.RemoveHandler(type, fnName)` | Removes a PRIVMSG handler of the given type and function name |
-| `Script.On(type, event, fnName)` | Add a handler of the given type to a specific event like "NOTICE" or "001" |
-| `replyTarget()` | The current reply target. If the current message was received in a channel, this will be the channel name. Otherwise it will be a nickname |
-| `print(message)`  | Replies to the current reply target with the given message |
+| Irc.Join(channel) | Joins the given channel |
+| Irc.Part(channel) | Parts the given channel |
+| Irc.Privmsg(target, message) | Messages target with message. Target can be a user or a channel |
+| Data.Get(key) | Gets a value with the given from the cross-vm storage |
+| Data.Set(key, val) | Sets a value with the given key in the cross-vm storage |
+| Script.AddHandler(type, fnName) | Add a PRIVMSG handler of the given type ("js", "lua", or "lisp") and function name |
+| Script.RemoveHandler(type, fnName) | Removes a PRIVMSG handler of the given type and function name |
+| Script.On(type, event, fnName) | Add a handler of the given type to a specific event like "NOTICE" or "001" |
+| replyTarget() | The current reply target. If the current message was received in a channel, this will be the channel name. Otherwise it will be a nickname |
+| print(message)  | Replies to the current reply target with the given message |
 
 ### Lua API
 
 ```
-joinchan(channel)
-partchan(channel)
-privmsg(target, channel)
-getex(key)
-setex(key, value)
-addhandler(type, fnName)
-removehandler(type, fnName)
-on(type, event, fnName)
-print(message)
+| Method | Description |
+| ------ | ----------- |
+| joinchan(channel) | Joins the given channel |
+| partchan(channel) | Parts the given channel |
+| privmsg(target, message) | Messages target with message. Target can be a user or a channel |
+| getex(key) | Gets a value with the given from the cross-vm storage |
+| setex(key, val) | Sets a value with the given key in the cross-vm storage |
+| addhandler(type, fnName) | Add a PRIVMSG handler of the given type ("js", "lua", or "lisp") and function name |
+| removehandler(type, fnName) | Removes a PRIVMSG handler of the given type and function name |
+| on(type, event, fnName) | Add a handler of the given type to a specific event like "NOTICE" or "001" |
+| replytarget() | The current reply target. If the current message was received in a channel, this will be the channel name. Otherwise it will be a nickname |
+| print(message)  | Replies to the current reply target with the given message |
 ```
 
 ### Lisp API
 
 ```
-(joinchan channel)
-(partchan channel)
-(privmsg target channel)
-(getex key)
-(setex key value)
-(addhandler type fnName)
-(removehandler type fnName)
-(on type event fnName)
-(print message)
+| Method | Description |
+| ------ | ----------- |
+| (joinchan channel) | Joins the given channel |
+| (partchan channel) | Parts the given channel |
+| (privmsg target message) | Messages target with message. Target can be a user or a channel |
+| (getex key) | Gets a value with the given from the cross-vm storage |
+| (setex key val) | Sets a value with the given key in the cross-vm storage |
+| (addhandler type fnName) | Add a PRIVMSG handler of the given type ("js", "lua", or "lisp") and function name |
+| (removehandler type fnName) | Removes a PRIVMSG handler of the given type and function name |
+| (on type event fnName) | Add a handler of the given type to a specific event like "NOTICE" or "001" |
+| (replytarget "") | The current reply target. If the current message was received in a channel, this will be the channel name. Otherwise it will be a nickname |
+| (print message)  | Replies to the current reply target with the given message |
 ```
 
 ### IRC event handlers
