@@ -31,6 +31,7 @@ func (mgr *IrcConnectionManager) Connect() {
 	}
 
 	config := mgr.manager.Injector.Get(reflect.TypeOf((*Configuration)(nil))).Interface().(*Configuration)
+	l := mgr.manager.Injector.Get(reflect.TypeOf((*log.Logger)(nil))).Interface().(*log.Logger)
 
 	h := mgr.manager.invokeAndMap(newHandlerCollection).(*HandlerCollection)
 	scriptHandler := mgr.manager.invokeAndMap(newScriptHandler).(*ScriptHandler)
@@ -38,8 +39,16 @@ func (mgr *IrcConnectionManager) Connect() {
 	h.Add(scriptHandler)
 
 	mgr.conn.AddCallback("001", func(e *irc.Event) {
+		l.Println("Connected")
 		mgr.connecting = false
 		mgr.connected = true
+	})
+
+	mgr.conn.AddCallback("ERROR", func(e *irc.Event) {
+		l.Println("Disconnected")
+		if mgr.Connected() {
+			mgr.Quit()
+		}
 	})
 
 	h.bind(mgr.conn)
