@@ -18,6 +18,7 @@ const (
 func bindEvents(mgr *IrcConnectionManager, e event.EventManager) {
 	mgr.conn.AddCallback("*", func(ev *irc.Event) {
 		e.Trigger(IrcEvent, newEventData(ev))
+		e.Trigger(event.EventType("irc."+ev.Code), newEventData(ev))
 	})
 
 	mgr.conn.AddCallback("001", func(ev *irc.Event) {

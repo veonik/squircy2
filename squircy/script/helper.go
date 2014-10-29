@@ -3,7 +3,6 @@ package script
 import (
 	ircevent "github.com/thoj/go-ircevent"
 	"github.com/tyler-sommer/squircy2/squircy/event"
-	"github.com/tyler-sommer/squircy2/squircy/irc"
 	"io/ioutil"
 	"net/http"
 )
@@ -73,7 +72,7 @@ type scriptHelper struct {
 
 // On adds a handler of the given script type for the given event type
 func (s *scriptHelper) On(sType string, eType string, fnName string) {
-	s.e.Bind(event.EventType(irc.IrcEvent), func(ev event.Event) {
+	s.e.Bind(event.EventType(eType), func(ev event.Event) {
 		switch scriptType := ScriptType(sType); {
 		case scriptType == Javascript:
 			s.jsDriver.Handle(ev, fnName)
