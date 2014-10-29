@@ -1,6 +1,7 @@
 package script
 
 import (
+	"fmt"
 	ircevent "github.com/thoj/go-ircevent"
 	"github.com/tyler-sommer/squircy2/squircy/event"
 	"io/ioutil"
@@ -68,12 +69,18 @@ type scriptHelper struct {
 	jsDriver   javascriptDriver
 	luaDriver  luaDriver
 	lispDriver lispDriver
+	handlers   map[string]event.EventHandler
 }
 
-// On adds a handler of the given script type for the given event type
-func (s *scriptHelper) On(sType string, eType string, fnName string) {
-	s.e.Bind(event.EventType(eType), func(ev event.Event) {
-		switch scriptType := ScriptType(sType); {
+func handlerId(scriptType ScriptType, eventType event.EventType, fnName string) string {
+	return fmt.Sprintf("%v-%v-%v", scriptType, eventType, fnName)
+}
+
+// Bind adds a handler of the given script type for the given event type
+func (s *scriptHelper) Bind(scriptType ScriptType, eventType event.EventType, fnName string) {
+	id := handlerId(scriptType, eventType, fnName)
+	handler := func(ev event.Event) {
+		switch {
 		case scriptType == Javascript:
 			s.jsDriver.Handle(ev, fnName)
 
@@ -83,15 +90,18 @@ func (s *scriptHelper) On(sType string, eType string, fnName string) {
 		case scriptType == Lisp:
 			s.lispDriver.Handle(ev, fnName)
 		}
-	})
+	}
+	s.handlers[id] = handler
+	s.e.Bind(eventType, handler)
 }
 
-// AddHandler adds a PRIVMSG handler of the gien script type
-func (s *scriptHelper) AddHandler(sType, fnName string) {
-
-}
-
-// RemoveHandler removes a PRIVMSG handler
-func (s *scriptHelper) RemoveHandler(sType, fnName string) {
-
+// Unbind removes a handler of the given script type for the given event type
+func (s *scriptHelper) Unbind(scriptType ScriptType, eventType event.EventType, fnName string) {
+	id := handlerId(scriptType, eventType, fnName)
+	handler, ok := s.handlers[id]
+	if !ok {
+		return
+	}
+	s.e.Unbind(eventType, handler)
+	delete(s.handlers, id)
 }
