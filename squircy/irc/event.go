@@ -34,7 +34,7 @@ func bindEvents(mgr *IrcConnectionManager, e event.EventManager) {
 	})
 }
 
-func triggerConnecting(mgr *IrcConnectionManager, e event.EventManager) {
+func triggerConnecting(e event.EventManager) {
 	e.Trigger(ConnectingEvent, nil)
 }
 

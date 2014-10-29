@@ -83,9 +83,8 @@ func (manager *Manager) invokeAndMap(fn interface{}) interface{} {
 
 func (manager *Manager) configure(conf *config.Configuration) {
 	manager.Handlers(
-		martini.Logger(),
 		martini.Static(conf.RootPath+"/public", martini.StaticOptions{
-			SkipLogging: false,
+			SkipLogging: true,
 		}),
 		render.Renderer(render.Options{
 			Directory:  conf.RootPath + "/views",

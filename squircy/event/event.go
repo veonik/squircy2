@@ -2,7 +2,6 @@ package event
 
 import (
 	"errors"
-	"fmt"
 	"github.com/codegangsta/inject"
 	"reflect"
 )
