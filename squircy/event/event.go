@@ -2,6 +2,7 @@ package event
 
 import (
 	"errors"
+	"fmt"
 	"github.com/codegangsta/inject"
 	"reflect"
 )
@@ -24,11 +25,11 @@ type EventManager interface {
 }
 
 type eventManager struct {
-	injector *inject.Injector
+	injector inject.Injector
 	events   map[EventType][]EventHandler
 }
 
-func NewEventManager(injector *inject.Injector) EventManager {
+func NewEventManager(injector inject.Injector) EventManager {
 	return EventManager(&eventManager{injector, make(map[EventType][]EventHandler, 0)})
 }
 
@@ -58,7 +59,7 @@ func (e *eventManager) Trigger(eventName EventType, data map[string]interface{})
 	event := Event{eventName, data}
 
 	c := inject.New()
-	c.SetParent(*e.injector)
+	c.SetParent(e.injector)
 	c.Map(event)
 
 	for _, handler := range handlers {

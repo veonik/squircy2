@@ -41,6 +41,10 @@ func (hist *logHistory) ReadAll() string {
 }
 
 func NewManager() (manager *Manager) {
+	manager = &Manager{martini.Classic()}
+	manager.Map(manager)
+	manager.Map(manager.Injector)
+
 	conf := config.NewDefaultConfiguration()
 	database := data.NewDatabaseConnection(conf.RootPath)
 	config.LoadConfig(database, conf)
@@ -48,9 +52,8 @@ func NewManager() (manager *Manager) {
 	hist := &logHistory{25, make([]string, 0)}
 	out := io.MultiWriter(os.Stdout, hist)
 
-	manager = &Manager{martini.Classic()}
-	manager.Map(manager)
-	manager.Map(&manager.Injector)
+	manager.Map(log.New(out, "[squircy] ", 0))
+	manager.Map(hist)
 
 	manager.Map(database)
 	manager.Map(script.NewScriptRepository(database))
@@ -60,9 +63,6 @@ func NewManager() (manager *Manager) {
 	manager.invokeAndMap(event.NewEventManager)
 	manager.invokeAndMap(irc.NewIrcConnectionManager)
 	manager.invokeAndMap(script.NewScriptManager)
-
-	manager.Map(log.New(out, "[squircy] ", 0))
-	manager.Map(hist)
 
 	manager.configure(conf)
 
@@ -83,8 +83,9 @@ func (manager *Manager) invokeAndMap(fn interface{}) interface{} {
 
 func (manager *Manager) configure(conf *config.Configuration) {
 	manager.Handlers(
+		martini.Logger(),
 		martini.Static(conf.RootPath+"/public", martini.StaticOptions{
-			SkipLogging: true,
+			SkipLogging: false,
 		}),
 		render.Renderer(render.Options{
 			Directory:  conf.RootPath + "/views",

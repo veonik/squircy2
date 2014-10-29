@@ -1,7 +1,9 @@
 package script
 
 import (
-	"github.com/thoj/go-ircevent"
+	ircevent "github.com/thoj/go-ircevent"
+	"github.com/tyler-sommer/squircy2/squircy/event"
+	"github.com/tyler-sommer/squircy2/squircy/irc"
 	"io/ioutil"
 	"net/http"
 )
@@ -38,26 +40,51 @@ func (db *dataHelper) Set(key string, val interface{}) {
 }
 
 type ircHelper struct {
-	conn *irc.Connection
+	conn *ircevent.Connection
 }
 
 func (irc *ircHelper) Privmsg(target, message string) {
+	if irc.conn == nil {
+		return
+	}
 	irc.conn.Privmsg(target, message)
 }
 
 func (irc *ircHelper) Join(target string) {
+	if irc.conn == nil {
+		return
+	}
 	irc.conn.Join(target)
 }
 
 func (irc *ircHelper) Part(target string) {
+	if irc.conn == nil {
+		return
+	}
 	irc.conn.Part(target)
 }
 
-type scriptHelper struct{}
+type scriptHelper struct {
+	e          event.EventManager
+	jsDriver   javascriptDriver
+	luaDriver  luaDriver
+	lispDriver lispDriver
+}
 
 // On adds a handler of the given script type for the given event type
 func (s *scriptHelper) On(sType string, eType string, fnName string) {
+	s.e.Bind(event.EventType(irc.IrcEvent), func(ev event.Event) {
+		switch scriptType := ScriptType(sType); {
+		case scriptType == Javascript:
+			s.jsDriver.Handle(ev, fnName)
 
+		case scriptType == Lua:
+			s.luaDriver.Handle(ev, fnName)
+
+		case scriptType == Lisp:
+			s.lispDriver.Handle(ev, fnName)
+		}
+	})
 }
 
 // AddHandler adds a PRIVMSG handler of the gien script type

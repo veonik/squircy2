@@ -17,22 +17,22 @@ const (
 )
 
 type IrcConnectionManager struct {
-	injector *inject.Injector
+	injector inject.Injector
 	conn     *irc.Connection
 	status   ConnectionStatus
 }
 
-func NewIrcConnectionManager(injector *inject.Injector) (mgr *IrcConnectionManager) {
+func NewIrcConnectionManager(injector inject.Injector) (mgr *IrcConnectionManager) {
 	mgr = &IrcConnectionManager{injector, nil, Disconnected}
 
 	return
 }
 
 func (mgr *IrcConnectionManager) newConnection() {
-	res, _ := (*mgr.injector).Invoke(newIrcConnection)
+	res, _ := mgr.injector.Invoke(newIrcConnection)
 	mgr.conn = res[0].Interface().(*irc.Connection)
-	(*mgr.injector).Map(mgr.conn)
-	(*mgr.injector).Invoke(bindEvents)
+	mgr.injector.Map(mgr.conn)
+	mgr.injector.Invoke(bindEvents)
 }
 
 func (mgr *IrcConnectionManager) Connect() {
@@ -40,9 +40,10 @@ func (mgr *IrcConnectionManager) Connect() {
 		mgr.newConnection()
 	}
 
-	config := (*mgr.injector).Get(reflect.TypeOf((*config.Configuration)(nil))).Interface().(*config.Configuration)
+	config := mgr.injector.Get(reflect.TypeOf((*config.Configuration)(nil))).Interface().(*config.Configuration)
 
 	mgr.status = Connecting
+	mgr.injector.Invoke(triggerConnecting)
 	mgr.conn.Connect(config.Network)
 }
 
@@ -57,6 +58,10 @@ func (mgr *IrcConnectionManager) Quit() {
 
 func (mgr *IrcConnectionManager) Status() ConnectionStatus {
 	return mgr.status
+}
+
+func (mgr *IrcConnectionManager) Connection() *irc.Connection {
+	return mgr.conn
 }
 
 func newIrcConnection(conf *config.Configuration, l *log.Logger) (conn *irc.Connection) {

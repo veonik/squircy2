@@ -1,6 +1,7 @@
 package irc
 
 import (
+	"fmt"
 	"github.com/thoj/go-ircevent"
 	"github.com/tyler-sommer/squircy2/squircy/event"
 )
@@ -15,37 +16,34 @@ const (
 )
 
 func bindEvents(mgr *IrcConnectionManager, e event.EventManager) {
-	e.Clear(PrivmsgEvent)
-	e.Clear(NoticeEvent)
-	e.Clear(ConnectEvent)
-	e.Clear(ConnectingEvent)
-	e.Clear(DisconnectEvent)
-	e.Clear(IrcEvent)
-
 	mgr.conn.AddCallback("*", func(ev *irc.Event) {
-		e.Trigger(IrcEvent, newEventData(mgr.conn, ev))
+		e.Trigger(IrcEvent, newEventData(ev))
 	})
 
 	mgr.conn.AddCallback("001", func(ev *irc.Event) {
+		fmt.Println("Connected")
 		mgr.status = Connected
-		e.Trigger(ConnectEvent, newEventData(mgr.conn, ev))
+		e.Trigger(ConnectEvent, newEventData(ev))
 	})
 
 	mgr.conn.AddCallback("ERROR", func(ev *irc.Event) {
 		if mgr.status != Disconnected {
 			mgr.Quit()
 		}
-		e.Trigger(DisconnectEvent, newEventData(mgr.conn, ev))
+		e.Trigger(DisconnectEvent, newEventData(ev))
 	})
 }
 
-func newEventData(conn *irc.Connection, ev *irc.Event) map[string]interface{} {
+func triggerConnecting(mgr *IrcConnectionManager, e event.EventManager) {
+	e.Trigger(ConnectingEvent, nil)
+}
+
+func newEventData(ev *irc.Event) map[string]interface{} {
 	return map[string]interface{}{
-		"Connection": conn,
-		"Event":      ev,
-		"Code":       ev.Code,
-		"Message":    ev.Message(),
-		"Nick":       ev.Nick,
-		"Target":     ev.Arguments[0],
+		"Event":   ev,
+		"Code":    ev.Code,
+		"Message": ev.Message(),
+		"Nick":    ev.Nick,
+		"Target":  ev.Arguments[0],
 	}
 }

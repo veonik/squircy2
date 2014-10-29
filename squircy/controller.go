@@ -82,14 +82,18 @@ func replAction(r render.Render) {
 	r.HTML(200, "repl/index", nil)
 }
 
-func replExecuteAction(r render.Render, manager *script.ScriptManager, request *http.Request) {
+func replExecuteAction(r render.Render, manager script.ScriptManager, request *http.Request) {
 	code := request.FormValue("script")
 	sType := script.ScriptType(request.FormValue("scriptType"))
 
 	res, err := manager.RunUnsafe(sType, code)
+	var errStr interface{}
+	if err != nil {
+		errStr = err.Error()
+	}
 	r.JSON(200, map[string]interface{}{
 		"res": res,
-		"err": err,
+		"err": errStr,
 	})
 }
 
