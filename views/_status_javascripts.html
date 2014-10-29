@@ -20,10 +20,10 @@ $(function() {
 			dataType: "json",
 			success: function(response) {
 				statusTimeout = setTimeout(updateStatus, 5000)
-				if (response.Connected) {
+				if (response.Status == 2) {
 					$disconnectBtn.show();
 					$connectBtn.add($connectingBtn).hide();
-				} else if (response.Connecting) {
+				} else if (response.Status == 1) {
 					$connectingBtn.show();
 					$disconnectBtn.add($connectBtn).hide();
 				} else {
