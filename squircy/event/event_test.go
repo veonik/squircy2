@@ -40,3 +40,25 @@ func TestInvalidHandler(t *testing.T) {
 		t.Error("Failed to trigger error")
 	}
 }
+
+func TestUnbind(t *testing.T) {
+	count := 0
+
+	invoker := inject.New()
+	manager := NewEventManager(invoker)
+
+	handler := func(event Event) {
+		count++
+	}
+	manager.Bind(TestEvent, handler)
+	manager.Bind(TestEvent, func() {
+		manager.Unbind(TestEvent, handler)
+	})
+
+	manager.Trigger(TestEvent, nil)
+	manager.Trigger(TestEvent, nil)
+
+	if count > 1 {
+		t.Errorf("Failed to unbind event; trigged %v times", count)
+	}
+}
