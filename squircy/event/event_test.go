@@ -9,7 +9,7 @@ const TestEvent EventType = "test"
 
 func TestEventHandler(t *testing.T) {
 	invoker := inject.New()
-	manager := NewEventManager(&invoker)
+	manager := NewEventManager(invoker)
 
 	test := false
 	manager.Bind(TestEvent, func(event Event) {
@@ -32,7 +32,7 @@ func TestInvalidHandler(t *testing.T) {
 	}()
 
 	invoker := inject.New()
-	manager := NewEventManager(&invoker)
+	manager := NewEventManager(invoker)
 
 	manager.Bind(TestEvent, nil)
 
