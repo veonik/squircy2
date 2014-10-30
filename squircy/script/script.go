@@ -63,6 +63,13 @@ func (m *ScriptManager) RunUnsafe(t ScriptType, code string) (result interface{}
 	err = nil
 	result = nil
 
+	defer func() {
+		if e := recover(); e != nil {
+			err = e.(error)
+			return
+		}
+	}()
+
 	switch {
 	case t == Javascript:
 		res, e := runUnsafeJavascript(m.jsVm, code)
@@ -90,15 +97,15 @@ func (m *ScriptManager) RunUnsafe(t ScriptType, code string) (result interface{}
 	return
 }
 
-func runUnsafeJavascript(vm *otto.Otto, unsafe string) (otto.Value, error) {
+func runUnsafeJavascript(vm *otto.Otto, unsafe string) (val otto.Value, err error) {
 	start := time.Now()
 	defer func() {
 		duration := time.Since(start)
-		if err := recover(); err != nil {
-			if err == Halt {
+		if e := recover(); e != nil {
+			if e == Halt {
 				fmt.Println("Some code took too long! Stopping after: ", duration)
 			}
-			panic(err)
+			err = e.(error)
 		}
 	}()
 
@@ -111,46 +118,47 @@ func runUnsafeJavascript(vm *otto.Otto, unsafe string) (otto.Value, error) {
 		}
 	}()
 
-	return vm.Run(unsafe)
+	val, err = vm.Run(unsafe)
+
+	return
 }
 
-func runUnsafeLua(vm *lua.State, unsafe string) error {
+func runUnsafeLua(vm *lua.State, unsafe string) (err error) {
 	start := time.Now()
 	defer func() {
 		duration := time.Since(start)
-		if err := recover(); err != nil {
-			if err == Halt {
+		if e := recover(); e != nil {
+			if e == Halt {
 				fmt.Println("Some code took too long! Stopping after: ", duration)
 			}
-			panic(err)
+			err = e.(error)
 		}
 	}()
 
 	vm.SetExecutionLimit(maxExecutionTime * (1 << 26))
-	err := vm.DoString(unsafe)
+	err = vm.DoString(unsafe)
 
-	if err != nil && err.Error() == "Lua execution quantum exceeded" {
-		panic(Halt)
-	}
-
-	return err
+	return
 }
 
-func runUnsafeLisp(unsafe string) (lisp.Value, error) {
+func runUnsafeLisp(unsafe string) (val lisp.Value, err error) {
 	start := time.Now()
 	defer func() {
 		duration := time.Since(start)
-		if err := recover(); err != nil {
-			if err.(error).Error() == "Execution limit exceeded" {
+		if e := recover(); e != nil {
+			if e.(error).Error() == "Execution limit exceeded" {
 				fmt.Println("Some code took too long! Stopping after: ", duration)
-				panic(Halt)
+				e = Halt
 			}
-			panic(err)
+			val = lisp.Nil
+			err = e.(error)
 		}
 	}()
 
-	lisp.SetExecutionLimit(maxExecutionTime * (1 << 15))
-	return lisp.EvalString(unsafe)
+	lisp.SetExecutionLimit(maxExecutionTime * (1 << 20))
+	val, err = lisp.EvalString(unsafe)
+
+	return
 }
 
 func (m *ScriptManager) ReInit() {

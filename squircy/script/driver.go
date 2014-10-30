@@ -46,11 +46,7 @@ func (d luaDriver) String() string {
 type lispDriver struct{}
 
 func (d lispDriver) Handle(e event.Event, fnName string) {
-	_, err := runUnsafeLisp(fmt.Sprintf("(%s \"%s\" \"%s\" \"%s\" %s)", fnName, e.Data["Code"], e.Data["Target"], e.Data["Nick"], strconv.Quote(e.Data["Message"].(string))))
-
-	if err == Halt {
-		panic(err)
-	}
+	runUnsafeLisp(fmt.Sprintf("(%s \"%s\" \"%s\" \"%s\" %s)", fnName, e.Data["Code"], e.Data["Target"], e.Data["Nick"], strconv.Quote(e.Data["Message"].(string))))
 }
 
 func (d lispDriver) String() string {
