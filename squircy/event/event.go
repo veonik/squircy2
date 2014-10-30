@@ -22,6 +22,7 @@ type EventManager interface {
 	Unbind(eventName EventType, handler EventHandler)
 	Trigger(eventName EventType, data map[string]interface{})
 	Clear(eventName EventType)
+	ClearAll()
 }
 
 type eventManager struct {

@@ -31,8 +31,8 @@ func scriptAction(r render.Render, repo script.ScriptRepository) {
 	r.HTML(200, "script/index", map[string]interface{}{"scripts": scripts})
 }
 
-func scriptReinitAction(r render.Render) {
-	// TODO: Make this work
+func scriptReinitAction(r render.Render, mgr script.ScriptManager) {
+	mgr.ReInit()
 
 	r.JSON(200, nil)
 }

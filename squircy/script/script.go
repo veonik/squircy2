@@ -153,13 +153,12 @@ func runUnsafeLisp(unsafe string) (lisp.Value, error) {
 	return lisp.EvalString(unsafe)
 }
 
+func (m *ScriptManager) ReInit() {
+	m.init()
+}
+
 func (m *ScriptManager) init() {
-	m.e.Clear(irc.PrivmsgEvent)
-	m.e.Clear(irc.NoticeEvent)
-	m.e.Clear(irc.ConnectEvent)
-	m.e.Clear(irc.ConnectingEvent)
-	m.e.Clear(irc.DisconnectEvent)
-	m.e.Clear(irc.IrcEvent)
+	m.e.ClearAll()
 	m.e.Bind(irc.ConnectingEvent, func(mgr *irc.IrcConnectionManager) {
 		m.ircHelper.conn = mgr.Connection()
 	})
