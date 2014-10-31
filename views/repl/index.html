@@ -2,9 +2,10 @@
 	<div class="col-md-8" style="height: 300px">
 		<h4>REPL</h4>
 		<select class="form-control" id="script_type" name="scriptType">
-			<option>Javascript</script>
-			<option>Lua</script>
-			<option>Lisp</script>
+			<option>Javascript</option>
+			<option>Lua</option>
+			<option>Lisp</option>
+			<option>Anko</option>
 		</select>
 		<br>
 		<div class="alert alert-warning" id="lua-warning" style="display: none">The Lua REPL currently does not support the important "print" aspect of REPL</div>
@@ -25,6 +26,7 @@
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/mode-javascript.js"></script>
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/mode-lisp.js"></script>
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/mode-lua.js"></script>
+<script src="//cdn.jsdelivr.net/ace/1.1.7/min/mode-text.js"></script>
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/theme-textmate.js"></script>
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/worker-javascript.js"></script>
 <script type="text/javascript">
@@ -32,7 +34,8 @@ $(function() {
 	var modeMap = {
 		"Javascript": "ace/mode/javascript",
 		"Lua": "ace/mode/lua",
-		"Lisp": "ace/mode/lisp"
+		"Lisp": "ace/mode/lisp",
+		"Anko": "ace/mode/text"
 	};
 	var $typeField = $('#script_type');
 	var $luaWarning = $('#lua-warning');
