@@ -3,12 +3,10 @@ squIRCy2
 
 ##### the scriptable IRC bot
 
-squIRCy2 is written in Go and supports Javascript, Lua, and a small dialect of Lisp. 
+squIRCy2 is written in Go and supports Javascript, Lua, a dialect of Lisp, and the Anko scripting language. 
 
-It sports a web management interface for writing scripts and bot management, as well as dynamic script reloading at runtime.
-
-
-> This program exposes scripting languages to IRC. Take care to set the Owner nickname and hostname settings properly.
+It sports a web management interface for writing scripts and bot management, as well as dynamic script reloading at 
+runtime.
 
 
 Installation
@@ -16,7 +14,8 @@ Installation
 
 As a prerequisite, the Lua 5.1 package must be installed on your system.
 
-[See here for more information](https://github.com/aarzilli/golua/blob/master/README.md) on getting Go Bindings for the Lua C API setup or just visit [the Lua download page](http://www.lua.org/download.html).
+[See here for more information](https://github.com/aarzilli/golua/blob/master/README.md) on getting Go Bindings for the 
+Lua C API setup or just visit [the Lua download page](http://www.lua.org/download.html).
 
 
 **Installing Lua 5.1 on Ubuntu or Debian**
@@ -58,7 +57,9 @@ Configuration
 
 Once the bot is up and running, you can access the web management interface via `localhost:3000`.
 
-The Settings page allows you to modify squishy's nickname, username, and which server he connects to. Configure the Owner nickname and hostname to your information.
+The Settings page allows you to modify squishy's nickname, username, and which server he connects to. Configure the 
+Owner nickname and hostname to your information. These values are available from within each scripting language at 
+runtime.
 
 > The Owner Nickname and Hostname settings limit in-IRC REPL to that user. Ensure these are configured properly.
 
@@ -74,6 +75,8 @@ squIRCy2 exposes a small API to each scripting language.
 
 ### Javascript API
 
+[otto](https://github.com/robertkrimen/otto) supports ECMAScript 5, less a regular expression incompatibility.
+
 | Method | Description |
 | ------ | ----------- |
 | Irc.Join(channel) | Joins the given channel |
@@ -81,15 +84,14 @@ squIRCy2 exposes a small API to each scripting language.
 | Irc.Privmsg(target, message) | Messages target with message. Target can be a user or a channel |
 | Data.Get(key) | Gets a value with the given from the cross-vm storage |
 | Data.Set(key, val) | Sets a value with the given key in the cross-vm storage |
-| Script.AddHandler(type, fnName) | Add a PRIVMSG handler of the given type ("js", "lua", or "lisp") and function name |
-| Script.RemoveHandler(type, fnName) | Removes a PRIVMSG handler of the given type and function name |
-| Script.On(type, event, fnName) | Add a handler of the given type to a specific event like "NOTICE" or "001" |
-| replyTarget() | The current reply target. If the current message was received in a channel, this will be the channel name. Otherwise it will be a nickname |
-| print(message)  | Replies to the current reply target with the given message |
+| Http.Get(url) | Fetch the given url using a GET HTTP request |
+| bind(eventName, fnName) | Add a handler of the given event type and function name |
+| unbind(eventName, fnName) | Removes a handler of the given type and function name |
 
 ### Lua API
 
-```
+[Go-lua](https://github.com/aarzilli/golua) binds many built in libraries
+
 | Method | Description |
 | ------ | ----------- |
 | joinchan(channel) | Joins the given channel |
@@ -97,16 +99,14 @@ squIRCy2 exposes a small API to each scripting language.
 | privmsg(target, message) | Messages target with message. Target can be a user or a channel |
 | getex(key) | Gets a value with the given from the cross-vm storage |
 | setex(key, val) | Sets a value with the given key in the cross-vm storage |
-| addhandler(type, fnName) | Add a PRIVMSG handler of the given type ("js", "lua", or "lisp") and function name |
-| removehandler(type, fnName) | Removes a PRIVMSG handler of the given type and function name |
-| on(type, event, fnName) | Add a handler of the given type to a specific event like "NOTICE" or "001" |
-| replytarget() | The current reply target. If the current message was received in a channel, this will be the channel name. Otherwise it will be a nickname |
-| print(message)  | Replies to the current reply target with the given message |
-```
+| httpget(url) | Fetch the given url using a GET HTTP request |
+| bind(eventName, fnName) | Add a handler of the given event type and function name |
+| unbind(eventName, fnName) | Removes a handler of the given type and function name |
 
 ### Lisp API
 
-```
+[Glisp](https://github.com/zhemao/glisp) also has many built-in functions.
+
 | Method | Description |
 | ------ | ----------- |
 | (joinchan channel) | Joins the given channel |
@@ -114,42 +114,54 @@ squIRCy2 exposes a small API to each scripting language.
 | (privmsg target message) | Messages target with message. Target can be a user or a channel |
 | (getex key) | Gets a value with the given from the cross-vm storage |
 | (setex key val) | Sets a value with the given key in the cross-vm storage |
-| (addhandler type fnName) | Add a PRIVMSG handler of the given type ("js", "lua", or "lisp") and function name |
-| (removehandler type fnName) | Removes a PRIVMSG handler of the given type and function name |
-| (on type event fnName) | Add a handler of the given type to a specific event like "NOTICE" or "001" |
-| (replytarget "") | The current reply target. If the current message was received in a channel, this will be the channel name. Otherwise it will be a nickname |
-| (print message)  | Replies to the current reply target with the given message |
-```
+| (httpget url) | Fetch the given url using a GET HTTP request |
+| (bind eventName fnName) | Add a handler of the given event type and function name |
+| (unbind eventName fnName) | Removes a handler of the given type and function name |
 
-### IRC event handlers
+### Anko API
 
-Chat (PRIVMSG) handlers can be registered with `Script.AddHandler` in Javascript or `addhandler` in Lua and Lisp. This function takes a type, one of: js, lua, lisp. It also takes the name of a function that should have the following signature:
+[Anko](https://github.com/mattn/anko) offers a myriad of built-in functions and has a go-like syntax
+
+| Method | Description |
+| ------ | ----------- |
+| irc.Join(channel) | Joins the given channel |
+| irc.Part(channel) | Parts the given channel |
+| irc.Privmsg(target, message) | Messages target with message. Target can be a user or a channel |
+| data.Get(key) | Gets a value with the given from the cross-vm storage |
+| data.Set(key, val) | Sets a value with the given key in the cross-vm storage |
+| bind(eventName, fnName) | Add a handler of the given event type and function name |
+| unbind(eventName, fnName) | Removes a handler of the given type and function name |
+
+
+### Event handlers
+
+Event handlers can be registered with `bind` and `unbind` in all languages. Bind takes two parameters: the name of the
+event, and the name of the function to call when the given event is triggered. 
+
+> Bind will only bind functions to the language it is called from; Lua scripts can only `bind` or `unbind` Lua scripts. 
+
+Event handlers should take four parameters: code, target, nick, message. An example javascript handler:
 
 ```js
 function handler(code, target, nick, message) {
-	// code is the irc event code, like PRIVMSG, NOTICE, or 001
+	// code is the IRC event code, like PRIVMSG, NOTICE, or 001
 	// target received the message
 	// nick sent the message
 }
 ```
 
-Additionally, exposed to the Javascript VM is `Script.On` which takes a script type, an event type, and a function name. The signature of the function is the same as a chat handler.
+#### Events
 
+| Event Name | Description |
+| ---------- | ----------- |
+| irc.CONNECTING | Fired when first connecting to the IRC server |
+| irc.CONNECT | Successfully connected to the IRC server |
+| irc.DISCONNECT | Disconnected from the IRC server |
+| irc.PRIVMSG | A message received, in a channel or a private message |
+| irc.NOTICE | A notice received |
+| irc.WILDCARD | Any IRC event |
 
-In-IRC REPL
------------
-
-squIRCy2 comes with an in-IRC REPL, though the print functionality needs to be explicitly called. A REPL session can be started by messaging squIRCy2, either in channel or private message: `!repl js`. Replace "js" with "lua" or "lisp" to start a session of that type. Message `!repl end` to end the REPL session.
-
-```
-<veonik> !repl js
-<squishyj> Javascript REPL session started.
-<veonik> function test(x, y) { print(x * y) }
-<veonik> test(10, 5)
-<squishyj> 50
-<veonik> !repl end
-<squishyj> Javascript REPL session ended.
-```
+> The IRC module also fires any IRC code as `irc.<code>`, for example 001 is `irc.001`, or `irc.NICK`.
 
 
 Example Scripts
@@ -161,7 +173,7 @@ Example Scripts
 function handleWelcome(code, target, nick, message) {
     Irc.Join('#squishyslab')
 }
-Script.On("js", "001", "handleWelcome");
+bind("irc.CONNECT", "handleWelcome");
 ```
 
 ### Identify with Nickserv (Javascript example)
@@ -173,7 +185,7 @@ function handleNickserv(code, target, nick, message) {
         console.log("Identified with Nickserv");
     }
 }
-Script.On("js", "NOTICE", "handleNickserv");
+bind("irc.NOTICE", "handleNickserv");
 ```
 
 
@@ -182,4 +194,4 @@ Additional Info
 
 squIRCy2 leverages [go-irc-event](https://github.com/thoj/go-ircevent) for IRC interaction. It makes use of [martini](https://github.com/go-martini/martini) for serving web requests and dependency injection. [Tiedot](https://github.com/HouzuoGuo/tiedot) is used as the storage engine.
 
-Additionally, squIRCy2 embeds the [otto Javascript VM](https://github.com/robertkrimen/otto), [Go language bindings for Lua](https://github.com/aarzilli/golua), and a [forked Lisp interpreter](https://github.com/veonik/go-lisp) based on [janne/go-lisp](https://github.com/janne/go-lisp).
+squIRCy2 embeds the [otto Javascript VM](https://github.com/robertkrimen/otto), [Go language bindings for Lua](https://github.com/aarzilli/golua), [Glisp lisp interpreter](https://github.com/zhemao/glisp), and the [Anko scripting language](https://github.com/mattn/anko).
