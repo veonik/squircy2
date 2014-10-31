@@ -4,11 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/aarzilli/golua/lua"
+	anko_parser "github.com/mattn/anko/parser"
+	anko "github.com/mattn/anko/vm"
 	"github.com/robertkrimen/otto"
 	"github.com/tyler-sommer/squircy2/squircy/event"
 	"github.com/tyler-sommer/squircy2/squircy/irc"
 	glisp "github.com/zhemao/glisp/interpreter"
 	"log"
+	"reflect"
 	"time"
 )
 
@@ -22,6 +25,7 @@ const (
 	Javascript ScriptType = "Javascript"
 	Lua                   = "Lua"
 	Lisp                  = "Lisp"
+	Anko                  = "Anko"
 )
 
 type ScriptManager struct {
@@ -30,8 +34,10 @@ type ScriptManager struct {
 	jsDriver     javascriptDriver
 	luaVm        *lua.State
 	luaDriver    luaDriver
-	lispVm	     *glisp.Glisp
+	lispVm       *glisp.Glisp
 	lispDriver   lispDriver
+	ankoVm       *anko.Env
+	ankoDriver   ankoDriver
 	httpHelper   httpHelper
 	ircHelper    ircHelper
 	dataHelper   dataHelper
@@ -49,6 +55,8 @@ func NewScriptManager(repo ScriptRepository, l *log.Logger, e event.EventManager
 		luaDriver{},
 		nil,
 		lispDriver{},
+		nil,
+		ankoDriver{},
 		httpHelper{},
 		ircHelper{},
 		dataHelper{make(map[string]interface{})},
@@ -91,6 +99,14 @@ func (m *ScriptManager) RunUnsafe(t ScriptType, code string) (result interface{}
 			return
 		}
 		result = res.SexpString()
+
+	case t == Anko:
+		res, e := runUnsafeAnko(m.ankoVm, code)
+		if e != nil {
+			err = e
+			return
+		}
+		result = res.Interface()
 
 	default:
 		err = UnknownScriptType
@@ -164,6 +180,31 @@ func runUnsafeLisp(vm *glisp.Glisp, unsafe string) (val glisp.Sexp, err error) {
 	return
 }
 
+func runUnsafeAnko(vm *anko.Env, unsafe string) (val reflect.Value, err error) {
+	start := time.Now()
+	defer func() {
+		duration := time.Since(start)
+		if e := recover(); e != nil {
+			if e == Halt {
+				fmt.Println("Some code took too long! Stopping after: ", duration)
+			}
+			val = anko.NilValue
+			err = e.(error)
+		}
+	}()
+
+	scanner := &anko_parser.Scanner{}
+	scanner.Init(unsafe)
+	stmts, err := anko_parser.Parse(scanner)
+	if err != nil {
+		val = anko.NilValue
+		return
+	}
+	val, err = anko.Run(stmts, vm)
+
+	return
+}
+
 func (m *ScriptManager) ReInit() {
 	m.init()
 }
@@ -181,6 +222,7 @@ func (m *ScriptManager) init() {
 	jsVm := newJavascriptVm(m)
 	luaVm := newLuaVm(m)
 	lispVm := newLispVm(m)
+	ankoVm := newAnkoVm(m)
 
 	m.jsVm = jsVm
 	m.jsDriver.vm = jsVm
@@ -188,8 +230,10 @@ func (m *ScriptManager) init() {
 	m.luaDriver.vm = luaVm
 	m.lispVm = lispVm
 	m.lispDriver.vm = lispVm
+	m.ankoVm = ankoVm
+	m.ankoDriver.vm = ankoVm
 
-	m.scriptHelper = scriptHelper{m.e, m.jsDriver, m.luaDriver, m.lispDriver, make(map[string]event.EventHandler, 0)}
+	m.scriptHelper = scriptHelper{m.e, m.jsDriver, m.luaDriver, m.lispDriver, m.ankoDriver, make(map[string]event.EventHandler, 0)}
 
 	scripts := m.repo.FetchAll()
 	for _, script := range scripts {

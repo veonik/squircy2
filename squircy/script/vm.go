@@ -2,10 +2,23 @@ package script
 
 import (
 	"github.com/aarzilli/golua/lua"
+	anko_core "github.com/mattn/anko/builtins"
+	anko_encoding "github.com/mattn/anko/builtins/encoding"
+	anko_flag "github.com/mattn/anko/builtins/flag"
+	anko_io "github.com/mattn/anko/builtins/io"
+	anko_math "github.com/mattn/anko/builtins/math"
+	anko_net "github.com/mattn/anko/builtins/net"
+	anko_os "github.com/mattn/anko/builtins/os"
+	anko_path "github.com/mattn/anko/builtins/path"
+	anko_regexp "github.com/mattn/anko/builtins/regexp"
+	anko_sort "github.com/mattn/anko/builtins/sort"
+	anko_strings "github.com/mattn/anko/builtins/strings"
+	anko_term "github.com/mattn/anko/builtins/term"
+	anko "github.com/mattn/anko/vm"
 	"github.com/robertkrimen/otto"
 	"github.com/tyler-sommer/squircy2/squircy/event"
-	glisp "github.com/zhemao/glisp/interpreter"
 	glispext "github.com/zhemao/glisp/extensions"
+	glisp "github.com/zhemao/glisp/interpreter"
 )
 
 func newJavascriptVm(m *ScriptManager) *otto.Otto {
@@ -100,4 +113,22 @@ func newLispVm(m *ScriptManager) *glisp.Glisp {
 	glispext.ImportCoroutines(lispVm)
 
 	return lispVm
+}
+
+func newAnkoVm(m *ScriptManager) *anko.Env {
+	ankoVm := anko.NewEnv()
+	anko_core.Import(ankoVm)
+	anko_flag.Import(ankoVm)
+	anko_net.Import(ankoVm)
+	anko_encoding.Import(ankoVm)
+	anko_os.Import(ankoVm)
+	anko_io.Import(ankoVm)
+	anko_math.Import(ankoVm)
+	anko_path.Import(ankoVm)
+	anko_regexp.Import(ankoVm)
+	anko_sort.Import(ankoVm)
+	anko_strings.Import(ankoVm)
+	anko_term.Import(ankoVm)
+
+	return ankoVm
 }

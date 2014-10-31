@@ -69,6 +69,7 @@ type scriptHelper struct {
 	jsDriver   javascriptDriver
 	luaDriver  luaDriver
 	lispDriver lispDriver
+	ankoDriver ankoDriver
 	handlers   map[string]event.EventHandler
 }
 
@@ -89,6 +90,9 @@ func (s *scriptHelper) Bind(scriptType ScriptType, eventType event.EventType, fn
 
 		case scriptType == Lisp:
 			s.lispDriver.Handle(ev, fnName)
+
+		case scriptType == Anko:
+			s.ankoDriver.Handle(ev, fnName)
 		}
 	}
 	s.handlers[id] = handler

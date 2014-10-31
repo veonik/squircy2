@@ -3,10 +3,11 @@ package script
 import (
 	"fmt"
 	"github.com/aarzilli/golua/lua"
+	anko "github.com/mattn/anko/vm"
 	"github.com/robertkrimen/otto"
 	"github.com/tyler-sommer/squircy2/squircy/event"
-	"strconv"
 	glisp "github.com/zhemao/glisp/interpreter"
+	"strconv"
 )
 
 type scriptDriver interface {
@@ -44,7 +45,7 @@ func (d luaDriver) String() string {
 	return "lua"
 }
 
-type lispDriver struct{
+type lispDriver struct {
 	vm *glisp.Glisp
 }
 
@@ -54,4 +55,16 @@ func (d lispDriver) Handle(e event.Event, fnName string) {
 
 func (d lispDriver) String() string {
 	return "lisp"
+}
+
+type ankoDriver struct {
+	vm *anko.Env
+}
+
+func (d ankoDriver) Handle(e event.Event, fnName string) {
+	runUnsafeAnko(d.vm, fmt.Sprintf("%s(\"%s\" \"%s\" \"%s\" %s)", fnName, e.Data["Code"], e.Data["Target"], e.Data["Nick"], strconv.Quote(e.Data["Message"].(string))))
+}
+
+func (d ankoDriver) String() string {
+	return "anko"
 }
