@@ -4,7 +4,8 @@ import (
 	"github.com/aarzilli/golua/lua"
 	"github.com/robertkrimen/otto"
 	"github.com/tyler-sommer/squircy2/squircy/event"
-	"github.com/veonik/go-lisp/lisp"
+	glisp "github.com/zhemao/glisp/interpreter"
+	glispext "github.com/zhemao/glisp/extensions"
 )
 
 func newJavascriptVm(m *ScriptManager) *otto.Otto {
@@ -90,75 +91,13 @@ func newLuaVm(m *ScriptManager) *lua.State {
 	return luaVm
 }
 
-func newLispVm(m *ScriptManager) {
-	lisp.SetHandler("setex", func(vars ...lisp.Value) (lisp.Value, error) {
-		if len(vars) != 2 {
-			return lisp.Nil, nil
-		}
-		key := vars[0].String()
-		value := vars[1].String()
-		m.dataHelper.Set(key, value)
-		return lisp.Nil, nil
-	})
-	lisp.SetHandler("getex", func(vars ...lisp.Value) (lisp.Value, error) {
-		if len(vars) != 1 {
-			return lisp.Nil, nil
-		}
-		key := vars[0].String()
-		if val := m.dataHelper.Get(key); val != nil {
-			return lisp.StringValue(val.(string)), nil
-		}
-		return lisp.Nil, nil
-	})
-	lisp.SetHandler("joinchan", func(vars ...lisp.Value) (lisp.Value, error) {
-		if len(vars) != 1 {
-			return lisp.Nil, nil
-		}
-		channel := vars[0].String()
-		m.ircHelper.Join(channel)
-		return lisp.Nil, nil
-	})
-	lisp.SetHandler("partchan", func(vars ...lisp.Value) (lisp.Value, error) {
-		if len(vars) != 1 {
-			return lisp.Nil, nil
-		}
-		channel := vars[0].String()
-		m.ircHelper.Part(channel)
-		return lisp.Nil, nil
-	})
-	lisp.SetHandler("privmsg", func(vars ...lisp.Value) (lisp.Value, error) {
-		if len(vars) != 2 {
-			return lisp.Nil, nil
-		}
-		target := vars[0].String()
-		message := vars[1].String()
-		m.ircHelper.Privmsg(target, message)
-		return lisp.Nil, nil
-	})
-	lisp.SetHandler("httpget", func(vars ...lisp.Value) (lisp.Value, error) {
-		if len(vars) != 1 {
-			return lisp.Nil, nil
-		}
-		url := vars[0].String()
-		res := m.httpHelper.Get(url)
-		return lisp.StringValue(res), nil
-	})
-	lisp.SetHandler("bind", func(vars ...lisp.Value) (lisp.Value, error) {
-		if len(vars) != 2 {
-			return lisp.Nil, nil
-		}
-		eventType := vars[0].String()
-		fnName := vars[1].String()
-		m.scriptHelper.Bind(Lisp, event.EventType(eventType), fnName)
-		return lisp.Nil, nil
-	})
-	lisp.SetHandler("unbind", func(vars ...lisp.Value) (lisp.Value, error) {
-		if len(vars) != 2 {
-			return lisp.Nil, nil
-		}
-		eventType := vars[0].String()
-		fnName := vars[1].String()
-		m.scriptHelper.Unbind(Lisp, event.EventType(eventType), fnName)
-		return lisp.Nil, nil
-	})
+func newLispVm(m *ScriptManager) *glisp.Glisp {
+	lispVm := glisp.NewGlisp()
+	lispVm.ImportEval()
+	glispext.ImportRandom(lispVm)
+	glispext.ImportTime(lispVm)
+	glispext.ImportChannels(lispVm)
+	glispext.ImportCoroutines(lispVm)
+
+	return lispVm
 }

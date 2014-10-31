@@ -6,6 +6,7 @@ import (
 	"github.com/robertkrimen/otto"
 	"github.com/tyler-sommer/squircy2/squircy/event"
 	"strconv"
+	glisp "github.com/zhemao/glisp/interpreter"
 )
 
 type scriptDriver interface {
@@ -43,10 +44,12 @@ func (d luaDriver) String() string {
 	return "lua"
 }
 
-type lispDriver struct{}
+type lispDriver struct{
+	vm *glisp.Glisp
+}
 
 func (d lispDriver) Handle(e event.Event, fnName string) {
-	runUnsafeLisp(fmt.Sprintf("(%s \"%s\" \"%s\" \"%s\" %s)", fnName, e.Data["Code"], e.Data["Target"], e.Data["Nick"], strconv.Quote(e.Data["Message"].(string))))
+	runUnsafeLisp(d.vm, fmt.Sprintf("(%s \"%s\" \"%s\" \"%s\" %s)", fnName, e.Data["Code"], e.Data["Target"], e.Data["Nick"], strconv.Quote(e.Data["Message"].(string))))
 }
 
 func (d lispDriver) String() string {

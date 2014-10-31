@@ -7,7 +7,7 @@ import (
 	"github.com/robertkrimen/otto"
 	"github.com/tyler-sommer/squircy2/squircy/event"
 	"github.com/tyler-sommer/squircy2/squircy/irc"
-	"github.com/veonik/go-lisp/lisp"
+	glisp "github.com/zhemao/glisp/interpreter"
 	"log"
 	"time"
 )
@@ -30,6 +30,7 @@ type ScriptManager struct {
 	jsDriver     javascriptDriver
 	luaVm        *lua.State
 	luaDriver    luaDriver
+	lispVm	     *glisp.Glisp
 	lispDriver   lispDriver
 	httpHelper   httpHelper
 	ircHelper    ircHelper
@@ -46,6 +47,7 @@ func NewScriptManager(repo ScriptRepository, l *log.Logger, e event.EventManager
 		javascriptDriver{},
 		nil,
 		luaDriver{},
+		nil,
 		lispDriver{},
 		httpHelper{},
 		ircHelper{},
@@ -83,12 +85,12 @@ func (m *ScriptManager) RunUnsafe(t ScriptType, code string) (result interface{}
 		err = runUnsafeLua(m.luaVm, code)
 
 	case t == Lisp:
-		res, e := runUnsafeLisp(code)
+		res, e := runUnsafeLisp(m.lispVm, code)
 		if e != nil {
 			err = e
 			return
 		}
-		result = res.Inspect()
+		result = res.SexpString()
 
 	default:
 		err = UnknownScriptType
@@ -141,7 +143,7 @@ func runUnsafeLua(vm *lua.State, unsafe string) (err error) {
 	return
 }
 
-func runUnsafeLisp(unsafe string) (val lisp.Value, err error) {
+func runUnsafeLisp(vm *glisp.Glisp, unsafe string) (val glisp.Sexp, err error) {
 	start := time.Now()
 	defer func() {
 		duration := time.Since(start)
@@ -150,13 +152,14 @@ func runUnsafeLisp(unsafe string) (val lisp.Value, err error) {
 				fmt.Println("Some code took too long! Stopping after: ", duration)
 				e = Halt
 			}
-			val = lisp.Nil
+			val = glisp.SexpNull
 			err = e.(error)
 		}
 	}()
 
-	lisp.SetExecutionLimit(maxExecutionTime * (1 << 20))
-	val, err = lisp.EvalString(unsafe)
+	vm.Clear()
+	vm.LoadString(unsafe)
+	val, err = vm.Run()
 
 	return
 }
@@ -177,12 +180,14 @@ func (m *ScriptManager) init() {
 
 	jsVm := newJavascriptVm(m)
 	luaVm := newLuaVm(m)
-	newLispVm(m)
+	lispVm := newLispVm(m)
 
 	m.jsVm = jsVm
 	m.jsDriver.vm = jsVm
 	m.luaVm = luaVm
 	m.luaDriver.vm = luaVm
+	m.lispVm = lispVm
+	m.lispDriver.vm = lispVm
 
 	m.scriptHelper = scriptHelper{m.e, m.jsDriver, m.luaDriver, m.lispDriver, make(map[string]event.EventHandler, 0)}
 
