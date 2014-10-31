@@ -98,7 +98,7 @@ func (m *ScriptManager) RunUnsafe(t ScriptType, code string) (result interface{}
 			err = e
 			return
 		}
-		result = res.SexpString()
+		result = sexpToInterface(res)
 
 	case t == Anko:
 		res, e := runUnsafeAnko(m.ankoVm, code)
@@ -178,6 +178,22 @@ func runUnsafeLisp(vm *glisp.Glisp, unsafe string) (val glisp.Sexp, err error) {
 	val, err = vm.Run()
 
 	return
+}
+
+func sexpToInterface(val glisp.Sexp) interface{} {
+	switch t := val.(type) {
+	case glisp.SexpInt:
+		return int(t)
+
+	case glisp.SexpFloat:
+		return float64(t)
+
+	case glisp.SexpStr:
+		return string(t)
+
+	default:
+		return val.SexpString()
+	}
 }
 
 func runUnsafeAnko(vm *anko.Env, unsafe string) (val reflect.Value, err error) {
