@@ -182,6 +182,9 @@ func runUnsafeLisp(vm *glisp.Glisp, unsafe string) (val glisp.Sexp, err error) {
 
 func sexpToInterface(val glisp.Sexp) interface{} {
 	switch t := val.(type) {
+	case glisp.SexpSymbol:
+		return t.Name()
+
 	case glisp.SexpInt:
 		return int(t)
 
@@ -191,9 +194,39 @@ func sexpToInterface(val glisp.Sexp) interface{} {
 	case glisp.SexpStr:
 		return string(t)
 
+	case glisp.SexpBool:
+		return bool(t)
+
+	case glisp.SexpChar:
+		return rune(t)
+
+	case glisp.SexpArray:
+		res := make([]interface{}, 0)
+		for _, sexp := range t {
+			res = append(res, sexpToInterface(sexp))
+		}
+		return res
+
+	case glisp.SexpHash:
+		res := make(map[string]interface{}, 0)
+		for _, pairs := range t {
+			for _, sexp := range pairs {
+				p := glisp.SexpPair(sexp)
+				symbol := p.Head()
+				tail := p.Tail()
+
+				res[sexpToInterface(symbol).(string)] = sexpToInterface(tail)
+			}
+		}
+		return res
+
 	default:
 		return val.SexpString()
 	}
+}
+
+func sexpToString(val glisp.Sexp) string {
+	return sexpToInterface(val).(string)
 }
 
 func runUnsafeAnko(vm *anko.Env, unsafe string) (val reflect.Value, err error) {

@@ -19,6 +19,7 @@ import (
 	"github.com/tyler-sommer/squircy2/squircy/event"
 	glispext "github.com/zhemao/glisp/extensions"
 	glisp "github.com/zhemao/glisp/interpreter"
+	"errors"
 )
 
 func newJavascriptVm(m *ScriptManager) *otto.Otto {
@@ -111,6 +112,91 @@ func newLispVm(m *ScriptManager) *glisp.Glisp {
 	glispext.ImportTime(lispVm)
 	glispext.ImportChannels(lispVm)
 	glispext.ImportCoroutines(lispVm)
+
+	lispVm.AddFunction("setex", func(vm *glisp.Glisp, name string, args []glisp.Sexp) (glisp.Sexp, error) {
+		if len(args) != 2 {
+			return glisp.SexpNull, errors.New("incorrect number of arguments")
+		}
+
+		key := sexpToString(args[0])
+		val := sexpToInterface(args[1])
+		m.dataHelper.Set(key, val)
+
+		return glisp.SexpNull, nil
+	})
+	lispVm.AddFunction("getex", func(vm *glisp.Glisp, name string, args []glisp.Sexp) (glisp.Sexp, error) {
+		if len(args) != 1 {
+			return glisp.SexpNull, errors.New("incorrect number of arguments")
+		}
+
+		key := sexpToString(args[0])
+		val := m.dataHelper.Get(key).(string)
+
+		return glisp.SexpStr(val), nil
+	})
+	lispVm.AddFunction("joinchan", func(vm *glisp.Glisp, name string, args []glisp.Sexp) (glisp.Sexp, error) {
+		if len(args) != 1 {
+			return glisp.SexpNull, errors.New("incorrect number of arguments")
+		}
+
+		channel := sexpToString(args[0])
+		m.ircHelper.Join(channel)
+
+		return glisp.SexpNull, nil
+	})
+	lispVm.AddFunction("partchan", func(vm *glisp.Glisp, name string, args []glisp.Sexp) (glisp.Sexp, error) {
+		if len(args) != 1 {
+			return glisp.SexpNull, errors.New("incorrect number of arguments")
+		}
+
+		channel := sexpToString(args[0])
+		m.ircHelper.Part(channel)
+
+		return glisp.SexpNull, nil
+	})
+	lispVm.AddFunction("privmsg", func(vm *glisp.Glisp, name string, args []glisp.Sexp) (glisp.Sexp, error) {
+		if len(args) != 2 {
+			return glisp.SexpNull, errors.New("incorrect number of arguments")
+		}
+
+		target := sexpToString(args[0])
+		message := sexpToString(args[1])
+		m.ircHelper.Privmsg(target, message)
+
+		return glisp.SexpNull, nil
+	})
+	lispVm.AddFunction("httpget", func(vm *glisp.Glisp, name string, args []glisp.Sexp) (glisp.Sexp, error) {
+		if len(args) != 1 {
+			return glisp.SexpNull, errors.New("incorrect number of arguments")
+		}
+
+		url := sexpToString(args[0])
+		resp := m.httpHelper.Get(url)
+
+		return glisp.SexpStr(resp), nil
+	})
+	lispVm.AddFunction("bind", func(vm *glisp.Glisp, name string, args []glisp.Sexp) (glisp.Sexp, error) {
+		if len(args) != 2 {
+			return glisp.SexpNull, errors.New("incorrect number of arguments")
+		}
+
+		eventType := sexpToString(args[0])
+		fnName := sexpToString(args[1])
+		m.scriptHelper.Bind(Lisp, event.EventType(eventType), fnName)
+
+		return glisp.SexpNull, nil
+	})
+	lispVm.AddFunction("unbind", func(vm *glisp.Glisp, name string, args []glisp.Sexp) (glisp.Sexp, error) {
+		if len(args) != 2 {
+			return glisp.SexpNull, errors.New("incorrect number of arguments")
+		}
+
+		eventType := sexpToString(args[0])
+		fnName := sexpToString(args[1])
+		m.scriptHelper.Unbind(Lisp, event.EventType(eventType), fnName)
+
+		return glisp.SexpNull, nil
+	})
 
 	return lispVm
 }
