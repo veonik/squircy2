@@ -22,6 +22,7 @@ import (
 	"errors"
 	"reflect"
 	"strconv"
+	"fmt"
 )
 
 func newJavascriptVm(m *ScriptManager) *otto.Otto {
@@ -198,6 +199,39 @@ func newLispVm(m *ScriptManager) *glisp.Glisp {
 		m.scriptHelper.Unbind(Lisp, event.EventType(eventType), fnName)
 
 		return glisp.SexpNull, nil
+	})
+	lispVm.AddFunction("parse-integer", func(vm *glisp.Glisp, name string, args[]glisp.Sexp) (glisp.Sexp, error) {
+		if len(args) != 1 {
+			return glisp.SexpNull, errors.New("incorrect number of arguments")
+		}
+
+		switch t := args[0].(type) {
+		case glisp.SexpStr:
+			val, err := strconv.ParseInt(string(t), 0, 64)
+			if err != nil {
+				return glisp.SexpNull, err
+			}
+			return glisp.SexpInt(int(val)), nil
+
+		default:
+			return glisp.SexpNull, errors.New(fmt.Sprintf("cannot convert %v to int", t))
+		}
+	})
+	lispVm.AddFunction("write-to-string", func(vm *glisp.Glisp, name string, args[]glisp.Sexp) (glisp.Sexp, error) {
+		if len(args) != 1 {
+			return glisp.SexpNull, errors.New("incorrect number of arguments")
+		}
+
+		switch t := args[0].(type) {
+		case glisp.SexpStr:
+			return t, nil
+
+		case glisp.SexpInt:
+			return glisp.SexpStr(strconv.Itoa(int(t))), nil
+
+		default:
+			return glisp.SexpStr(fmt.Sprintf("%v", t))
+		}
 	})
 
 	return lispVm
