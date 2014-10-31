@@ -2,8 +2,8 @@ package script
 
 import (
 	"fmt"
-	ircevent "github.com/thoj/go-ircevent"
 	"github.com/tyler-sommer/squircy2/squircy/event"
+	"github.com/tyler-sommer/squircy2/squircy/irc"
 	"io/ioutil"
 	"net/http"
 )
@@ -40,28 +40,31 @@ func (db *dataHelper) Set(key string, val interface{}) {
 }
 
 type ircHelper struct {
-	conn *ircevent.Connection
+	manager *irc.IrcConnectionManager
 }
 
-func (irc *ircHelper) Privmsg(target, message string) {
-	if irc.conn == nil {
+func (h *ircHelper) Privmsg(target, message string) {
+	conn := h.manager.Connection()
+	if conn == nil {
 		return
 	}
-	irc.conn.Privmsg(target, message)
+	conn.Privmsg(target, message)
 }
 
-func (irc *ircHelper) Join(target string) {
-	if irc.conn == nil {
+func (h *ircHelper) Join(target string) {
+	conn := h.manager.Connection()
+	if conn == nil {
 		return
 	}
-	irc.conn.Join(target)
+	conn.Join(target)
 }
 
-func (irc *ircHelper) Part(target string) {
-	if irc.conn == nil {
+func (h *ircHelper) Part(target string) {
+	conn := h.manager.Connection()
+	if conn == nil {
 		return
 	}
-	irc.conn.Part(target)
+	conn.Part(target)
 }
 
 type scriptHelper struct {

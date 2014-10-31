@@ -47,7 +47,7 @@ type ScriptManager struct {
 	l            *log.Logger
 }
 
-func NewScriptManager(repo ScriptRepository, l *log.Logger, e event.EventManager) ScriptManager {
+func NewScriptManager(repo ScriptRepository, l *log.Logger, e event.EventManager, ircmanager *irc.IrcConnectionManager) ScriptManager {
 	mgr := ScriptManager{
 		e,
 		nil,
@@ -59,7 +59,7 @@ func NewScriptManager(repo ScriptRepository, l *log.Logger, e event.EventManager
 		nil,
 		ankoDriver{},
 		httpHelper{},
-		ircHelper{},
+		ircHelper{ircmanager},
 		dataHelper{make(map[string]interface{})},
 		scriptHelper{},
 		repo,
@@ -271,13 +271,6 @@ func (m *ScriptManager) ReInit() {
 
 func (m *ScriptManager) init() {
 	m.e.ClearAll()
-	m.e.Bind(irc.ConnectingEvent, func(mgr *irc.IrcConnectionManager) {
-		m.ircHelper.conn = mgr.Connection()
-	})
-
-	m.e.Bind(irc.DisconnectEvent, func(ev event.Event) {
-		m.ircHelper.conn = nil
-	})
 
 	jsVm := newJavascriptVm(m)
 	luaVm := newLuaVm(m)
