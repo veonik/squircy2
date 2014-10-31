@@ -20,6 +20,8 @@ import (
 	glispext "github.com/zhemao/glisp/extensions"
 	glisp "github.com/zhemao/glisp/interpreter"
 	"errors"
+	"reflect"
+	"strconv"
 )
 
 func newJavascriptVm(m *ScriptManager) *otto.Otto {
@@ -215,6 +217,35 @@ func newAnkoVm(m *ScriptManager) *anko.Env {
 	anko_sort.Import(ankoVm)
 	anko_strings.Import(ankoVm)
 	anko_term.Import(ankoVm)
+
+	mod := ankoVm.NewModule("data")
+	mod.Define("Get", reflect.ValueOf(m.dataHelper.Get))
+	mod.Define("Set", reflect.ValueOf(m.dataHelper.Set))
+
+	mod = ankoVm.NewModule("irc")
+	mod.Define("Join", reflect.ValueOf(func(channel string) {
+		m.ircHelper.Join(channel)
+	}))
+	mod.Define("Part", reflect.ValueOf(func(channel string) {
+		m.ircHelper.Part(channel)
+	}))
+	mod.Define("Privmsg", reflect.ValueOf(func(target, message string) {
+		m.ircHelper.Privmsg(target, message)
+	}))
+
+	mod = ankoVm.NewModule("strconv")
+	mod.Define("ParseInt", reflect.ValueOf(func(s string) int {
+		i, _ := strconv.ParseInt(s, 0, 64)
+		return int(i)
+	}))
+
+	ankoVm.Define("bind", reflect.ValueOf(func(eventType, fnName string) {
+		m.scriptHelper.Bind(Anko, event.EventType(eventType), fnName)
+	}))
+
+	ankoVm.Define("unbind", reflect.ValueOf(func(eventType, fnName string) {
+		m.scriptHelper.Unbind(Anko, event.EventType(eventType), fnName)
+	}))
 
 	return ankoVm
 }

@@ -49,8 +49,10 @@ func (repo *ScriptRepository) FetchAll() []Script {
 	col.ForEachDoc(func(id int, doc []byte) (moveOn bool) {
 		moveOn = true
 
-		script := Script{}
-		json.Unmarshal(doc, &script)
+		val := make(map[string]interface{}, 0)
+
+		json.Unmarshal(doc, &val)
+		script := hydrateScript(val)
 		script.ID = id
 
 		scripts = append(scripts, script)

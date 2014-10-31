@@ -13,6 +13,7 @@ import (
 	"log"
 	"reflect"
 	"time"
+	"strings"
 )
 
 const maxExecutionTime = 2 // in seconds
@@ -77,6 +78,12 @@ func (m *ScriptManager) RunUnsafe(t ScriptType, code string) (result interface{}
 		if e := recover(); e != nil {
 			err = e.(error)
 			return
+		}
+	}()
+
+	defer func() {
+		if err != nil {
+			fmt.Println("An error occurred: ", err)
 		}
 	}()
 
@@ -242,11 +249,15 @@ func runUnsafeAnko(vm *anko.Env, unsafe string) (val reflect.Value, err error) {
 		}
 	}()
 
+	// Anko chokes on carriage returns
+	unsafe = strings.Replace(unsafe, "\r", "", -1)
+
 	scanner := &anko_parser.Scanner{}
 	scanner.Init(unsafe)
-	stmts, err := anko_parser.Parse(scanner)
-	if err != nil {
+	stmts, e := anko_parser.Parse(scanner)
+	if e != nil {
 		val = anko.NilValue
+		err = e
 		return
 	}
 	val, err = anko.Run(stmts, vm)

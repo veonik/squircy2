@@ -62,7 +62,7 @@ type ankoDriver struct {
 }
 
 func (d ankoDriver) Handle(e event.Event, fnName string) {
-	runUnsafeAnko(d.vm, fmt.Sprintf("%s(\"%s\" \"%s\" \"%s\" %s)", fnName, e.Data["Code"], e.Data["Target"], e.Data["Nick"], strconv.Quote(e.Data["Message"].(string))))
+	runUnsafeAnko(d.vm, fmt.Sprintf("%s(\"%s\", \"%s\", \"%s\", %s)", fnName, e.Data["Code"], e.Data["Target"], e.Data["Nick"], strconv.Quote(e.Data["Message"].(string))))
 }
 
 func (d ankoDriver) String() string {
