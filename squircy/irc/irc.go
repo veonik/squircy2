@@ -2,7 +2,7 @@ package irc
 
 import (
 	"github.com/codegangsta/inject"
-	"github.com/thoj/go-ircevent"
+	ircevent "github.com/thoj/go-ircevent"
 	"github.com/tyler-sommer/squircy2/squircy/config"
 	"log"
 	"reflect"
@@ -18,7 +18,7 @@ const (
 
 type IrcConnectionManager struct {
 	injector inject.Injector
-	conn     *irc.Connection
+	conn     *ircevent.Connection
 	status   ConnectionStatus
 }
 
@@ -30,7 +30,7 @@ func NewIrcConnectionManager(injector inject.Injector) (mgr *IrcConnectionManage
 
 func (mgr *IrcConnectionManager) newConnection() {
 	res, _ := mgr.injector.Invoke(newIrcConnection)
-	mgr.conn = res[0].Interface().(*irc.Connection)
+	mgr.conn = res[0].Interface().(*ircevent.Connection)
 	mgr.injector.Map(mgr.conn)
 	mgr.injector.Invoke(bindEvents)
 }
@@ -60,12 +60,12 @@ func (mgr *IrcConnectionManager) Status() ConnectionStatus {
 	return mgr.status
 }
 
-func (mgr *IrcConnectionManager) Connection() *irc.Connection {
+func (mgr *IrcConnectionManager) Connection() *ircevent.Connection {
 	return mgr.conn
 }
 
-func newIrcConnection(conf *config.Configuration, l *log.Logger) (conn *irc.Connection) {
-	conn = irc.IRC(conf.Nick, conf.Username)
+func newIrcConnection(conf *config.Configuration, l *log.Logger) (conn *ircevent.Connection) {
+	conn = ircevent.IRC(conf.Nick, conf.Username)
 	conn.Log = l
 
 	return
