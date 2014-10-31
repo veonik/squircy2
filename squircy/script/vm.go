@@ -230,7 +230,7 @@ func newLispVm(m *ScriptManager) *glisp.Glisp {
 			return glisp.SexpStr(strconv.Itoa(int(t))), nil
 
 		default:
-			return glisp.SexpStr(fmt.Sprintf("%v", t))
+			return glisp.SexpStr(fmt.Sprintf("%v", t)), nil
 		}
 	})
 
