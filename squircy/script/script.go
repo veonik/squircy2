@@ -167,17 +167,27 @@ func runUnsafeLua(vm *lua.State, unsafe string) (err error) {
 }
 
 func runUnsafeLisp(vm *glisp.Glisp, unsafe string) (val glisp.Sexp, err error) {
+	halted := false
 	start := time.Now()
 	defer func() {
 		duration := time.Since(start)
+		if halted {
+			fmt.Println("Some code took too long! Stopping after: ", duration)
+			err = Halt
+			val = glisp.SexpNull
+			return
+		}
+
 		if e := recover(); e != nil {
-			if e.(error).Error() == "Execution limit exceeded" {
-				fmt.Println("Some code took too long! Stopping after: ", duration)
-				e = Halt
-			}
 			val = glisp.SexpNull
 			err = e.(error)
 		}
+	}()
+
+	go func() {
+		time.Sleep(maxExecutionTime * time.Second)
+		vm.Clear()
+		halted = true
 	}()
 
 	vm.Clear()
@@ -240,6 +250,10 @@ func runUnsafeAnko(vm *anko.Env, unsafe string) (val reflect.Value, err error) {
 	start := time.Now()
 	defer func() {
 		duration := time.Since(start)
+		if err == Halt {
+			fmt.Println("Some code took too long! Stopping after: ", duration)
+			return
+		}
 		if e := recover(); e != nil {
 			if e == Halt {
 				fmt.Println("Some code took too long! Stopping after: ", duration)
@@ -260,7 +274,34 @@ func runUnsafeAnko(vm *anko.Env, unsafe string) (val reflect.Value, err error) {
 		err = e
 		return
 	}
-	val, err = anko.Run(stmts, vm)
+
+	done := make(chan bool)
+	go func() {
+		v, e := anko.Run(stmts, vm)
+		select {
+		case _ = <- done:
+			return
+		default:
+			done <- true
+			val = v
+			err = e
+		}
+	}()
+
+	go func() {
+		time.Sleep(maxExecutionTime * time.Second)
+		select {
+		case _ = <- done:
+			return
+		default:
+			done <- true
+			val = anko.NilValue
+			err = Halt
+		}
+	}()
+
+	_ = <- done
+	close(done)
 
 	return
 }
