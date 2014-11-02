@@ -10,6 +10,8 @@ var InvalidHandler = errors.New("Invalid handler")
 
 type EventType string
 
+const AllEvents EventType = "event.WILDCARD"
+
 type Event struct {
 	Type EventType
 	Data map[string]interface{}
@@ -30,8 +32,12 @@ type eventManager struct {
 	events   map[EventType][]reflect.Value
 }
 
-func NewEventManager(injector inject.Injector) EventManager {
-	return EventManager(&eventManager{injector, make(map[EventType][]reflect.Value, 0)})
+func NewEventManager(injector inject.Injector) *eventManager {
+	evm := new(eventManager)
+	evm.events = make(map[EventType][]reflect.Value, 0)
+	evm.injector = injector
+
+	return evm
 }
 
 func (e *eventManager) Bind(eventName EventType, handler EventHandler) {
@@ -85,5 +91,11 @@ func (e *eventManager) Trigger(eventName EventType, data map[string]interface{})
 
 	for _, handler := range handlers {
 		c.Invoke(handler.Interface())
+	}
+
+	if wildcardHandlers, ok := e.events[AllEvents]; ok {
+		for _, handler := range wildcardHandlers {
+			c.Invoke(handler.Interface())
+		}
 	}
 }
