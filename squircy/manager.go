@@ -18,28 +18,6 @@ type Manager struct {
 	*martini.ClassicMartini
 }
 
-type logHistory struct {
-	limit int
-	data  []string
-}
-
-func (hist *logHistory) Write(p []byte) (n int, err error) {
-	n = len(p)
-	err = nil
-
-	if len(hist.data) >= hist.limit {
-		hist.data = hist.data[1:]
-	}
-
-	hist.data = append(hist.data, string(p))
-
-	return
-}
-
-func (hist *logHistory) ReadAll() string {
-	return strings.Join(hist.data, "")
-}
-
 func NewManager() (manager *Manager) {
 	manager = &Manager{martini.Classic()}
 	manager.Map(manager)
@@ -49,10 +27,10 @@ func NewManager() (manager *Manager) {
 	database := data.NewDatabaseConnection(conf.RootPath)
 	config.LoadConfig(database, conf)
 
-	hist := &logHistory{25, make([]string, 0)}
+	hist := &limitedLogger{25, make([]string, 0)}
 	out := io.MultiWriter(os.Stdout, hist)
-
-	manager.Map(log.New(out, "[squircy] ", 0))
+	logger := log.New(out, "", log.Ltime)
+	manager.Map(logger)
 	manager.Map(hist)
 
 	manager.Map(database)
@@ -112,4 +90,26 @@ func (manager *Manager) configure(conf *config.Configuration) {
 		r.Get("", replAction)
 		r.Post("/execute", replExecuteAction)
 	})
+}
+
+type limitedLogger struct {
+	limit int
+	data  []string
+}
+
+func (l *limitedLogger) Write(p []byte) (n int, err error) {
+	n = len(p)
+	err = nil
+
+	if len(l.data) >= l.limit {
+		l.data = l.data[1:]
+	}
+
+	l.data = append(l.data, string(p))
+
+	return
+}
+
+func (hist *limitedLogger) ReadAll() string {
+	return strings.Join(hist.data, "")
 }

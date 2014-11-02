@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-func indexAction(r render.Render, hist *logHistory) {
+func indexAction(r render.Render, hist *limitedLogger) {
 	r.HTML(200, "index", map[string]interface{}{
 		"history": hist.ReadAll(),
 	})
