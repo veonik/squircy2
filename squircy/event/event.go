@@ -97,14 +97,12 @@ func (e *eventManager) Trigger(eventName EventType, data map[string]interface{})
 
 	if ok {
 		for _, handler := range handlers {
-			fmt.Println("Invoking", handler)
 			c.Invoke(handler.Interface())
 		}
 	}
 
 	if wok {
 		for _, handler := range wildcardHandlers {
-			fmt.Println("Invoking wildcard handler", handler)
 			c.Invoke(handler.Interface())
 		}
 	}

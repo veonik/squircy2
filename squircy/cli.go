@@ -3,34 +3,30 @@ package squircy
 import (
 	"bufio"
 	"fmt"
-	ircevent "github.com/thoj/go-ircevent"
+	"github.com/tyler-sommer/squircy2/squircy/event"
 	"github.com/tyler-sommer/squircy2/squircy/irc"
+	"io"
 	"log"
 	"os"
-	"reflect"
 	"time"
+)
+
+const (
+	OutputEvent event.EventType = "cli.OUTPUT"
+	InputEvent                  = "cli.INPUT"
 )
 
 func (man *Manager) LoopCli() {
 	man.Invoke(loopCli)
 }
 
-func getConnection(manager *Manager) *ircevent.Connection {
-	return manager.Injector.Get(reflect.TypeOf((*ircevent.Connection)(nil))).Interface().(*ircevent.Connection)
-}
-
-func getConnectionManager(manager *Manager) *irc.IrcConnectionManager {
-	return manager.Injector.Get(reflect.TypeOf((*irc.IrcConnectionManager)(nil))).Interface().(*irc.IrcConnectionManager)
-}
-
-func loopCli(l *log.Logger, manager *Manager) {
+func loopCli(l *log.Logger, manager *Manager, ircmgr *irc.IrcConnectionManager, evm event.EventManager) {
 	help := func() {
 		fmt.Println(`Commands:
 
 exit		Quits IRC, if connected, and exits the program
 debug		Toggles debug on or off`)
-		mgr := getConnectionManager(manager)
-		if mgr.Status() != irc.Disconnected {
+		if ircmgr.Status() != irc.Disconnected {
 			fmt.Println("disconnect	Disconnect from IRC\n")
 		} else {
 			fmt.Println("connect		Connect to IRC\n")
@@ -41,20 +37,22 @@ debug		Toggles debug on or off`)
 
 	bin := bufio.NewReader(os.Stdin)
 	for {
-		switch str, _ := bin.ReadString('\n'); {
+		str, _ := bin.ReadString('\n')
+		evm.Trigger(InputEvent, map[string]interface{}{
+			"Message": str,
+		})
+		switch {
 		case str == "exit\n" || str == "quit\n":
-			mgr := getConnectionManager(manager)
-			go mgr.Quit()
+			go ircmgr.Quit()
 			time.Sleep(2 * time.Second)
 			l.Println("Exiting")
 			return
 
 		case str == "debug\n":
-			mgr := getConnectionManager(manager)
-			if mgr.Status() == irc.Disconnected {
+			if ircmgr.Status() == irc.Disconnected {
 				fmt.Println("Not connected")
 			} else {
-				conn := getConnection(manager)
+				conn := ircmgr.Connection()
 				debugging := !conn.Debug
 				conn.Debug = debugging
 				conn.VerboseCallbackHandler = debugging
@@ -66,13 +64,12 @@ debug		Toggles debug on or off`)
 			}
 
 		case str == "connect\n" || str == "disconnect\n":
-			mgr := getConnectionManager(manager)
-			if mgr.Status() != irc.Disconnected {
+			if ircmgr.Status() != irc.Disconnected {
 				fmt.Println("Disconnecting...")
-				mgr.Quit()
+				ircmgr.Quit()
 			} else {
 				fmt.Println("Connecting...")
-				mgr.Connect()
+				ircmgr.Connect()
 			}
 
 		default:
@@ -80,4 +77,24 @@ debug		Toggles debug on or off`)
 			help()
 		}
 	}
+}
+
+func configureLog(manager *Manager, evm event.EventManager) {
+	hist := &triggerLogger{evm}
+	out := io.MultiWriter(os.Stdout, hist)
+	logger := log.New(out, "", log.Ltime)
+	manager.Map(logger)
+	manager.Map(hist)
+}
+
+type triggerLogger struct {
+	evm event.EventManager
+}
+
+func (l *triggerLogger) Write(p []byte) (n int, err error) {
+	l.evm.Trigger(OutputEvent, map[string]interface{}{
+		"Message": string(p),
+	})
+
+	return
 }

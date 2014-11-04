@@ -11,9 +11,10 @@ import (
 	"strconv"
 )
 
-func indexAction(r render.Render, hist *limitedLogger) {
+func indexAction(r render.Render, t *eventTracer) {
 	r.HTML(200, "index", map[string]interface{}{
-		"history": hist.ReadAll(),
+		"terminal": t.History(OutputEvent),
+		"irc":      t.History(irc.IrcEvent),
 	})
 }
 
