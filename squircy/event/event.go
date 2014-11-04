@@ -74,12 +74,18 @@ func (e *eventManager) Clear(eventName EventType) {
 }
 
 func (e *eventManager) ClearAll() {
+	wildcardHandlers, ok := e.events[AllEvents]
+
 	e.events = make(map[EventType][]reflect.Value, 0)
+	if ok {
+		e.events[AllEvents] = wildcardHandlers
+	}
 }
 
 func (e *eventManager) Trigger(eventName EventType, data map[string]interface{}) {
 	handlers, ok := e.events[eventName]
-	if !ok {
+	wildcardHandlers, wok := e.events[AllEvents]
+	if !ok && !wok {
 		return
 	}
 
@@ -89,12 +95,16 @@ func (e *eventManager) Trigger(eventName EventType, data map[string]interface{})
 	c.SetParent(e.injector)
 	c.Map(event)
 
-	for _, handler := range handlers {
-		c.Invoke(handler.Interface())
+	if ok {
+		for _, handler := range handlers {
+			fmt.Println("Invoking", handler)
+			c.Invoke(handler.Interface())
+		}
 	}
 
-	if wildcardHandlers, ok := e.events[AllEvents]; ok {
+	if wok {
 		for _, handler := range wildcardHandlers {
+			fmt.Println("Invoking wildcard handler", handler)
 			c.Invoke(handler.Interface())
 		}
 	}
