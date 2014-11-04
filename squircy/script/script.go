@@ -12,8 +12,8 @@ import (
 	glisp "github.com/zhemao/glisp/interpreter"
 	"log"
 	"reflect"
-	"time"
 	"strings"
+	"time"
 )
 
 const maxExecutionTime = 2 // in seconds
@@ -279,7 +279,7 @@ func runUnsafeAnko(vm *anko.Env, unsafe string) (val reflect.Value, err error) {
 	go func() {
 		v, e := anko.Run(stmts, vm)
 		select {
-		case _ = <- done:
+		case _ = <-done:
 			return
 		default:
 			done <- true
@@ -291,7 +291,7 @@ func runUnsafeAnko(vm *anko.Env, unsafe string) (val reflect.Value, err error) {
 	go func() {
 		time.Sleep(maxExecutionTime * time.Second)
 		select {
-		case _ = <- done:
+		case _ = <-done:
 			return
 		default:
 			done <- true
@@ -300,7 +300,7 @@ func runUnsafeAnko(vm *anko.Env, unsafe string) (val reflect.Value, err error) {
 		}
 	}()
 
-	_ = <- done
+	_ = <-done
 	close(done)
 
 	return

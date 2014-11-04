@@ -1,6 +1,8 @@
 package script
 
 import (
+	"errors"
+	"fmt"
 	"github.com/aarzilli/golua/lua"
 	anko_core "github.com/mattn/anko/builtins"
 	anko_encoding "github.com/mattn/anko/builtins/encoding"
@@ -19,10 +21,8 @@ import (
 	"github.com/tyler-sommer/squircy2/squircy/event"
 	glispext "github.com/zhemao/glisp/extensions"
 	glisp "github.com/zhemao/glisp/interpreter"
-	"errors"
 	"reflect"
 	"strconv"
-	"fmt"
 )
 
 func newJavascriptVm(m *ScriptManager) *otto.Otto {
@@ -200,7 +200,7 @@ func newLispVm(m *ScriptManager) *glisp.Glisp {
 
 		return glisp.SexpNull, nil
 	})
-	lispVm.AddFunction("parse-integer", func(vm *glisp.Glisp, name string, args[]glisp.Sexp) (glisp.Sexp, error) {
+	lispVm.AddFunction("parse-integer", func(vm *glisp.Glisp, name string, args []glisp.Sexp) (glisp.Sexp, error) {
 		if len(args) != 1 {
 			return glisp.SexpNull, errors.New("incorrect number of arguments")
 		}
@@ -217,7 +217,7 @@ func newLispVm(m *ScriptManager) *glisp.Glisp {
 			return glisp.SexpNull, errors.New(fmt.Sprintf("cannot convert %v to int", t))
 		}
 	})
-	lispVm.AddFunction("write-to-string", func(vm *glisp.Glisp, name string, args[]glisp.Sexp) (glisp.Sexp, error) {
+	lispVm.AddFunction("write-to-string", func(vm *glisp.Glisp, name string, args []glisp.Sexp) (glisp.Sexp, error) {
 		if len(args) != 1 {
 			return glisp.SexpNull, errors.New("incorrect number of arguments")
 		}

@@ -23,4 +23,5 @@ body {
 
 pre.history {
     word-wrap: normal;
+    max-height: 200px;
 }

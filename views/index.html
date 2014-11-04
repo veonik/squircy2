@@ -3,7 +3,18 @@
 		<h4>Dashboard</h4>
 	</div>
 	<div class="col-md-4">
-		<h5>History</h5>
+		<h5>Terminal</h5>
 		<pre class="history">{{ .history }}</pre>
+        <h5>Events</h5>
+        <pre id="event-log" class="history"></pre>
 	</div>
 </div>
+<script type="text/javascript">
+$(function() {
+    var $eventLog = $('#event-log');
+    es = new EventSource('/event');
+    es.addEventListener("irc.WILDCARD", function(e) {
+        $eventLog.append(e.data + "\n");
+    });
+});
+</script>

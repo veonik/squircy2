@@ -1,6 +1,8 @@
 package squircy
 
 import (
+	"encoding/json"
+	"github.com/antage/eventsource"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
 	"github.com/tyler-sommer/squircy2/squircy/config"
@@ -10,7 +12,9 @@ import (
 	"github.com/tyler-sommer/squircy2/squircy/script"
 	"io"
 	"log"
+	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -39,12 +43,26 @@ func NewManager() (manager *Manager) {
 
 	// Additional managers
 	manager.invokeAndMap(event.NewEventManager)
+	manager.invokeAndMap(newEventSource)
 	manager.invokeAndMap(irc.NewIrcConnectionManager)
 	manager.invokeAndMap(script.NewScriptManager)
 
 	manager.configure(conf)
 
 	return
+}
+
+func newEventSource(evm event.EventManager) eventsource.EventSource {
+	es := eventsource.New(nil, nil)
+
+	var id int = -1
+	evm.Bind(event.AllEvents, func(es eventsource.EventSource, ev event.Event) {
+		id++
+		data, _ := json.Marshal(ev.Data)
+		go es.SendEventMessage(string(data), string(ev.Type), strconv.Itoa(id))
+	})
+
+	return es
 }
 
 func (manager *Manager) invokeAndMap(fn interface{}) interface{} {
@@ -69,6 +87,9 @@ func (manager *Manager) configure(conf *config.Configuration) {
 			Layout:     "layout",
 			Extensions: []string{".tmpl", ".html"},
 		}))
+	manager.Get("/event", func(es eventsource.EventSource, w http.ResponseWriter, r *http.Request) {
+		es.ServeHTTP(w, r)
+	})
 	manager.Get("/", indexAction)
 	manager.Get("/status", statusAction)
 	manager.Group("/manage", func(r martini.Router) {
