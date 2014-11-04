@@ -58,7 +58,7 @@ func newEventSource(evm event.EventManager) eventsource.EventSource {
 	var id int = -1
 	evm.Bind(event.AllEvents, func(es eventsource.EventSource, ev event.Event) {
 		id++
-		data, _ := json.Marshal(ev.Data)
+		data, _ := json.Marshal(ev.Data["Event"])
 		go es.SendEventMessage(string(data), string(ev.Type), strconv.Itoa(id))
 	})
 
