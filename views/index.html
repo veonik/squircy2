@@ -14,7 +14,7 @@
 $(function() {
     var $eventLog = $('#event-log');
     var $terminalLog = $('#terminal-log');
-    var es = new EventSource('/event');
+    var es = window.squIRCyEvents;
     es.addEventListener("irc.WILDCARD", function(e) {
         var data = JSON.parse(e.data);
         $eventLog.append(data.Event.Raw + "\n");

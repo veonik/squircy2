@@ -1,0 +1,48 @@
+<script type="text/javascript">
+$(function() {
+    var es = window.squIRCyEvents = new EventSource('/event');
+
+	var $connectBtn = $('#connect-button');
+	var $disconnectBtn = $('#disconnect-button');
+	var $connectingBtn = $('#connecting-button');
+    es.addEventListener("irc.CONNECTING", function() {
+        $connectingBtn.show();
+		$disconnectBtn.add($connectBtn).hide();
+    });
+    es.addEventListener("irc.CONNECT", function() {
+        $disconnectBtn.show();
+		$connectBtn.add($connectingBtn).hide();
+    });
+    es.addEventListener("irc.DISCONNECT", function() {
+        $connectBtn.show();
+        $disconnectBtn.add($connectingBtn).hide();
+    });
+
+	var $postLinks = $('.post-action');
+	$postLinks.on('click', function(e) {
+		e.preventDefault();
+		
+		var url = $(this).attr('href');
+		$.ajax({
+			url: url,
+			type: 'post'
+		});
+	});
+	
+	var $reinit = $('#reinit').tooltip({
+		placement: 'bottom',
+		container: 'body'
+	});
+	$reinit.on('click', function(e) {
+		e.preventDefault();
+		
+		if (confirm('Are you sure you want to reinitialize all scripts?')) {
+			var url = $(this).attr('href');
+			$.ajax({
+				url: url,
+				type: 'post'
+			})
+		}
+	});
+});
+</script>
