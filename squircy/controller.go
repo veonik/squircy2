@@ -31,7 +31,7 @@ func scriptAction(r render.Render, repo script.ScriptRepository) {
 	r.HTML(200, "script/index", map[string]interface{}{"scripts": scripts})
 }
 
-func scriptReinitAction(r render.Render, mgr script.ScriptManager) {
+func scriptReinitAction(r render.Render, mgr *script.ScriptManager) {
 	mgr.ReInit()
 
 	r.JSON(200, nil)
@@ -82,7 +82,7 @@ func replAction(r render.Render) {
 	r.HTML(200, "repl/index", nil)
 }
 
-func replExecuteAction(r render.Render, manager script.ScriptManager, request *http.Request) {
+func replExecuteAction(r render.Render, manager *script.ScriptManager, request *http.Request) {
 	code := request.FormValue("script")
 	sType := script.ScriptType(request.FormValue("scriptType"))
 
