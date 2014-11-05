@@ -20,7 +20,7 @@ func (man *Manager) LoopCli() {
 	man.Invoke(loopCli)
 }
 
-func loopCli(l *log.Logger, manager *Manager, ircmgr *irc.IrcConnectionManager, evm event.EventManager) {
+func loopCli(l *log.Logger, ircmgr *irc.IrcConnectionManager, evm event.EventManager) {
 	help := func() {
 		fmt.Println(`Commands:
 

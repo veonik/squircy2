@@ -83,20 +83,22 @@ func handlerId(scriptType ScriptType, eventType event.EventType, fnName string) 
 // Bind adds a handler of the given script type for the given event type
 func (s *scriptHelper) Bind(scriptType ScriptType, eventType event.EventType, fnName string) {
 	id := handlerId(scriptType, eventType, fnName)
+	var d scriptDriver
+	switch {
+	case scriptType == Javascript:
+		d = s.jsDriver
+
+	case scriptType == Lua:
+		d = s.luaDriver
+
+	case scriptType == Lisp:
+		d = s.lispDriver
+
+	case scriptType == Anko:
+		d = s.ankoDriver
+	}
 	handler := func(ev event.Event) {
-		switch {
-		case scriptType == Javascript:
-			s.jsDriver.Handle(ev, fnName)
-
-		case scriptType == Lua:
-			s.luaDriver.Handle(ev, fnName)
-
-		case scriptType == Lisp:
-			s.lispDriver.Handle(ev, fnName)
-
-		case scriptType == Anko:
-			s.ankoDriver.Handle(ev, fnName)
-		}
+		d.Handle(ev, fnName)
 	}
 	s.handlers[id] = handler
 	s.e.Bind(eventType, handler)
