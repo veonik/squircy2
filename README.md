@@ -82,6 +82,8 @@ squIRCy2 exposes a small API to each scripting language.
 | Irc.Join(channel) | Joins the given channel |
 | Irc.Part(channel) | Parts the given channel |
 | Irc.Privmsg(target, message) | Messages target with message. Target can be a user or a channel |
+| Irc.CurrentNick() | Get the bot's current nickname |
+| Irc.Nick(newNick) | Change the bot's nickname |
 | Data.Get(key) | Gets a value with the given from the cross-vm storage |
 | Data.Set(key, val) | Sets a value with the given key in the cross-vm storage |
 | Http.Get(url) | Fetch the given url using a GET HTTP request |
@@ -97,6 +99,8 @@ squIRCy2 exposes a small API to each scripting language.
 | joinchan(channel) | Joins the given channel |
 | partchan(channel) | Parts the given channel |
 | privmsg(target, message) | Messages target with message. Target can be a user or a channel |
+| currentnick() | Get the bot's current nickname |
+| nick(newNick) | Change the bot's nickname |
 | getex(key) | Gets a value with the given from the cross-vm storage |
 | setex(key, val) | Sets a value with the given key in the cross-vm storage |
 | httpget(url) | Fetch the given url using a GET HTTP request |
@@ -112,11 +116,15 @@ squIRCy2 exposes a small API to each scripting language.
 | (joinchan channel) | Joins the given channel |
 | (partchan channel) | Parts the given channel |
 | (privmsg target message) | Messages target with message. Target can be a user or a channel |
+| (currentnick) | Get the bot's current nickname |
+| (nick newNick) | Change the bot's nickname |
 | (getex key) | Gets a value with the given from the cross-vm storage |
 | (setex key val) | Sets a value with the given key in the cross-vm storage |
 | (httpget url) | Fetch the given url using a GET HTTP request |
 | (bind eventName fnName) | Add a handler of the given event type and function name |
 | (unbind eventName fnName) | Removes a handler of the given type and function name |
+| (parse-integer val) | Parse the given val and return an integer |
+| (write-to-string val) | Parse the given val and return a string |
 
 ### Anko API
 
@@ -127,6 +135,8 @@ squIRCy2 exposes a small API to each scripting language.
 | irc.Join(channel) | Joins the given channel |
 | irc.Part(channel) | Parts the given channel |
 | irc.Privmsg(target, message) | Messages target with message. Target can be a user or a channel |
+| irc.CurrentNick() | Get the bot's current nickname |
+| irc.Nick(newNick) | Change the bot's nickname |
 | data.Get(key) | Gets a value with the given from the cross-vm storage |
 | data.Set(key, val) | Sets a value with the given key in the cross-vm storage |
 | bind(eventName, fnName) | Add a handler of the given event type and function name |

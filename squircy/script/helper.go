@@ -67,6 +67,22 @@ func (h *ircHelper) Part(target string) {
 	conn.Part(target)
 }
 
+func (h *ircHelper) CurrentNick() string {
+	conn := h.manager.Connection()
+	if conn == nil {
+		return ""
+	}
+	return conn.GetNick()
+}
+
+func (h *ircHelper) Nick(newNick string) {
+	conn := h.manager.Connection()
+	if conn == nil {
+		return
+	}
+	conn.Nick(newNick)
+}
+
 type scriptHelper struct {
 	e          event.EventManager
 	jsDriver   javascriptDriver

@@ -86,6 +86,15 @@ func newLuaVm(m *ScriptManager) *lua.State {
 		m.ircHelper.Privmsg(target, message)
 		return 0
 	})
+	luaVm.Register("currentnick", func(vm *lua.State) int {
+		vm.PushString(m.ircHelper.CurrentNick())
+		return 1
+	})
+	luaVm.Register("nick", func(vm *lua.State) int {
+		newNick := vm.ToString(1)
+		m.ircHelper.Nick(newNick)
+		return 0
+	})
 	luaVm.Register("httpget", func(vm *lua.State) int {
 		url := vm.ToString(1)
 		res := m.httpHelper.Get(url)
@@ -165,6 +174,21 @@ func newLispVm(m *ScriptManager) *glisp.Glisp {
 		target := sexpToString(args[0])
 		message := sexpToString(args[1])
 		m.ircHelper.Privmsg(target, message)
+
+		return glisp.SexpNull, nil
+	})
+	lispVm.AddFunction("currentnick", func(vm *glisp.Glisp, name string, args []glisp.Sexp) (glisp.Sexp, error) {
+		res := m.ircHelper.CurrentNick()
+
+		return glisp.SexpStr(res), nil
+	})
+	lispVm.AddFunction("nick", func(vm *glisp.Glisp, name string, args []glisp.Sexp) (glisp.Sexp, error) {
+		if len(args) != 1 {
+			return glisp.SexpNull, errors.New("incorrect number of arguments")
+		}
+
+		newNick := sexpToString(args[0])
+		m.ircHelper.Nick(newNick)
 
 		return glisp.SexpNull, nil
 	})
@@ -265,6 +289,12 @@ func newAnkoVm(m *ScriptManager) *anko.Env {
 	}))
 	mod.Define("Privmsg", reflect.ValueOf(func(target, message string) {
 		m.ircHelper.Privmsg(target, message)
+	}))
+	mod.Define("CurrentNick", reflect.ValueOf(func() string {
+		return m.ircHelper.CurrentNick()
+	}))
+	mod.Define("Nick", reflect.ValueOf(func(newNick string) {
+		m.ircHelper.Nick(newNick)
 	}))
 
 	mod = ankoVm.NewModule("strconv")
