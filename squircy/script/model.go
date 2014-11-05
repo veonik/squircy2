@@ -5,6 +5,15 @@ import (
 	"github.com/HouzuoGuo/tiedot/db"
 )
 
+type ScriptType string
+
+const (
+	Javascript ScriptType = "Javascript"
+	Lua                   = "Lua"
+	Lisp                  = "Lisp"
+	Anko                  = "Anko"
+)
+
 type Script struct {
 	ID      int
 	Type    ScriptType

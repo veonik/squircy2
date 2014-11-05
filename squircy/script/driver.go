@@ -1,17 +1,26 @@
 package script
 
 import (
+	"errors"
 	"fmt"
 	"github.com/aarzilli/golua/lua"
+	anko_parser "github.com/mattn/anko/parser"
 	anko "github.com/mattn/anko/vm"
 	"github.com/robertkrimen/otto"
 	"github.com/tyler-sommer/squircy2/squircy/event"
 	glisp "github.com/zhemao/glisp/interpreter"
 	"strconv"
+	"strings"
+	"time"
 )
+
+const maxExecutionTime = 2 // in seconds
+var Halt = errors.New("Execution limit exceeded")
+var UnknownScriptType = errors.New("Unknown script type")
 
 type scriptDriver interface {
 	Handle(e event.Event, fnName string)
+	RunUnsafe(code string) (interface{}, error)
 	String() string
 }
 
@@ -22,6 +31,33 @@ type javascriptDriver struct {
 func (d javascriptDriver) Handle(e event.Event, fnName string) {
 	d.vm.Interrupt = make(chan func(), 1)
 	d.vm.Call(fnName, otto.NullValue(), e.Data["Code"], e.Data["Target"], e.Data["Nick"], e.Data["Message"])
+}
+
+func (d javascriptDriver) RunUnsafe(unsafe string) (val interface{}, err error) {
+	start := time.Now()
+	defer func() {
+		duration := time.Since(start)
+		if e := recover(); e != nil {
+			if e == Halt {
+				fmt.Println("Some code took too long! Stopping after: ", duration)
+			}
+			err = e.(error)
+		}
+	}()
+
+	d.vm.Interrupt = make(chan func(), 1)
+
+	go func() {
+		time.Sleep(maxExecutionTime * time.Second)
+		d.vm.Interrupt <- func() {
+			panic(Halt)
+		}
+	}()
+
+	v, err := d.vm.Run(unsafe)
+	val, _ = v.Export()
+
+	return
 }
 
 func (d javascriptDriver) String() string {
@@ -41,6 +77,25 @@ func (d luaDriver) Handle(e event.Event, fnName string) {
 	d.vm.Call(4, 0)
 }
 
+func (d luaDriver) RunUnsafe(unsafe string) (val interface{}, err error) {
+	val = nil // TODO: Lua does not return a value
+	start := time.Now()
+	defer func() {
+		duration := time.Since(start)
+		if e := recover(); e != nil {
+			if e == Halt {
+				fmt.Println("Some code took too long! Stopping after: ", duration)
+			}
+			err = e.(error)
+		}
+	}()
+
+	d.vm.SetExecutionLimit(maxExecutionTime * (1 << 26))
+	err = d.vm.DoString(unsafe)
+
+	return
+}
+
 func (d luaDriver) String() string {
 	return "lua"
 }
@@ -50,7 +105,88 @@ type lispDriver struct {
 }
 
 func (d lispDriver) Handle(e event.Event, fnName string) {
-	runUnsafeLisp(d.vm, fmt.Sprintf("(%s \"%s\" \"%s\" \"%s\" %s)", fnName, e.Data["Code"], e.Data["Target"], e.Data["Nick"], strconv.Quote(e.Data["Message"].(string))))
+	d.RunUnsafe(fmt.Sprintf("(%s \"%s\" \"%s\" \"%s\" %s)", fnName, e.Data["Code"], e.Data["Target"], e.Data["Nick"], strconv.Quote(e.Data["Message"].(string))))
+}
+
+func (d lispDriver) RunUnsafe(unsafe string) (val interface{}, err error) {
+	halted := false
+	start := time.Now()
+	defer func() {
+		duration := time.Since(start)
+		if halted {
+			fmt.Println("Some code took too long! Stopping after: ", duration)
+			err = Halt
+			val = glisp.SexpNull
+			return
+		}
+
+		if e := recover(); e != nil {
+			val = glisp.SexpNull
+			err = e.(error)
+		}
+	}()
+
+	go func() {
+		time.Sleep(maxExecutionTime * time.Second)
+		d.vm.Clear()
+		halted = true
+	}()
+
+	d.vm.Clear()
+	d.vm.LoadString(unsafe)
+	v, err := d.vm.Run()
+	val = exportSexp(v)
+
+	return
+}
+
+func exportSexp(val glisp.Sexp) interface{} {
+	switch t := val.(type) {
+	case glisp.SexpSymbol:
+		return t.Name()
+
+	case glisp.SexpInt:
+		return int(t)
+
+	case glisp.SexpFloat:
+		return float64(t)
+
+	case glisp.SexpStr:
+		return string(t)
+
+	case glisp.SexpBool:
+		return bool(t)
+
+	case glisp.SexpChar:
+		return rune(t)
+
+	case glisp.SexpArray:
+		res := make([]interface{}, 0)
+		for _, sexp := range t {
+			res = append(res, exportSexp(sexp))
+		}
+		return res
+
+	case glisp.SexpHash:
+		res := make(map[string]interface{}, 0)
+		for _, pairs := range t {
+			for _, sexp := range pairs {
+				p := glisp.SexpPair(sexp)
+				symbol := p.Head()
+				tail := p.Tail()
+
+				res[exportSexp(symbol).(string)] = exportSexp(tail)
+			}
+		}
+		return res
+
+	default:
+		return val.SexpString()
+	}
+}
+
+func sexpToString(val glisp.Sexp) string {
+	return exportSexp(val).(string)
 }
 
 func (d lispDriver) String() string {
@@ -62,7 +198,67 @@ type ankoDriver struct {
 }
 
 func (d ankoDriver) Handle(e event.Event, fnName string) {
-	runUnsafeAnko(d.vm, fmt.Sprintf("%s(\"%s\", \"%s\", \"%s\", %s)", fnName, e.Data["Code"], e.Data["Target"], e.Data["Nick"], strconv.Quote(e.Data["Message"].(string))))
+	d.RunUnsafe(fmt.Sprintf("%s(\"%s\", \"%s\", \"%s\", %s)", fnName, e.Data["Code"], e.Data["Target"], e.Data["Nick"], strconv.Quote(e.Data["Message"].(string))))
+}
+
+func (d ankoDriver) RunUnsafe(unsafe string) (val interface{}, err error) {
+	start := time.Now()
+	defer func() {
+		duration := time.Since(start)
+		if err == Halt {
+			fmt.Println("Some code took too long! Stopping after: ", duration)
+			return
+		}
+		if e := recover(); e != nil {
+			if e == Halt {
+				fmt.Println("Some code took too long! Stopping after: ", duration)
+			}
+			val = anko.NilValue
+			err = e.(error)
+		}
+	}()
+
+	// Anko chokes on carriage returns
+	unsafe = strings.Replace(unsafe, "\r", "", -1)
+
+	scanner := &anko_parser.Scanner{}
+	scanner.Init(unsafe)
+	stmts, e := anko_parser.Parse(scanner)
+	if e != nil {
+		val = nil
+		err = e
+		return
+	}
+
+	done := make(chan bool)
+	go func() {
+		v, e := anko.Run(stmts, d.vm)
+		select {
+		case _ = <-done:
+			return
+		default:
+			done <- true
+			val = v.Interface()
+			err = e
+		}
+	}()
+
+	go func() {
+		time.Sleep(maxExecutionTime * time.Second)
+		select {
+		case _ = <-done:
+			return
+		default:
+			done <- true
+			val = nil
+			err = Halt
+		}
+	}()
+
+	_ = <-done
+	close(done)
+
+	return
 }
 
 func (d ankoDriver) String() string {

@@ -122,7 +122,7 @@ func newLispVm(m *ScriptManager) *glisp.Glisp {
 		}
 
 		key := sexpToString(args[0])
-		val := sexpToInterface(args[1])
+		val := exportSexp(args[1])
 		m.dataHelper.Set(key, val)
 
 		return glisp.SexpNull, nil
