@@ -41,7 +41,9 @@ func triggerConnecting(e event.EventManager) {
 
 func newEventData(ev *ircevent.Event) map[string]interface{} {
 	return map[string]interface{}{
-		"Event":   ev,
+		"User":    ev.User,
+		"Host":    ev.Host,
+		"Source":  ev.Source,
 		"Code":    ev.Code,
 		"Message": ev.Message(),
 		"Nick":    ev.Nick,
