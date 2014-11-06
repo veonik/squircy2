@@ -164,6 +164,8 @@ function handler(code, target, nick, message) {
 
 | Event Name | Description |
 | ---------- | ----------- |
+| cli.INPUT | Input received from terminal |
+| cli.OUTPUT | Output sent to terminal |
 | irc.CONNECTING | Fired when first connecting to the IRC server |
 | irc.CONNECT | Successfully connected to the IRC server |
 | irc.DISCONNECT | Disconnected from the IRC server |
@@ -171,7 +173,7 @@ function handler(code, target, nick, message) {
 | irc.NOTICE | A notice received |
 | irc.WILDCARD | Any IRC event |
 
-> The IRC module also fires any IRC code as `irc.<code>`, for example 001 is `irc.001`, or `irc.NICK`.
+> The IRC module also fires any IRC code as `irc.<code>`, for example 001 is `irc.001`, or NICK is `irc.NICK`.
 
 
 Example Scripts
