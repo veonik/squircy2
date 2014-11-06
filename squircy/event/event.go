@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/codegangsta/inject"
 	"reflect"
+	"sync"
 )
 
 var InvalidHandler = errors.New("Invalid handler")
@@ -28,6 +29,7 @@ type EventManager interface {
 }
 
 type eventManager struct {
+	sync.Mutex
 	injector inject.Injector
 	events   map[EventType][]reflect.Value
 }
@@ -83,6 +85,8 @@ func (e *eventManager) ClearAll() {
 }
 
 func (e *eventManager) Trigger(eventName EventType, data map[string]interface{}) {
+	e.Lock()
+	defer e.Unlock()
 	handlers, ok := e.events[eventName]
 	wildcardHandlers, wok := e.events[AllEvents]
 	if !ok && !wok {
