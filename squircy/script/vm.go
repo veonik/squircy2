@@ -28,6 +28,7 @@ import (
 func newJavascriptVm(m *ScriptManager) *otto.Otto {
 	jsVm := otto.New()
 	jsVm.Set("Http", &m.httpHelper)
+	jsVm.Set("Config", &m.configHelper)
 	jsVm.Set("Data", &m.dataHelper)
 	jsVm.Set("Irc", &m.ircHelper)
 	jsVm.Set("bind", func(call otto.FunctionCall) otto.Value {

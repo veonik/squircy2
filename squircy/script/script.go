@@ -2,6 +2,7 @@ package script
 
 import (
 	"fmt"
+	"github.com/tyler-sommer/squircy2/squircy/config"
 	"github.com/tyler-sommer/squircy2/squircy/event"
 	"github.com/tyler-sommer/squircy2/squircy/irc"
 	"log"
@@ -14,6 +15,7 @@ type ScriptManager struct {
 	lispDriver   lispDriver
 	ankoDriver   ankoDriver
 	httpHelper   httpHelper
+	configHelper configHelper
 	ircHelper    ircHelper
 	dataHelper   dataHelper
 	scriptHelper scriptHelper
@@ -21,7 +23,7 @@ type ScriptManager struct {
 	l            *log.Logger
 }
 
-func NewScriptManager(repo ScriptRepository, l *log.Logger, e event.EventManager, ircmanager *irc.IrcConnectionManager) *ScriptManager {
+func NewScriptManager(repo ScriptRepository, l *log.Logger, e event.EventManager, ircmanager *irc.IrcConnectionManager, config *config.Configuration) *ScriptManager {
 	mgr := ScriptManager{
 		e,
 		javascriptDriver{},
@@ -29,6 +31,7 @@ func NewScriptManager(repo ScriptRepository, l *log.Logger, e event.EventManager
 		lispDriver{},
 		ankoDriver{},
 		httpHelper{},
+		configHelper{config},
 		ircHelper{ircmanager},
 		dataHelper{make(map[string]interface{})},
 		scriptHelper{},

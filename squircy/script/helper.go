@@ -2,6 +2,7 @@ package script
 
 import (
 	"fmt"
+	"github.com/tyler-sommer/squircy2/squircy/config"
 	"github.com/tyler-sommer/squircy2/squircy/event"
 	"github.com/tyler-sommer/squircy2/squircy/irc"
 	"io/ioutil"
@@ -21,6 +22,18 @@ func (client *httpHelper) Get(url string) string {
 		return ""
 	}
 	return string(body)
+}
+
+type configHelper struct{
+	conf *config.Configuration
+}
+
+func (h *configHelper) OwnerNick() string {
+	return h.conf.OwnerNick
+}
+
+func (h *configHelper) OwnerHost() string {
+	return h.conf.OwnerHost
 }
 
 type dataHelper struct {
