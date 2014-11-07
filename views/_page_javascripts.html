@@ -44,5 +44,23 @@ $(function() {
 			})
 		}
 	});
+
+	$.ajax({
+		url: '/status',
+		type: 'get',
+		dataType: 'json',
+		success: function(response) {
+			if (response.Status == 2) {
+				$disconnectBtn.show();
+				$connectBtn.add($connectingBtn).hide();
+			} else if (response.Status == 1) {
+				$connectingBtn.show();
+				$disconnectBtn.add($connectBtn).hide();
+			} else {
+				$connectBtn.show();
+				$disconnectBtn.add($connectingBtn).hide();
+			}
+		}
+	});
 });
 </script>
