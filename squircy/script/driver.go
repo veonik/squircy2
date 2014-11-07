@@ -30,7 +30,15 @@ type javascriptDriver struct {
 
 func (d javascriptDriver) Handle(e event.Event, fnName string) {
 	d.vm.Interrupt = make(chan func(), 1)
-	d.vm.Call(fnName, otto.NullValue(), e.Data["Code"], e.Data["Target"], e.Data["Nick"], e.Data["Message"])
+	data, err := d.vm.ToValue(e.Data)
+	if err != nil {
+		fmt.Println("An error occurred while creating event data", err)
+		return
+	}
+	_, err = d.vm.Call(fnName, otto.NullValue(), data)
+	if err != nil {
+		fmt.Println("An error occurred while executing the handler", err)
+	}
 }
 
 func (d javascriptDriver) RunUnsafe(unsafe string) (val interface{}, err error) {
@@ -74,7 +82,10 @@ func (d luaDriver) Handle(e event.Event, fnName string) {
 	d.vm.PushString(e.Data["Target"].(string))
 	d.vm.PushString(e.Data["Nick"].(string))
 	d.vm.PushString(e.Data["Message"].(string))
-	d.vm.Call(4, 0)
+	err := d.vm.Call(4, 0)
+	if err != nil {
+		fmt.Println("An error occurred while executing the handler", err)
+	}
 }
 
 func (d luaDriver) RunUnsafe(unsafe string) (val interface{}, err error) {
@@ -105,7 +116,10 @@ type lispDriver struct {
 }
 
 func (d lispDriver) Handle(e event.Event, fnName string) {
-	d.RunUnsafe(fmt.Sprintf("(%s \"%s\" \"%s\" \"%s\" %s)", fnName, e.Data["Code"], e.Data["Target"], e.Data["Nick"], strconv.Quote(e.Data["Message"].(string))))
+	_, err := d.RunUnsafe(fmt.Sprintf("(%s \"%s\" \"%s\" \"%s\" %s)", fnName, e.Data["Code"], e.Data["Target"], e.Data["Nick"], strconv.Quote(e.Data["Message"].(string))))
+	if err != nil {
+		fmt.Println("An error occurred while executing the handler", err)
+	}
 }
 
 func (d lispDriver) RunUnsafe(unsafe string) (val interface{}, err error) {
@@ -198,7 +212,10 @@ type ankoDriver struct {
 }
 
 func (d ankoDriver) Handle(e event.Event, fnName string) {
-	d.RunUnsafe(fmt.Sprintf("%s(\"%s\", \"%s\", \"%s\", %s)", fnName, e.Data["Code"], e.Data["Target"], e.Data["Nick"], strconv.Quote(e.Data["Message"].(string))))
+	_, err := d.RunUnsafe(fmt.Sprintf("%s(\"%s\", \"%s\", \"%s\", %s)", fnName, e.Data["Code"], e.Data["Target"], e.Data["Nick"], strconv.Quote(e.Data["Message"].(string))))
+	if err != nil {
+		fmt.Println("An error occurred while executing the handler", err)
+	}
 }
 
 func (d ankoDriver) RunUnsafe(unsafe string) (val interface{}, err error) {
@@ -210,9 +227,6 @@ func (d ankoDriver) RunUnsafe(unsafe string) (val interface{}, err error) {
 			return
 		}
 		if e := recover(); e != nil {
-			if e == Halt {
-				fmt.Println("Some code took too long! Stopping after: ", duration)
-			}
 			val = anko.NilValue
 			err = e.(error)
 		}
