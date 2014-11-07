@@ -3,10 +3,12 @@ squIRCy2
 
 ##### the scriptable IRC bot
 
-squIRCy2 is written in Go and supports Javascript, Lua, a dialect of Lisp, and the Anko scripting language. 
+squIRCy2 is written in Go and is scriptable using Javascript, Lua, a dialect of Lisp, and the Anko scripting
+language.
 
 It sports a web management interface for writing scripts and bot management, as well as dynamic script reloading at 
-runtime.
+runtime. Bind custom scripts to run when events occur in the application. Events can come from IRC, the CLI, or
+even the web.
 
 
 Installation
@@ -61,11 +63,11 @@ The Settings page allows you to modify squishy's nickname, username, and which s
 Owner nickname and hostname to your information. These values are available from within each scripting language at 
 runtime.
 
-> The Owner Nickname and Hostname settings limit in-IRC REPL to that user. Ensure these are configured properly.
+> The Owner Nickname and Hostname settings are available within your scripts.
 
 From the Scripts page, you can add and edit scripts.
 
-From the Dashboard page, you can re-initialize scripts and connect or disconnect from IRC.
+From the Dashboard page, you can see CLI and IRC history.
 
 
 Exposed API
@@ -87,6 +89,8 @@ squIRCy2 exposes a small API to each scripting language.
 | Data.Get(key) | Gets a value with the given from the cross-vm storage |
 | Data.Set(key, val) | Sets a value with the given key in the cross-vm storage |
 | Http.Get(url) | Fetch the given url using a GET HTTP request |
+| Config.OwnerNick() | Get the configured Owner Nickname |
+| Config.OwnerHost() | Get the configured Owner Host |
 | bind(eventName, fnName) | Add a handler of the given event type and function name |
 | unbind(eventName, fnName) | Removes a handler of the given type and function name |
 
@@ -150,13 +154,21 @@ event, and the name of the function to call when the given event is triggered.
 
 > Bind will only bind functions to the language it is called from; Lua scripts can only `bind` or `unbind` Lua scripts. 
 
-Event handlers should take four parameters: code, target, nick, message. An example javascript handler:
+Event handlers should take four parameters: code, target, nick, message. An example Lua handler:
+
+```lua
+function handler(code, target, nick, message)
+	-- code is the IRC event code, like PRIVMSG, NOTICE, or 001
+	-- target received the message
+	-- nick sent the message
+end
+```
+
+Javascript handlers receive an Event object with additional information. An example Javascript handler:
 
 ```js
-function handler(code, target, nick, message) {
-	// code is the IRC event code, like PRIVMSG, NOTICE, or 001
-	// target received the message
-	// nick sent the message
+function handler(e) {
+    // e is an object with all the transmitted event details
 }
 ```
 
