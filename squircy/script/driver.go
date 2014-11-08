@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/aarzilli/golua/lua"
+	"github.com/stevedonovan/luar"
 	anko_parser "github.com/mattn/anko/parser"
 	anko "github.com/mattn/anko/vm"
 	"github.com/robertkrimen/otto"
@@ -101,19 +102,7 @@ func (d luaDriver) RunUnsafe(unsafe string) (val interface{}, err error) {
 		}
 	}()
 	d.vm.Register("res", func(vm *lua.State) int {
-		switch r := vm.Type(0); {
-		case r == lua.LUA_TNUMBER:
-			val = vm.ToNumber(0)
-
-		case r == lua.LUA_TBOOLEAN:
-			val = vm.ToBoolean(0)
-
-		case r== lua.LUA_TSTRING:
-			val = vm.ToString(0)
-
-		default:
-			val = vm.ToString(0)
-		}
+		val = luar.LuaToGo(vm, nil, 0)
 		return 0
 	})
 	d.vm.SetExecutionLimit(maxExecutionTime * (1 << 26))

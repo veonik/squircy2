@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/aarzilli/golua/lua"
+	"github.com/stevedonovan/luar"
 	anko_core "github.com/mattn/anko/builtins"
 	anko_encoding "github.com/mattn/anko/builtins/encoding"
 	anko_flag "github.com/mattn/anko/builtins/flag"
@@ -78,8 +79,7 @@ func newJavascriptVm(m *ScriptManager) *otto.Otto {
 }
 
 func newLuaVm(m *ScriptManager) *lua.State {
-	luaVm := lua.NewState()
-	luaVm.OpenLibs()
+	luaVm := luar.Init()
 	luaVm.Register("typename", func(vm *lua.State) int {
 		o := vm.Typename(int(vm.Type(1)))
 		vm.PushString(o)
@@ -87,7 +87,7 @@ func newLuaVm(m *ScriptManager) *lua.State {
 	})
 	luaVm.Register("setex", func(vm *lua.State) int {
 		key := vm.ToString(1)
-		value := vm.ToString(2)
+		value := luar.LuaToGo(luaVm, nil, 2)
 		m.dataHelper.Set(key, value)
 		return 0
 	})
@@ -95,7 +95,7 @@ func newLuaVm(m *ScriptManager) *lua.State {
 		key := vm.ToString(1)
 		value := m.dataHelper.Get(key)
 		if value != nil {
-			vm.PushString(value.(string))
+			luar.GoToLua(luaVm, nil, reflect.ValueOf(value), false)
 			return 1
 		}
 		vm.PushNil()
