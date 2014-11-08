@@ -43,6 +43,15 @@ func newJavascriptVm(m *ScriptManager) *otto.Otto {
 		m.scriptHelper.Unbind(Javascript, event.EventType(eventType), fnName)
 		return otto.UndefinedValue()
 	})
+	jsVm.Set("trigger", func(call otto.FunctionCall) otto.Value {
+		eventType := call.Argument(0).String()
+		data, _ := call.Argument(1).Export()
+		if data == nil {
+			data = make(map[string]interface{}, 0)
+		}
+		m.scriptHelper.Trigger(event.EventType(eventType), data.(map[string]interface{}))
+		return otto.UndefinedValue()
+	})
 
 	return jsVm
 }

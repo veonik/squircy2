@@ -143,3 +143,7 @@ func (s *scriptHelper) Unbind(scriptType ScriptType, eventType event.EventType, 
 	s.e.Unbind(eventType, handler)
 	delete(s.handlers, id)
 }
+
+func (s *scriptHelper) Trigger(eventType event.EventType, data map[string]interface{}) {
+	s.e.Trigger(eventType, data)
+}
