@@ -23,9 +23,22 @@ import (
 	glisp "github.com/zhemao/glisp/interpreter"
 	"reflect"
 	"strconv"
+	"crypto/sha1"
 )
 
+
+
 func newJavascriptVm(m *ScriptManager) *otto.Otto {
+	getFnName := func(fn otto.Value) (name string) {
+		if fn.IsFunction() {
+			name = fmt.Sprintf("__Handler%x", sha1.Sum([]byte(fn.String())))
+		} else {
+			name = fn.String()
+		}
+
+		return
+	}
+
 	jsVm := otto.New()
 	jsVm.Set("Http", &m.httpHelper)
 	jsVm.Set("Config", &m.configHelper)
@@ -33,13 +46,21 @@ func newJavascriptVm(m *ScriptManager) *otto.Otto {
 	jsVm.Set("Irc", &m.ircHelper)
 	jsVm.Set("bind", func(call otto.FunctionCall) otto.Value {
 		eventType := call.Argument(0).String()
-		fnName := call.Argument(1).String()
+		fn := call.Argument(1)
+		fnName := getFnName(fn)
+		if fn.IsFunction() {
+			m.jsDriver.vm.Set(fnName, func(call otto.FunctionCall) otto.Value {
+				fn.Call(call.This, call.ArgumentList)
+				return otto.UndefinedValue()
+			})
+		}
 		m.scriptHelper.Bind(Javascript, event.EventType(eventType), fnName)
-		return otto.UndefinedValue()
+		val, _ := otto.ToValue(fnName)
+		return val
 	})
 	jsVm.Set("unbind", func(call otto.FunctionCall) otto.Value {
 		eventType := call.Argument(0).String()
-		fnName := call.Argument(1).String()
+		fnName := getFnName(call.Argument(1))
 		m.scriptHelper.Unbind(Javascript, event.EventType(eventType), fnName)
 		return otto.UndefinedValue()
 	})
