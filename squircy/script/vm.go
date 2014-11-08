@@ -85,52 +85,11 @@ func newLuaVm(m *ScriptManager) *lua.State {
 		vm.PushString(o)
 		return 1
 	})
-	luaVm.Register("setex", func(vm *lua.State) int {
-		key := vm.ToString(1)
-		value := luar.LuaToGo(luaVm, nil, 2)
-		m.dataHelper.Set(key, value)
-		return 0
-	})
-	luaVm.Register("getex", func(vm *lua.State) int {
-		key := vm.ToString(1)
-		value := m.dataHelper.Get(key)
-		if value != nil {
-			luar.GoToLua(luaVm, nil, reflect.ValueOf(value), false)
-			return 1
-		}
-		vm.PushNil()
-		return 1
-	})
-	luaVm.Register("joinchan", func(vm *lua.State) int {
-		channel := vm.ToString(1)
-		m.ircHelper.Join(channel)
-		return 0
-	})
-	luaVm.Register("partchan", func(vm *lua.State) int {
-		channel := vm.ToString(1)
-		m.ircHelper.Part(channel)
-		return 0
-	})
-	luaVm.Register("privmsg", func(vm *lua.State) int {
-		target := vm.ToString(1)
-		message := vm.ToString(2)
-		m.ircHelper.Privmsg(target, message)
-		return 0
-	})
-	luaVm.Register("currentnick", func(vm *lua.State) int {
-		vm.PushString(m.ircHelper.CurrentNick())
-		return 1
-	})
-	luaVm.Register("nick", func(vm *lua.State) int {
-		newNick := vm.ToString(1)
-		m.ircHelper.Nick(newNick)
-		return 0
-	})
-	luaVm.Register("httpget", func(vm *lua.State) int {
-		url := vm.ToString(1)
-		res := m.httpHelper.Get(url)
-		vm.PushString(res)
-		return 1
+	luar.Register(luaVm, "", luar.Map{
+		"http": m.httpHelper,
+		"config": m.configHelper,
+		"data": m.dataHelper,
+		"irc": m.ircHelper,
 	})
 	luaVm.Register("bind", func(vm *lua.State) int {
 		eventType := vm.ToString(1)
@@ -142,6 +101,15 @@ func newLuaVm(m *ScriptManager) *lua.State {
 		eventType := vm.ToString(1)
 		fnName := vm.ToString(2)
 		m.scriptHelper.Unbind(Lua, event.EventType(eventType), fnName)
+		return 0
+	})
+	luaVm.Register("trigger", func(vm *lua.State) int {
+		eventType := vm.ToString(1)
+		data := luar.LuaToGo(vm, nil, 2)
+		if data == nil {
+			data = make(map[string]interface{}, 0)
+		}
+		m.scriptHelper.Trigger(event.EventType(eventType), data.(map[string]interface{}))
 		return 0
 	})
 

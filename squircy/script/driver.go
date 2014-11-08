@@ -78,12 +78,8 @@ type luaDriver struct {
 }
 
 func (d luaDriver) Handle(e event.Event, fnName string) {
-	d.vm.GetGlobal(fnName)
-	d.vm.PushString(e.Data["Code"].(string))
-	d.vm.PushString(e.Data["Target"].(string))
-	d.vm.PushString(e.Data["Nick"].(string))
-	d.vm.PushString(e.Data["Message"].(string))
-	err := d.vm.Call(4, 0)
+	o := luar.NewLuaObjectFromName(d.vm, fnName)
+	_, err := o.Call(e.Data)
 	if err != nil {
 		fmt.Println("An error occurred while executing the handler", err)
 	}
