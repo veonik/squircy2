@@ -5,7 +5,6 @@ import (
 	ircevent "github.com/thoj/go-ircevent"
 	"github.com/tyler-sommer/squircy2/squircy/config"
 	"log"
-	"reflect"
 )
 
 type ConnectionStatus int
@@ -36,7 +35,7 @@ func (mgr *IrcConnectionManager) newConnection() {
 }
 
 func (mgr *IrcConnectionManager) Connect() {
-	mgr.injector.Invoke(mgr.newConnection)
+	mgr.injector.Invoke(mgr.connect)
 }
 
 func (mgr *IrcConnectionManager) connect(c *config.Configuration) {
