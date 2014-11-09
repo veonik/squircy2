@@ -90,15 +90,10 @@ func (m *ScriptManager) ReInit() {
 func (m *ScriptManager) init() {
 	m.e.ClearAll()
 
-	jsVm := newJavascriptVm(m)
-	luaVm := newLuaVm(m)
-	lispVm := newLispVm(m)
-	ankoVm := newAnkoVm(m)
-
-	m.jsDriver.vm = jsVm
-	m.luaDriver.vm = luaVm
-	m.lispDriver.vm = lispVm
-	m.ankoDriver.vm = ankoVm
+	m.jsDriver.vm   = newJavascriptVm(m)
+	m.luaDriver.vm  = newLuaVm(m)
+	m.lispDriver.vm = newLispVm(m)
+	m.ankoDriver.vm = newAnkoVm(m)
 
 	m.scriptHelper = scriptHelper{m.e, m.jsDriver, m.luaDriver, m.lispDriver, m.ankoDriver, make(map[string]event.EventHandler, 0)}
 

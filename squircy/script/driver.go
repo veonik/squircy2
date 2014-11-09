@@ -38,7 +38,7 @@ func (d javascriptDriver) Handle(e event.Event, fnName string) {
 	}
 	_, err = d.vm.Call(fnName, otto.NullValue(), data)
 	if err != nil {
-		fmt.Println("An error occurred while executing the handler", err)
+		fmt.Println("An error occurred while executing the Javascript handler", err)
 	}
 }
 
@@ -48,7 +48,7 @@ func (d javascriptDriver) RunUnsafe(unsafe string) (val interface{}, err error) 
 		duration := time.Since(start)
 		if e := recover(); e != nil {
 			if e == Halt {
-				fmt.Println("Some code took too long! Stopping after: ", duration)
+				fmt.Println("Some Javascript code took too long! Stopping after: ", duration)
 			}
 			err = e.(error)
 		}
@@ -81,7 +81,7 @@ func (d luaDriver) Handle(e event.Event, fnName string) {
 	o := luar.NewLuaObjectFromName(d.vm, fnName)
 	_, err := o.Call(e.Data)
 	if err != nil {
-		fmt.Println("An error occurred while executing the handler", err)
+		fmt.Println("An error occurred while executing the Lua handler", err)
 	}
 }
 
@@ -92,7 +92,7 @@ func (d luaDriver) RunUnsafe(unsafe string) (val interface{}, err error) {
 		duration := time.Since(start)
 		if e := recover(); e != nil {
 			if e == Halt {
-				fmt.Println("Some code took too long! Stopping after: ", duration)
+				fmt.Println("Some Lua code took too long! Stopping after: ", duration)
 			}
 			err = e.(error)
 		}
@@ -118,7 +118,7 @@ type lispDriver struct {
 func (d lispDriver) Handle(e event.Event, fnName string) {
 	_, err := d.RunUnsafe(fmt.Sprintf("(%s \"%s\" \"%s\" \"%s\" %s)", fnName, e.Data["Code"], e.Data["Target"], e.Data["Nick"], strconv.Quote(e.Data["Message"].(string))))
 	if err != nil {
-		fmt.Println("An error occurred while executing the handler", err)
+		fmt.Println("An error occurred while executing the Lisp handler", err)
 	}
 }
 
@@ -128,7 +128,7 @@ func (d lispDriver) RunUnsafe(unsafe string) (val interface{}, err error) {
 	defer func() {
 		duration := time.Since(start)
 		if halted {
-			fmt.Println("Some code took too long! Stopping after: ", duration)
+			fmt.Println("Some Lisp code took too long! Stopping after: ", duration)
 			err = Halt
 			val = glisp.SexpNull
 			return
@@ -214,7 +214,7 @@ type ankoDriver struct {
 func (d ankoDriver) Handle(e event.Event, fnName string) {
 	_, err := d.RunUnsafe(fmt.Sprintf("%s(\"%s\", \"%s\", \"%s\", %s)", fnName, e.Data["Code"], e.Data["Target"], e.Data["Nick"], strconv.Quote(e.Data["Message"].(string))))
 	if err != nil {
-		fmt.Println("An error occurred while executing the handler", err)
+		fmt.Println("An error occurred while executing the Anko handler", err)
 	}
 }
 
@@ -223,7 +223,7 @@ func (d ankoDriver) RunUnsafe(unsafe string) (val interface{}, err error) {
 	defer func() {
 		duration := time.Since(start)
 		if err == Halt {
-			fmt.Println("Some code took too long! Stopping after: ", duration)
+			fmt.Println("Some Anko code took too long! Stopping after: ", duration)
 			return
 		}
 		if e := recover(); e != nil {
