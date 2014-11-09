@@ -36,20 +36,22 @@ func (mgr *IrcConnectionManager) newConnection() {
 }
 
 func (mgr *IrcConnectionManager) Connect() {
+	mgr.injector.Invoke(mgr.newConnection)
+}
+
+func (mgr *IrcConnectionManager) connect(c *config.Configuration) {
 	if mgr.conn == nil {
 		mgr.newConnection()
 	}
 
-	config := mgr.injector.Get(reflect.TypeOf((*config.Configuration)(nil))).Interface().(*config.Configuration)
-
 	mgr.status = Connecting
 	mgr.injector.Invoke(triggerConnecting)
-	mgr.conn.Connect(config.Network)
+	mgr.conn.Connect(c.Network)
 }
 
 func (mgr *IrcConnectionManager) Quit() {
 	mgr.status = Disconnected
-	if mgr.conn != nil {
+	if mgr.conn != nil && mgr.conn.Connected() {
 		mgr.conn.Quit()
 	}
 
