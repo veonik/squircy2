@@ -24,7 +24,7 @@ func (client *httpHelper) Get(url string) string {
 	return string(body)
 }
 
-type configHelper struct{
+type configHelper struct {
 	conf *config.Configuration
 }
 

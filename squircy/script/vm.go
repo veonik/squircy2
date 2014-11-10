@@ -1,10 +1,10 @@
 package script
 
 import (
+	"crypto/sha1"
 	"errors"
 	"fmt"
 	"github.com/aarzilli/golua/lua"
-	"github.com/stevedonovan/luar"
 	anko_core "github.com/mattn/anko/builtins"
 	anko_encoding "github.com/mattn/anko/builtins/encoding"
 	anko_flag "github.com/mattn/anko/builtins/flag"
@@ -19,16 +19,14 @@ import (
 	anko_term "github.com/mattn/anko/builtins/term"
 	anko "github.com/mattn/anko/vm"
 	"github.com/robertkrimen/otto"
-	"github.com/tyler-sommer/squircy2/squircy/event"
+	"github.com/stevedonovan/luar"
 	"github.com/tyler-sommer/squircy2/squircy/data"
+	"github.com/tyler-sommer/squircy2/squircy/event"
 	glispext "github.com/zhemao/glisp/extensions"
 	glisp "github.com/zhemao/glisp/interpreter"
 	"reflect"
 	"strconv"
-	"crypto/sha1"
 )
-
-
 
 func newJavascriptVm(m *ScriptManager) *otto.Otto {
 	getFnName := func(fn otto.Value) (name string) {
@@ -150,7 +148,6 @@ func newJavascriptVm(m *ScriptManager) *otto.Otto {
 		return obj.Value()
 	})
 
-
 	return jsVm
 }
 
@@ -162,10 +159,10 @@ func newLuaVm(m *ScriptManager) *lua.State {
 		return 1
 	})
 	luar.Register(luaVm, "", luar.Map{
-		"http": m.httpHelper,
+		"http":   m.httpHelper,
 		"config": m.configHelper,
-		"data": m.dataHelper,
-		"irc": m.ircHelper,
+		"data":   m.dataHelper,
+		"irc":    m.ircHelper,
 	})
 	luaVm.Register("bind", func(vm *lua.State) int {
 		eventType := vm.ToString(1)

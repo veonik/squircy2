@@ -7,7 +7,7 @@ import (
 
 type GenericRepository struct {
 	database *db.DB
-	coll string
+	coll     string
 }
 
 type GenericModel map[string]interface{}

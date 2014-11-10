@@ -55,42 +55,6 @@ func (manager *Manager) invokeAndMap(fn interface{}) interface{} {
 	return val
 }
 
-func configureWeb(manager *Manager, conf *config.Configuration) {
-	manager.Handlers(
-		martini.Static(conf.RootPath+"/public", martini.StaticOptions{
-			SkipLogging: true,
-		}),
-		render.Renderer(render.Options{
-			Directory:  conf.RootPath + "/views",
-			Layout:     "layout",
-			Extensions: []string{".tmpl", ".html"},
-		}))
-	manager.Get("/event", func(es eventsource.EventSource, w http.ResponseWriter, r *http.Request) {
-		es.ServeHTTP(w, r)
-	})
-	manager.Get("/", indexAction)
-	manager.Get("/status", statusAction)
-	manager.Group("/manage", func(r martini.Router) {
-		r.Get("", manageAction)
-		r.Post("/update", manageUpdateAction)
-	})
-	manager.Post("/connect", connectAction)
-	manager.Post("/disconnect", disconnectAction)
-	manager.Group("/script", func(r martini.Router) {
-		r.Get("", scriptAction)
-		r.Post("/reinit", scriptReinitAction)
-		r.Get("/new", newScriptAction)
-		r.Post("/create", createScriptAction)
-		r.Get("/:id/edit", editScriptAction)
-		r.Post("/:id/update", updateScriptAction)
-		r.Post("/:id/remove", removeScriptAction)
-	})
-	manager.Group("/repl", func(r martini.Router) {
-		r.Get("", replAction)
-		r.Post("/execute", replExecuteAction)
-	})
-}
-
 func newEventSource(evm event.EventManager) eventsource.EventSource {
 	es := eventsource.New(nil, nil)
 

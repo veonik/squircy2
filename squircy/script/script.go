@@ -90,8 +90,8 @@ func (m *ScriptManager) ReInit() {
 func (m *ScriptManager) init() {
 	m.e.ClearAll()
 
-	m.jsDriver.vm   = newJavascriptVm(m)
-	m.luaDriver.vm  = newLuaVm(m)
+	m.jsDriver.vm = newJavascriptVm(m)
+	m.luaDriver.vm = newLuaVm(m)
 	m.lispDriver.vm = newLispVm(m)
 	m.ankoDriver.vm = newAnkoVm(m)
 
