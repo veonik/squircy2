@@ -27,25 +27,8 @@ func NewIrcConnectionManager(injector inject.Injector) (mgr *IrcConnectionManage
 	return
 }
 
-func (mgr *IrcConnectionManager) newConnection() {
-	res, _ := mgr.injector.Invoke(newIrcConnection)
-	mgr.conn = res[0].Interface().(*ircevent.Connection)
-	mgr.injector.Map(mgr.conn)
-	mgr.injector.Invoke(bindEvents)
-}
-
 func (mgr *IrcConnectionManager) Connect() {
-	mgr.injector.Invoke(mgr.connect)
-}
-
-func (mgr *IrcConnectionManager) connect(c *config.Configuration) {
-	if mgr.conn == nil {
-		mgr.newConnection()
-	}
-
-	mgr.status = Connecting
-	mgr.injector.Invoke(triggerConnecting)
-	mgr.conn.Connect(c.Network)
+	mgr.injector.Invoke(connect)
 }
 
 func (mgr *IrcConnectionManager) Quit() {
@@ -65,9 +48,15 @@ func (mgr *IrcConnectionManager) Connection() *ircevent.Connection {
 	return mgr.conn
 }
 
-func newIrcConnection(conf *config.Configuration, l *log.Logger) (conn *ircevent.Connection) {
-	conn = ircevent.IRC(conf.Nick, conf.Username)
-	conn.Log = l
+func connect(mgr *IrcConnectionManager, conf *config.Configuration, l *log.Logger) {
+	if mgr.conn == nil {
+		mgr.conn = ircevent.IRC(conf.Nick, conf.Username)
+		mgr.conn.Log = l
+		mgr.injector.Map(mgr.conn)
+		mgr.injector.Invoke(bindEvents)
+	}
 
-	return
+	mgr.status = Connecting
+	mgr.injector.Invoke(triggerConnecting)
+	mgr.conn.Connect(conf.Network)
 }

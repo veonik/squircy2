@@ -4,13 +4,11 @@ import (
 	"encoding/json"
 	"github.com/antage/eventsource"
 	"github.com/go-martini/martini"
-	"github.com/martini-contrib/render"
 	"github.com/tyler-sommer/squircy2/squircy/config"
 	"github.com/tyler-sommer/squircy2/squircy/data"
 	"github.com/tyler-sommer/squircy2/squircy/event"
 	"github.com/tyler-sommer/squircy2/squircy/irc"
 	"github.com/tyler-sommer/squircy2/squircy/script"
-	"net/http"
 	"strconv"
 )
 
