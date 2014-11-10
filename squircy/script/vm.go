@@ -20,6 +20,7 @@ import (
 	anko "github.com/mattn/anko/vm"
 	"github.com/robertkrimen/otto"
 	"github.com/tyler-sommer/squircy2/squircy/event"
+	"github.com/tyler-sommer/squircy2/squircy/data"
 	glispext "github.com/zhemao/glisp/extensions"
 	glisp "github.com/zhemao/glisp/interpreter"
 	"reflect"
@@ -78,17 +79,17 @@ func newJavascriptVm(m *ScriptManager) *otto.Otto {
 		coll := call.Argument(0).String()
 
 		// Todo: get the Database properly
-		db := NewGenericRepository(m.repo.database, coll)
+		db := data.NewGenericRepository(m.repo.database, coll)
 		obj, _ := jsVm.Object("({})")
 		obj.Set("Save", func(call otto.FunctionCall) otto.Value {
 			exp, _ := call.Argument(0).Export()
-			var model GenericModel
+			var model data.GenericModel
 			switch t := exp.(type) {
-			case GenericModel:
+			case data.GenericModel:
 				model = t
 
 			case map[string]interface{}:
-				model = GenericModel(t)
+				model = data.GenericModel(t)
 			}
 			switch t := model["ID"].(type) {
 			case int64:
