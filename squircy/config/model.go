@@ -19,7 +19,7 @@ func flattenConfig(config *Configuration) map[string]interface{} {
 	}
 }
 
-func (repo *configRepository) FetchInto(config *Configuration) {
+func (repo *configRepository) fetchInto(config *Configuration) {
 	col := repo.database.Use("Settings")
 	col.ForEachDoc(func(id int, doc []byte) (moveOn bool) {
 		moveOn = false
@@ -31,7 +31,7 @@ func (repo *configRepository) FetchInto(config *Configuration) {
 	})
 }
 
-func (repo *configRepository) Save(config *Configuration) {
+func (repo *configRepository) save(config *Configuration) {
 	col := repo.database.Use("Settings")
 	data := flattenConfig(config)
 

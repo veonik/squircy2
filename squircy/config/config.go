@@ -48,11 +48,11 @@ func resolveRoot() string {
 
 func LoadConfig(database *db.DB, config *Configuration) {
 	repo := configRepository{database}
-	repo.FetchInto(config)
+	repo.fetchInto(config)
 	SaveConfig(database, config)
 }
 
 func SaveConfig(database *db.DB, config *Configuration) {
 	repo := configRepository{database}
-	repo.Save(config)
+	repo.save(config)
 }
