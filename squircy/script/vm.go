@@ -74,6 +74,81 @@ func newJavascriptVm(m *ScriptManager) *otto.Otto {
 		m.scriptHelper.Trigger(event.EventType(eventType), data.(map[string]interface{}))
 		return otto.UndefinedValue()
 	})
+	jsVm.Set("use", func(call otto.FunctionCall) otto.Value {
+		coll := call.Argument(0).String()
+
+		// Todo: get the Database properly
+		db := NewGenericRepository(m.repo.database, coll)
+		obj, _ := jsVm.Object("({})")
+		obj.Set("Save", func(call otto.FunctionCall) otto.Value {
+			exp, _ := call.Argument(0).Export()
+			var model GenericModel
+			switch t := exp.(type) {
+			case GenericModel:
+				model = t
+
+			case map[string]interface{}:
+				model = GenericModel(t)
+			}
+			switch t := model["ID"].(type) {
+			case int64:
+				model["ID"] = int(t)
+
+			case int:
+				model["ID"] = t
+			}
+			db.Save(model)
+
+			id, _ := jsVm.ToValue(model["ID"])
+
+			return id
+		})
+		obj.Set("Fetch", func(call otto.FunctionCall) otto.Value {
+			i, _ := call.Argument(0).ToInteger()
+			val := db.Fetch(int(i))
+			v, err := jsVm.ToValue(val)
+
+			if err != nil {
+				panic(err)
+			}
+
+			return v
+		})
+		obj.Set("FetchAll", func(call otto.FunctionCall) otto.Value {
+			vals := db.FetchAll()
+			v, err := jsVm.ToValue(vals)
+
+			if err != nil {
+				panic(err)
+			}
+
+			return v
+		})
+		obj.Set("Index", func(call otto.FunctionCall) otto.Value {
+			exp, _ := call.Argument(0).Export()
+			cols := make([]string, 0)
+			for _, val := range exp.([]interface{}) {
+				cols = append(cols, val.(string))
+			}
+			db.Index(cols)
+
+			return otto.UndefinedValue()
+		})
+		obj.Set("Query", func(call otto.FunctionCall) otto.Value {
+			qry, _ := call.Argument(0).Export()
+			vals := db.Query(qry)
+			v, err := jsVm.ToValue(vals)
+
+			if err != nil {
+				panic(err)
+			}
+
+			return v
+		})
+
+		return obj.Value()
+	})
+
 
 	return jsVm
 }
