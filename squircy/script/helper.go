@@ -99,9 +99,6 @@ func (h *ircHelper) Nick(newNick string) {
 type scriptHelper struct {
 	e          event.EventManager
 	jsDriver   javascriptDriver
-	luaDriver  luaDriver
-	lispDriver lispDriver
-	ankoDriver ankoDriver
 	handlers   map[string]event.EventHandler
 }
 
@@ -116,21 +113,14 @@ func (s *scriptHelper) Bind(scriptType ScriptType, eventType event.EventType, fn
 	switch {
 	case scriptType == Javascript:
 		d = s.jsDriver
-
-	case scriptType == Lua:
-		d = s.luaDriver
-
-	case scriptType == Lisp:
-		d = s.lispDriver
-
-	case scriptType == Anko:
-		d = s.ankoDriver
 	}
+
 	handler := func(ev event.Event) {
 		d.Handle(ev, fnName)
 	}
 	s.handlers[id] = handler
 	s.e.Bind(eventType, handler)
+
 }
 
 // Unbind removes a handler of the given script type for the given event type

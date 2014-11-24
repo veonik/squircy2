@@ -11,9 +11,6 @@ import (
 type ScriptManager struct {
 	e            event.EventManager
 	jsDriver     javascriptDriver
-	luaDriver    luaDriver
-	lispDriver   lispDriver
-	ankoDriver   ankoDriver
 	httpHelper   httpHelper
 	configHelper configHelper
 	ircHelper    ircHelper
@@ -27,9 +24,6 @@ func NewScriptManager(repo ScriptRepository, l *log.Logger, e event.EventManager
 	mgr := ScriptManager{
 		e,
 		javascriptDriver{},
-		luaDriver{},
-		lispDriver{},
-		ankoDriver{},
 		httpHelper{},
 		configHelper{config},
 		ircHelper{ircmanager},
@@ -64,15 +58,6 @@ func (m *ScriptManager) RunUnsafe(t ScriptType, code string) (result interface{}
 	case t == Javascript:
 		d = m.jsDriver
 
-	case t == Lua:
-		d = m.luaDriver
-
-	case t == Lisp:
-		d = m.lispDriver
-
-	case t == Anko:
-		d = m.ankoDriver
-
 	default:
 		err = UnknownScriptType
 		return
@@ -91,11 +76,8 @@ func (m *ScriptManager) init() {
 	m.e.ClearAll()
 
 	m.jsDriver.vm = newJavascriptVm(m)
-	m.luaDriver.vm = newLuaVm(m)
-	m.lispDriver.vm = newLispVm(m)
-	m.ankoDriver.vm = newAnkoVm(m)
 
-	m.scriptHelper = scriptHelper{m.e, m.jsDriver, m.luaDriver, m.lispDriver, m.ankoDriver, make(map[string]event.EventHandler, 0)}
+	m.scriptHelper = scriptHelper{m.e, m.jsDriver, make(map[string]event.EventHandler, 0)}
 
 	scripts := m.repo.FetchAll()
 	for _, script := range scripts {

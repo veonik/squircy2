@@ -9,9 +9,6 @@ type ScriptType string
 
 const (
 	Javascript ScriptType = "Javascript"
-	Lua                   = "Lua"
-	Lisp                  = "Lisp"
-	Anko                  = "Anko"
 )
 
 type Script struct {
