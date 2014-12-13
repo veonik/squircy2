@@ -3,24 +3,17 @@
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/ext-spellcheck.js"></script>
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/ext-static_highlight.js"></script>
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/mode-javascript.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/mode-lisp.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/mode-lua.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/mode-golang.js"></script>
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/theme-textmate.js"></script>
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/worker-javascript.js"></script>
 <script type="text/javascript">
 $(function() {
 	var modeMap = {
 		"Javascript": "ace/mode/javascript",
-		"Lua": "ace/mode/lua",
-		"Lisp": "ace/mode/lisp",
-		"Anko": "ace/mode/golang"
 	};	
 	var $bodyField = $('#script_body');
 	var $typeField = $('#script_type');
 	var editor = ace.edit("editor");
     editor.setTheme("ace/theme/textmate");
-    editor.getSession().setMode("ace/mode/lua");
 	editor.setValue($bodyField.val());
 	editor.getSession().on('change', function() {
 		$bodyField.val(editor.getValue());
