@@ -3,12 +3,8 @@
 		<h4>REPL</h4>
 		<select class="form-control" id="script_type" name="scriptType">
 			<option>Javascript</option>
-			<option>Lua</option>
-			<option>Lisp</option>
-			<option>Anko</option>
 		</select>
 		<br>
-		<div class="alert alert-warning" id="lua-warning" style="display: none">The Lua REPL only supports returning values using the <code>res</code> function</div>
   		<div id="editor" style="width: 100%; height: 100%"></div>
         <div style="display: none">
             <textarea id="code-body"></textarea>
@@ -27,9 +23,6 @@
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/ext-spellcheck.js"></script>
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/ext-static_highlight.js"></script>
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/mode-javascript.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/mode-lisp.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/mode-lua.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/mode-golang.js"></script>
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/theme-textmate.js"></script>
 <script src="//cdn.jsdelivr.net/ace/1.1.7/min/worker-javascript.js"></script>
 <script type="text/javascript">
@@ -38,7 +31,6 @@ $(function() {
 		"Javascript": "ace/mode/javascript",
 	};
 	var $typeField = $('#script_type');
-	var $luaWarning = $('#lua-warning');
 	var $bodyField = $('#code-body');
 	var editor = ace.edit("editor");
     editor.setTheme("ace/theme/textmate");
