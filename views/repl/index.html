@@ -41,11 +41,6 @@ $(function() {
 	});
 	
 	$typeField.on('change', function() {
-		if ($typeField.val() == "Lua") {
-			$luaWarning.slideDown();
-		} else {
-			$luaWarning.slideUp();
-		}
 		editor.getSession().setMode(modeMap[$typeField.val()]);
 	}).change();
 	
