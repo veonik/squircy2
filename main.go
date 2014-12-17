@@ -5,15 +5,14 @@ import (
 	"flag"
 )
 
-var daemonize bool
-func init() {
-	flag.BoolVar(&daemonize, "daemonize", true, "Run as a daemon")
-}
+var daemonizeFlag = flag.Bool("daemonize", false, "Run as a daemon")
 
 func main() {
+	flag.Parse()
+
 	mgr := squircy.NewManager()
 
-	if (!daemonize) {
+	if (!*daemonizeFlag) {
 		go mgr.Run()
 
 		mgr.LoopCli()
