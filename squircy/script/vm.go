@@ -24,6 +24,7 @@ func newJavascriptVm(m *ScriptManager) *otto.Otto {
 	jsVm.Set("Config", &m.configHelper)
 	jsVm.Set("Data", &m.dataHelper)
 	jsVm.Set("Irc", &m.ircHelper)
+	jsVm.Set("Os", &m.osHelper)
 	jsVm.Set("bind", func(call otto.FunctionCall) otto.Value {
 		eventType := call.Argument(0).String()
 		fn := call.Argument(1)

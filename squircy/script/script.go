@@ -16,6 +16,7 @@ type ScriptManager struct {
 	ircHelper    ircHelper
 	dataHelper   dataHelper
 	scriptHelper scriptHelper
+	osHelper     osHelper
 	repo         ScriptRepository
 	l            *log.Logger
 }
@@ -29,6 +30,7 @@ func NewScriptManager(repo ScriptRepository, l *log.Logger, e event.EventManager
 		ircHelper{ircmanager},
 		dataHelper{make(map[string]interface{})},
 		scriptHelper{},
+		osHelper{},
 		repo,
 		l,
 	}
