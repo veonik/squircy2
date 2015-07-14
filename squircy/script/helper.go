@@ -97,6 +97,14 @@ func (h *ircHelper) Nick(newNick string) {
 	conn.Nick(newNick)
 }
 
+func (h *ircHelper) Raw(command string) {
+	conn := h.manager.Connection()
+	if conn == nil {
+		return
+	}
+	conn.SendRaw(command)
+}
+
 type scriptHelper struct {
 	e          event.EventManager
 	jsDriver   javascriptDriver
