@@ -34,12 +34,12 @@ func New() (s SystemInfo) {
 	pageInfo := c.getOutput("sysctl", "-n", "vm.swapusage")
 	matches := swapMatcher.FindAllString(pageInfo, -1)
 
-	if (len(matches) > 0) {
+	if len(matches) > 0 {
 		swapTotal, _ := strconv.ParseInt(matches[0], 10, 64)
-		s.SwapTotal = uint(swapTotal)*1024*1024
+		s.SwapTotal = uint(swapTotal) * 1024 * 1024
 	}
 
-	if (len(matches) > 4) {
+	if len(matches) > 4 {
 		swapFree, _ := strconv.ParseInt(matches[4], 10, 64)
 		s.SwapFree = uint(swapFree) * 1024 * 1024
 	}

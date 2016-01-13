@@ -19,7 +19,7 @@ type scriptDriver interface {
 }
 
 type javascriptDriver struct {
-	vm *otto.Otto
+	vm *jsVm
 }
 
 func (d javascriptDriver) Handle(e event.Event, fnName string) {
@@ -65,4 +65,3 @@ func (d javascriptDriver) RunUnsafe(unsafe string) (val interface{}, err error) 
 func (d javascriptDriver) String() string {
 	return "js"
 }
-

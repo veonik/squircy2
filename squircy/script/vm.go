@@ -6,9 +6,29 @@ import (
 	"github.com/robertkrimen/otto"
 	"github.com/tyler-sommer/squircy2/squircy/data"
 	"github.com/tyler-sommer/squircy2/squircy/event"
+	"time"
 )
 
-func newJavascriptVm(m *ScriptManager) *otto.Otto {
+// timer represents a function call to be performed after a delay.
+type timer struct {
+	t      *time.Timer
+	dur    time.Duration
+	repeat bool
+	call   otto.FunctionCall
+}
+
+// jsVM is a small wrapper around Otto VM, facilitating the event loop
+// and setTimeout/setInterval functionality.
+type jsVm struct {
+	*otto.Otto
+
+	registry map[*timer]*timer
+	ready    chan *timer
+}
+
+func newJavascriptVm(m *ScriptManager) *jsVm {
+	jsVm := &jsVm{otto.New(), make(map[*timer]*timer), make(chan *timer)}
+
 	getFnName := func(fn otto.Value) (name string) {
 		if fn.IsFunction() {
 			name = fmt.Sprintf("__Handler%x", sha1.Sum([]byte(fn.String())))
@@ -18,8 +38,51 @@ func newJavascriptVm(m *ScriptManager) *otto.Otto {
 
 		return
 	}
+	newTimer := func(call otto.FunctionCall, repeat bool) (*timer, otto.Value, error) {
+		delay, _ := call.Argument(1).ToInteger()
+		if delay <= 0 {
+			delay = 1
+		}
 
-	jsVm := otto.New()
+		res := &timer{nil, time.Duration(delay) * time.Millisecond, repeat, call}
+		jsVm.registry[res] = res
+
+		res.t = time.AfterFunc(res.dur, func() {
+			jsVm.ready <- res
+		})
+
+		val, err := jsVm.ToValue(res)
+		if err != nil {
+			return nil, otto.UndefinedValue(), err
+		}
+
+		return res, val, nil
+	}
+	clearTimer := func(call otto.FunctionCall) otto.Value {
+		ti, _ := call.Argument(0).Export()
+		if ti, ok := ti.(*timer); ok {
+			ti.t.Stop()
+			delete(jsVm.registry, ti)
+		}
+		return otto.UndefinedValue()
+	}
+
+	jsVm.Set("setTimeout", func(call otto.FunctionCall) otto.Value {
+		_, v, err := newTimer(call, false)
+		if err != nil {
+			return otto.UndefinedValue()
+		}
+		return v
+	})
+	jsVm.Set("setInterval", func(call otto.FunctionCall) otto.Value {
+		_, v, err := newTimer(call, true)
+		if err != nil {
+			return otto.UndefinedValue()
+		}
+		return v
+	})
+	jsVm.Set("clearTimeout", clearTimer)
+	jsVm.Set("clearInterval", clearTimer)
 	jsVm.Set("Http", &m.httpHelper)
 	jsVm.Set("Config", &m.configHelper)
 	jsVm.Set("Data", &m.dataHelper)
@@ -129,5 +192,41 @@ func newJavascriptVm(m *ScriptManager) *otto.Otto {
 		return obj.Value()
 	})
 
+	go jsVm.Loop()
+
 	return jsVm
+}
+
+// Loop kicks off the VM's event loop.
+func (vm *jsVm) Loop() {
+	for {
+		select {
+		case ti := <-vm.ready:
+			var args []interface{}
+			if len(ti.call.ArgumentList) > 2 {
+				tmp := ti.call.ArgumentList[2:]
+				// args[1] will end up being "this" when the function is invoked,
+				// so we need to offset each actual argument by one
+				args = make([]interface{}, 2+len(tmp))
+				for i, value := range tmp {
+					args[i+2] = value
+				}
+			} else {
+				args = make([]interface{}, 1)
+			}
+			args[0] = ti.call.ArgumentList[0]
+			// Since we are calling "Function.call.call", we pass the function
+			// to be called in as the first argument, which means args[1] will
+			// end up being the function's "this" binding, and any further values
+			// in args will be passed to the function as arguments.
+			_, err := vm.Call("Function.call.call", nil, args...)
+			if err == nil && ti.repeat {
+				ti.t.Reset(ti.dur)
+			} else {
+				delete(vm.registry, ti)
+			}
+		default:
+			// no op
+		}
+	}
 }

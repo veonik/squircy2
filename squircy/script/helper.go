@@ -106,9 +106,9 @@ func (h *ircHelper) Raw(command string) {
 }
 
 type scriptHelper struct {
-	e          event.EventManager
-	jsDriver   javascriptDriver
-	handlers   map[string]event.EventHandler
+	e        event.EventManager
+	jsDriver javascriptDriver
+	handlers map[string]event.EventHandler
 }
 
 func handlerId(scriptType ScriptType, eventType event.EventType, fnName string) string {
@@ -146,7 +146,7 @@ func (s *scriptHelper) Trigger(eventType event.EventType, data map[string]interf
 	s.e.Trigger(eventType, data)
 }
 
-type osHelper struct {}
+type osHelper struct{}
 
 func (h *osHelper) SystemInfo() sysinfo.SystemInfo {
 	return sysinfo.New()
