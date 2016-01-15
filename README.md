@@ -61,6 +61,19 @@ squIRCy2 exposes a small API to each scripting language.
 | Config.OwnerHost() | Get the configured Owner Host |
 | bind(eventName, fnName) | Add a handler of the given event type and function name |
 | unbind(eventName, fnName) | Removes a handler of the given type and function name |
+| setTimeout(fnName, delay) | Executes fnName after delay milliseconds |
+| setInterval(fnName, delay) | Executes fnName every delay milliseconds |
+| use(coll) | Opens and returns a repository for the given collection |
+
+#### Repository methods
+
+These are methods available on a repository returned by `use`.
+
+| Method | Description |
+| ------ | ----------- |
+| repo.Fetch(id) | Attempts to load and return an entity with the given id |
+| repo.FetchAll() | Returns a collection of all the entities in the repository |
+| repo.Save(entity) | Saves the given entity |
 
 ### Event handlers
 
@@ -73,6 +86,37 @@ Event handlers receive an Event object with additional information. An example J
 function handler(e) {
     // e is an object with all the transmitted event details
 }
+```
+
+#### Binding a handler
+
+An event handler can either be a named function, or more commonly, a function itself.
+
+```js
+bind("irc.PRIVMSG", function(e) {
+    console.log("Received message from "+e.Nick);
+});
+
+// or
+function privmsgHandler(e) {
+    console.log("Received message from "+e.Nick);
+}
+bind("irc.PRIVMSG", privmsgHandler);
+```
+
+#### Unbinding a handler
+
+To unbind a handler, you must retain a reference to that function. Generally this means keeping
+a reference to the original handler around.
+
+```js
+function privmsgHandler(e) {
+    if (e.Nick == "Someone") {
+        // Unbind after Someone sends a message
+        unbind("irc.PRIVMSG", privmsgHandler);
+    }
+}
+bind("irc.PRIVMSG", privmsgHandler);
 ```
 
 #### Events
@@ -94,27 +138,41 @@ function handler(e) {
 Example Scripts
 ---------------
 
-### Join channels on connect (Javascript example)
+### Join channels on connect
 
 ```js
-function handleWelcome(code, target, nick, message) {
+bind("irc.CONNECT", function(e) {
     Irc.Join('#squishyslab')
-}
-bind("irc.CONNECT", "handleWelcome");
+});
 ```
 
-### Identify with Nickserv (Javascript example)
+### Identify with Nickserv
+
+In the example below, a handler is bound to the `irc.NOTICE` event. When NickServ notices you,
+requesting you identify, it will reply with your password.
 
 ```js
-function handleNickserv(code, target, nick, message) {
-    if (nick == "NickServ" && message.indexOf("identify") >= 0) {
+function handleNickserv(e) {
+    if (e.Nick == "NickServ" && e.Message.indexOf("identify") >= 0) {
         Irc.Privmsg("NickServ", "IDENTIFY superlongandsecurepassword");
         console.log("Identified with Nickserv");
     }
 }
-bind("irc.NOTICE", "handleNickserv");
+bind("irc.NOTICE", handleNickserv);
 ```
 
+When your handler function is invoked, an object (`e` in the example) is passed as 
+the first parameter. This object has different properties depending on the event.
+
+### Iterate over an event's properties
+
+```js
+bind("irc.WILDCARD", function(e) {
+    for (var i in e) {
+        console.log(i+": "+e[i]);
+    }
+});
+```
 
 Additional Info
 ---------------
