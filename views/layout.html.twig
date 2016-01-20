@@ -11,11 +11,11 @@
 </head>
 
 <body>
-{{ template "_page_javascripts" }}
 	<div id="main-container" class="container">
 		<div class="row">
 			<div class="col-md-12">
-			{{ yield }}
+			{% block content %}
+			{% endblock %}
 			</div>
 		</div>
 	</div>
@@ -40,6 +40,10 @@
 		      </ul>
 	  	</div>
 	</nav>
+
+    {% include '_page_javascripts.html.twig' %}
+    {% block additional_javascripts %}
+    {% endblock %}
 </body>
 
 </html>

@@ -76,7 +76,7 @@ func newEventTracer(evm event.EventManager) *eventTracer {
 	evm.Bind(event.AllEvents, func(ev event.Event) {
 		history, ok := t.data[ev.Type]
 		if !ok {
-			history = make([]map[string]interface{}, 1)
+			history = make([]map[string]interface{}, 0)
 		}
 
 		if len(history) >= t.limit {

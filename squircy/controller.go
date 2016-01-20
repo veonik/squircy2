@@ -10,18 +10,44 @@ import (
 	"github.com/tyler-sommer/squircy2/squircy/script"
 	"net/http"
 	"strconv"
+	"github.com/tyler-sommer/stick"
+	"fmt"
+	"html"
 )
+
+type stickHandler struct {
+	env *stick.Env
+	res http.ResponseWriter
+}
+
+func (h *stickHandler) HTML(status int, name string, ctx map[string]stick.Value) {
+	h.res.WriteHeader(200)
+	err := h.env.Execute(name, h.res, ctx)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func newStickHandler(rootDir string) martini.Handler {
+	return func(res http.ResponseWriter, req *http.Request, c martini.Context) {
+		env := stick.NewEnv(stick.NewFilesystemLoader(rootDir))
+		env.SetFunction("escape", func(e *stick.Env, args ...stick.Value) stick.Value {
+			if len(args) < 1 {
+				return nil
+			}
+			return html.EscapeString(stick.CoerceString(args[0]))
+		})
+		c.Map(&stickHandler{env, res})
+	}
+}
 
 func configureWeb(manager *Manager, conf *config.Configuration) {
 	manager.Handlers(
 		martini.Static(conf.RootPath+"/public", martini.StaticOptions{
 			SkipLogging: true,
 		}),
-		render.Renderer(render.Options{
-			Directory:  conf.RootPath + "/views",
-			Layout:     "layout",
-			Extensions: []string{".tmpl", ".html"},
-		}))
+		render.Renderer(),
+		newStickHandler(conf.RootPath + "/views"))
 	manager.Get("/event", func(es eventsource.EventSource, w http.ResponseWriter, r *http.Request) {
 		es.ServeHTTP(w, r)
 	})
@@ -48,8 +74,8 @@ func configureWeb(manager *Manager, conf *config.Configuration) {
 	})
 }
 
-func indexAction(r render.Render, t *eventTracer) {
-	r.HTML(200, "index", map[string]interface{}{
+func indexAction(s *stickHandler, t *eventTracer) {
+	s.HTML(200, "index.html.twig", map[string]stick.Value{
 		"terminal": t.History(OutputEvent),
 		"irc":      t.History(irc.IrcEvent),
 	})
@@ -63,10 +89,10 @@ func statusAction(r render.Render, mgr *irc.IrcConnectionManager) {
 	r.JSON(200, appStatus{mgr.Status()})
 }
 
-func scriptAction(r render.Render, repo script.ScriptRepository) {
+func scriptAction(s *stickHandler, repo script.ScriptRepository) {
 	scripts := repo.FetchAll()
 
-	r.HTML(200, "script/index", map[string]interface{}{"scripts": scripts})
+	s.HTML(200, "script/index.html.twig", map[string]stick.Value{"scripts": scripts})
 }
 
 func scriptReinitAction(r render.Render, mgr *script.ScriptManager) {
@@ -89,12 +115,12 @@ func createScriptAction(r render.Render, repo script.ScriptRepository, request *
 	r.Redirect("/script", 302)
 }
 
-func editScriptAction(r render.Render, repo script.ScriptRepository, params martini.Params) {
+func editScriptAction(s *stickHandler, repo script.ScriptRepository, params martini.Params) {
 	id, _ := strconv.ParseInt(params["id"], 0, 64)
 
 	script := repo.Fetch(int(id))
 
-	r.HTML(200, "script/edit", map[string]interface{}{"Script": script})
+	s.HTML(200, "script/edit.html.twig", map[string]stick.Value{"script": script})
 }
 
 func updateScriptAction(r render.Render, repo script.ScriptRepository, params martini.Params, request *http.Request) {
@@ -116,8 +142,8 @@ func removeScriptAction(r render.Render, repo script.ScriptRepository, params ma
 	r.JSON(200, nil)
 }
 
-func replAction(r render.Render) {
-	r.HTML(200, "repl/index", nil)
+func replAction(s *stickHandler) {
+	s.HTML(200, "repl/index.html.twig", nil)
 }
 
 func replExecuteAction(r render.Render, manager *script.ScriptManager, request *http.Request) {
@@ -147,9 +173,9 @@ func disconnectAction(r render.Render, mgr *irc.IrcConnectionManager) {
 	r.JSON(200, nil)
 }
 
-func manageAction(r render.Render, config *config.Configuration) {
-	r.HTML(200, "manage/edit", map[string]interface{}{
-		"Config": config,
+func manageAction(s *stickHandler, config *config.Configuration) {
+	s.HTML(200, "manage/edit.html.twig", map[string]stick.Value{
+		"config": config,
 	})
 }
 

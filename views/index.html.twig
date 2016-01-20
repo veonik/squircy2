@@ -1,15 +1,21 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
 <div class="row">
 	<div class="col-md-8">
 		<h4>Dashboard</h4>
 	</div>
-	<div class="col-md-4">
-		<h5>Terminal</h5>
-		<pre id="terminal-log" class="history">{{ range .terminal }}{{ .Message }}{{ end }}</pre>
+    <div class="col-md-4">
+        <h5>Terminal</h5>
+        <pre id="terminal-log" class="history">{% for line in terminal %}{{ line.Message }}{% endfor %}</pre>
         <h5>Events</h5>
-        <pre id="event-log" class="history">{{ range .irc }}[{{ .Code }}] {{ .Nick }}->{{ .Target }}: {{ .Message }}
-{{ end }}</pre>
-	</div>
+        <pre id="event-log" class="history">{% for line in irc %}[{{ line.Code }}] {{ line.Nick }}->{{ line.Target }}: {{ line.Message }}
+{% endfor %}</pre>
+    </div>
 </div>
+{% endblock %}
+
+{% block additional_javascripts %}
 <script type="text/javascript">
 $(function() {
     var $eventLog = $('#event-log');
@@ -30,3 +36,4 @@ $(function() {
     $terminalLog[0].scrollTop = $terminalLog[0].scrollHeight;
 });
 </script>
+{% endblock %}
