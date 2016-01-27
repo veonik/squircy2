@@ -31,12 +31,12 @@ func (h *stickHandler) HTML(status int, name string, ctx map[string]stick.Value)
 func newStickHandler(rootDir string) martini.Handler {
 	return func(res http.ResponseWriter, req *http.Request, c martini.Context) {
 		env := stick.NewEnv(stick.NewFilesystemLoader(rootDir))
-		env.SetFunction("escape", func(e *stick.Env, args ...stick.Value) stick.Value {
+		env.Functions["escape"] = func(e *stick.Env, args ...stick.Value) stick.Value {
 			if len(args) < 1 {
 				return nil
 			}
 			return html.EscapeString(stick.CoerceString(args[0]))
-		})
+		}
 		c.Map(&stickHandler{env, res})
 	}
 }
