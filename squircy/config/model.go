@@ -16,6 +16,7 @@ func flattenConfig(config *Configuration) map[string]interface{} {
 		"Username":  config.Username,
 		"OwnerNick": config.OwnerNick,
 		"OwnerHost": config.OwnerHost,
+		"TLS":       config.TLS,
 	}
 }
 

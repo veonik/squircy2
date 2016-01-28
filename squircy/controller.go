@@ -185,7 +185,12 @@ func manageUpdateAction(r render.Render, database *db.DB, conf *config.Configura
 	conf.Username = request.FormValue("username")
 	conf.OwnerNick = request.FormValue("owner_nick")
 	conf.OwnerHost = request.FormValue("owner_host")
-
+	if request.FormValue("tls") == "on" {
+		conf.TLS = "checked"
+	} else {
+		conf.TLS = ""
+	}
+	
 	config.SaveConfig(database, conf)
 
 	r.Redirect("/manage", 302)
