@@ -1,6 +1,7 @@
 package irc
 
 import (
+	"crypto/tls"
 	"github.com/codegangsta/inject"
 	ircevent "github.com/thoj/go-ircevent"
 	"github.com/tyler-sommer/squircy2/squircy/config"
