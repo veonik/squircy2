@@ -101,8 +101,8 @@ func scriptReinitAction(r render.Render, mgr *script.ScriptManager) {
 	r.JSON(200, nil)
 }
 
-func newScriptAction(r render.Render) {
-	r.HTML(200, "script/new", nil)
+func newScriptAction(s *stickHandler) {
+	s.HTML(200, "script/new.html.twig", nil)
 }
 
 func createScriptAction(r render.Render, repo script.ScriptRepository, request *http.Request) {
