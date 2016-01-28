@@ -3,9 +3,8 @@ package config
 import (
 	"github.com/HouzuoGuo/tiedot/db"
 	"go/build"
+	"os"
 )
-
-const basePkg = "github.com/tyler-sommer/squircy2"
 
 type Configuration struct {
 	ID        int
@@ -38,12 +37,13 @@ func compile(config *Configuration) {
 	return
 }
 
-func resolveRoot() string {
-	p, err := build.Default.Import(basePkg, "", build.FindOnly)
+func resolveRoot() string {	
+	wd, err := os.Getwd()
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
-	return p.Dir
+	return wd
 }
 
 func LoadConfig(database *db.DB, config *Configuration) {
