@@ -6,9 +6,13 @@
 	<div class="col-md-12">
 <form method="post" action="/manage/update">
 <div class="row">
-	<div class="col-md-4 form-group">
+	<div class="col-md-3 form-group">
 		<label for="network">IRC Network</label>
   		<input class="form-control" name="network" id="network" placeholder="irc.freenode.net:6667" value="{{ config.Network }}">
+	</div>
+	<div class="col-md-1 form-group">
+		<label for="tls">Use TLS</label>
+  		<input class="form-control" type="checkbox" name="tls" id="tls" {{ config.TLS }}>
 	</div>
 	<div class="col-md-4 form-group">
 		<label for="nick">IRC Nickname</label>
