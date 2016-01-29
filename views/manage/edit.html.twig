@@ -9,7 +9,14 @@
 	<div class="col-md-4 form-group">
 		<label for="network">IRC Network</label>
   		<input class="form-control" name="network" id="network" placeholder="irc.freenode.net:6667" value="{{ config.Network }}">
+		<div class="checkbox">
+			<label for="tls">
+				<input type="checkbox" name="tls" id="tls" value="on" {% if config.TLS %}checked {% endif %}> Use TLS
+			</label>
+		</div>
 	</div>
+</div>
+<div class="row">
 	<div class="col-md-4 form-group">
 		<label for="nick">IRC Nickname</label>
   		<input class="form-control" name="nick" id="nick" placeholder="mrsquishy" value="{{ config.Nick }}">

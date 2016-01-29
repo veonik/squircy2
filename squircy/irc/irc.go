@@ -1,6 +1,7 @@
 package irc
 
 import (
+	"crypto/tls"
 	"github.com/codegangsta/inject"
 	ircevent "github.com/thoj/go-ircevent"
 	"github.com/tyler-sommer/squircy2/squircy/config"
@@ -54,6 +55,11 @@ func connect(mgr *IrcConnectionManager, conf *config.Configuration, l *log.Logge
 		mgr.conn.Log = l
 		mgr.injector.Map(mgr.conn)
 		mgr.injector.Invoke(bindEvents)
+	}
+
+	if conf.TLS {
+		mgr.conn.UseTLS = true
+		mgr.conn.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 
 	mgr.status = Connecting

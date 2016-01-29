@@ -5,13 +5,16 @@
 	<div class="col-md-8">
 		<h4>Dashboard</h4>
 	</div>
-    <div class="col-md-4">
+</div>
+<div class="row">
+    <div class="col-md-12">
         <h5>Terminal</h5>
         <pre id="terminal-log" class="history">{% for line in terminal %}{{ line.Message }}{% endfor %}</pre>
         <h5>Events</h5>
         <pre id="event-log" class="history">{% for line in irc %}[{{ line.Code }}] {{ line.Nick }}->{{ line.Target }}: {{ line.Message }}
 {% endfor %}</pre>
     </div>
+</div>
 </div>
 {% endblock %}
 

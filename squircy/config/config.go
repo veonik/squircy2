@@ -5,8 +5,6 @@ import (
 	"go/build"
 )
 
-const basePkg = "github.com/tyler-sommer/squircy2"
-
 type Configuration struct {
 	ID        int
 	Network   string
@@ -15,27 +13,30 @@ type Configuration struct {
 	OwnerNick string
 	OwnerHost string
 	RootPath  string
+	TLS       bool
 }
 
-func NewDefaultConfiguration() (config *Configuration) {
-	config = &Configuration{
+const basePkg = "github.com/tyler-sommer/squircy2"
+
+func NewConfiguration(rootPath string) *Configuration {
+	if len(rootPath) == 0 {
+		rootPath = resolveRoot()
+	}
+	config := &Configuration{
 		-1,
 		"irc.freenode.net:6667",
 		"mrsquishy",
-		"mrjones",
+		"squishyj",
 		"",
 		"",
-		"",
+		rootPath,
+		false,
 	}
-	compile(config)
-	return
+	return config
 }
 
-func compile(config *Configuration) {
-	if len(config.RootPath) == 0 {
-		config.RootPath = resolveRoot()
-	}
-	return
+func NewDefaultConfiguration() *Configuration {
+	return NewConfiguration("")
 }
 
 func resolveRoot() string {

@@ -1,6 +1,7 @@
 package squircy
 
 import (
+	"fmt"
 	"github.com/HouzuoGuo/tiedot/db"
 	"github.com/antage/eventsource"
 	"github.com/go-martini/martini"
@@ -8,11 +9,10 @@ import (
 	"github.com/tyler-sommer/squircy2/squircy/config"
 	"github.com/tyler-sommer/squircy2/squircy/irc"
 	"github.com/tyler-sommer/squircy2/squircy/script"
+	"github.com/tyler-sommer/stick"
+	"html"
 	"net/http"
 	"strconv"
-	"github.com/tyler-sommer/stick"
-	"fmt"
-	"html"
 )
 
 type stickHandler struct {
@@ -47,7 +47,7 @@ func configureWeb(manager *Manager, conf *config.Configuration) {
 			SkipLogging: true,
 		}),
 		render.Renderer(),
-		newStickHandler(conf.RootPath + "/views"))
+		newStickHandler(conf.RootPath+"/views"))
 	manager.Get("/event", func(es eventsource.EventSource, w http.ResponseWriter, r *http.Request) {
 		es.ServeHTTP(w, r)
 	})
@@ -185,6 +185,11 @@ func manageUpdateAction(r render.Render, database *db.DB, conf *config.Configura
 	conf.Username = request.FormValue("username")
 	conf.OwnerNick = request.FormValue("owner_nick")
 	conf.OwnerHost = request.FormValue("owner_host")
+	if request.FormValue("tls") == "on" {
+		conf.TLS = true
+	} else {
+		conf.TLS = false
+	}
 
 	config.SaveConfig(database, conf)
 
