@@ -16,12 +16,12 @@ type Manager struct {
 	*martini.ClassicMartini
 }
 
-func NewManager() (manager *Manager) {
+func NewManager(rootPath string) (manager *Manager) {
 	manager = &Manager{martini.Classic()}
 	manager.Map(manager)
 	manager.Map(manager.Injector)
 
-	conf := config.NewDefaultConfiguration()
+	conf := config.NewConfiguration(rootPath)
 	database := data.NewDatabaseConnection(conf.RootPath)
 	config.LoadConfig(database, conf)
 

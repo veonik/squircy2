@@ -1,9 +1,8 @@
 package config
 
 import (
-	"fmt"
 	"github.com/HouzuoGuo/tiedot/db"
-	"os"
+	"go/build"
 )
 
 type Configuration struct {
@@ -14,38 +13,38 @@ type Configuration struct {
 	OwnerNick string
 	OwnerHost string
 	RootPath  string
-	TLS       string
+	TLS       bool
 }
 
-func NewDefaultConfiguration() (config *Configuration) {
-	config = &Configuration{
+const basePkg = "github.com/tyler-sommer/squircy2"
+
+func NewConfiguration(rootPath string) *Configuration {
+	if len(rootPath) == 0 {
+		rootPath = resolveRoot()
+	}
+	config := &Configuration{
 		-1,
 		"irc.freenode.net:6667",
-		"nickname",
-		"username",
+		"mrsquishy",
+		"squishyj",
 		"",
 		"",
-		"",
-		"",
+		rootPath,
+		false,
 	}
-	compile(config)
-	return
+	return config
 }
 
-func compile(config *Configuration) {
-	if len(config.RootPath) == 0 {
-		config.RootPath = resolveRoot()
-	}
-	return
+func NewDefaultConfiguration() *Configuration {
+	return NewConfiguration("")
 }
 
 func resolveRoot() string {
-	wd, err := os.Getwd()
+	p, err := build.Default.Import(basePkg, "", build.FindOnly)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		panic(err)
 	}
-	return wd
+	return p.Dir
 }
 
 func LoadConfig(database *db.DB, config *Configuration) {

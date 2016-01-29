@@ -56,8 +56,8 @@ func connect(mgr *IrcConnectionManager, conf *config.Configuration, l *log.Logge
 		mgr.injector.Map(mgr.conn)
 		mgr.injector.Invoke(bindEvents)
 	}
-	
-	if len(conf.TLS) > 0 {
+
+	if conf.TLS {
 		mgr.conn.UseTLS = true
 		mgr.conn.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	}
