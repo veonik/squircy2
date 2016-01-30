@@ -3,12 +3,13 @@ package squircy
 import (
 	"bufio"
 	"fmt"
-	"github.com/tyler-sommer/squircy2/squircy/event"
-	"github.com/tyler-sommer/squircy2/squircy/irc"
 	"io"
 	"log"
 	"os"
 	"time"
+
+	"github.com/tyler-sommer/squircy2/squircy/event"
+	"github.com/tyler-sommer/squircy2/squircy/irc"
 )
 
 const (

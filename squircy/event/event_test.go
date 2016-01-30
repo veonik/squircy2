@@ -1,8 +1,9 @@
 package event
 
 import (
-	"github.com/codegangsta/inject"
 	"testing"
+
+	"github.com/codegangsta/inject"
 )
 
 const TestEvent EventType = "test"

@@ -3,10 +3,11 @@ package script
 import (
 	"crypto/sha1"
 	"fmt"
+	"time"
+
 	"github.com/robertkrimen/otto"
 	"github.com/tyler-sommer/squircy2/squircy/data"
 	"github.com/tyler-sommer/squircy2/squircy/event"
-	"time"
 )
 
 // timer represents a function call to be performed after a delay.

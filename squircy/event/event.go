@@ -2,9 +2,10 @@ package event
 
 import (
 	"errors"
-	"github.com/codegangsta/inject"
 	"reflect"
 	"sync"
+
+	"github.com/codegangsta/inject"
 )
 
 var InvalidHandler = errors.New("Invalid handler")
