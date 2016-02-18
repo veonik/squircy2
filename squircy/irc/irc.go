@@ -2,10 +2,11 @@ package irc
 
 import (
 	"crypto/tls"
+	"log"
+
 	"github.com/codegangsta/inject"
 	ircevent "github.com/thoj/go-ircevent"
 	"github.com/tyler-sommer/squircy2/squircy/config"
-	"log"
 )
 
 type ConnectionStatus int

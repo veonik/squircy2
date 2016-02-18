@@ -2,6 +2,7 @@ package data
 
 import (
 	"encoding/json"
+
 	"github.com/HouzuoGuo/tiedot/db"
 )
 

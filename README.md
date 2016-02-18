@@ -13,13 +13,16 @@ even the web.
 Installation
 ------------
 
-installing squIRCy2 is as easy as running:
+Installing squIRCy2 is as easy as running:
 
 ```
 go get -u github.com/tyler-sommer/squircy2
 ```
 
-With squIRCy2 is installed, you can run it immediately with `squircy2` and a default configuration will be initialized.
+With squIRCy2 is installed, you can run it immediately with `squircy2` and a default configuration will be initialized
+in `~/.squircy2`.
+
+> For information on modifying and customizing squircy2 itself, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 
 Configuration
@@ -38,14 +41,15 @@ From the Scripts page, you can add and edit scripts.
 From the Dashboard page, you can see CLI and IRC history.
 
 
-Exposed API
------------
+Scripting
+---------
 
-squIRCy2 exposes a small API to each scripting language.
+squIRCy2 embeds a Javascript interpreter, allowing you to write scripts to implement various bot behaviors.
 
 ### Javascript API
 
 [otto](https://github.com/robertkrimen/otto) supports ECMAScript 5, less a regular expression incompatibility.
+Additionally, the following functions are available to interact with the various squIRCy2 modules:
 
 | Method | Description |
 | ------ | ----------- |
@@ -177,4 +181,8 @@ bind("irc.WILDCARD", function(e) {
 Additional Info
 ---------------
 
-squIRCy2 leverages [go-irc-event](https://github.com/thoj/go-ircevent) for IRC interaction. It makes use of [martini](https://github.com/go-martini/martini) for serving web requests and dependency injection. [Tiedot](https://github.com/HouzuoGuo/tiedot) is used as the storage engine. squIRCy2 embeds the [otto Javascript VM](https://github.com/robertkrimen/otto).
+squIRCy2 leverages [go-irc-event](https://github.com/thoj/go-ircevent) for IRC interaction. 
+It makes use of [martini](https://github.com/go-martini/martini) for serving web requests and 
+dependency injection. [Tiedot](https://github.com/HouzuoGuo/tiedot) is used as the storage engine. 
+squIRCy2 embeds the [otto Javascript VM](https://github.com/robertkrimen/otto). Finally, it uses
+[the stick templating engine](https://github.com/tyler-sommer/stick) for rendering HTML templates.

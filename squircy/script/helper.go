@@ -2,12 +2,13 @@ package script
 
 import (
 	"fmt"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/tyler-sommer/squircy2/squircy/config"
 	"github.com/tyler-sommer/squircy2/squircy/event"
 	"github.com/tyler-sommer/squircy2/squircy/irc"
 	"github.com/tyler-sommer/squircy2/squircy/sysinfo"
-	"io/ioutil"
-	"net/http"
 )
 
 type httpHelper struct{}

@@ -2,10 +2,11 @@ package script
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/tyler-sommer/squircy2/squircy/config"
 	"github.com/tyler-sommer/squircy2/squircy/event"
 	"github.com/tyler-sommer/squircy2/squircy/irc"
-	"log"
 )
 
 type ScriptManager struct {

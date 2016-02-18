@@ -3,9 +3,10 @@ package script
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/robertkrimen/otto"
 	"github.com/tyler-sommer/squircy2/squircy/event"
-	"time"
 )
 
 const maxExecutionTime = 30 // in seconds

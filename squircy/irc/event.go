@@ -2,6 +2,7 @@ package irc
 
 import (
 	"fmt"
+
 	ircevent "github.com/thoj/go-ircevent"
 	"github.com/tyler-sommer/squircy2/squircy/event"
 )

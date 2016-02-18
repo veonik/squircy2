@@ -2,6 +2,10 @@ package squircy
 
 import (
 	"fmt"
+	"html"
+	"net/http"
+	"strconv"
+
 	"github.com/HouzuoGuo/tiedot/db"
 	"github.com/antage/eventsource"
 	"github.com/go-martini/martini"
@@ -10,9 +14,6 @@ import (
 	"github.com/tyler-sommer/squircy2/squircy/irc"
 	"github.com/tyler-sommer/squircy2/squircy/script"
 	"github.com/tyler-sommer/stick"
-	"html"
-	"net/http"
-	"strconv"
 )
 
 type stickHandler struct {
@@ -28,26 +29,25 @@ func (h *stickHandler) HTML(status int, name string, ctx map[string]stick.Value)
 	}
 }
 
-func newStickHandler(rootDir string) martini.Handler {
-	return func(res http.ResponseWriter, req *http.Request, c martini.Context) {
-		env := stick.NewEnv(stick.NewFilesystemLoader(rootDir))
-		env.Functions["escape"] = func(e *stick.Env, args ...stick.Value) stick.Value {
-			if len(args) < 1 {
-				return nil
-			}
-			return html.EscapeString(stick.CoerceString(args[0]))
+func newStickHandler() martini.Handler {
+	env := stick.NewEnv(newTemplateLoader())
+	env.Functions["escape"] = func(e *stick.Env, args ...stick.Value) stick.Value {
+		if len(args) < 1 {
+			return nil
 		}
+		return html.EscapeString(stick.CoerceString(args[0]))
+	}
+	return func(res http.ResponseWriter, req *http.Request, c martini.Context) {
 		c.Map(&stickHandler{env, res})
 	}
 }
 
 func configureWeb(manager *Manager, conf *config.Configuration) {
 	manager.Handlers(
-		martini.Static(conf.RootPath+"/public", martini.StaticOptions{
-			SkipLogging: true,
-		}),
+		newStaticHandler(),
+		newStickHandler(),
 		render.Renderer(),
-		newStickHandler(conf.RootPath+"/views"))
+	)
 	manager.Get("/event", func(es eventsource.EventSource, w http.ResponseWriter, r *http.Request) {
 		es.ServeHTTP(w, r)
 	})
