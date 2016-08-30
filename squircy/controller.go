@@ -2,6 +2,7 @@ package squircy
 
 import (
 	"fmt"
+	"html"
 	"net/http"
 	"strconv"
 
@@ -29,7 +30,13 @@ func (h *stickHandler) HTML(status int, name string, ctx map[string]stick.Value)
 }
 
 func newStickHandler() martini.Handler {
-	env := stick.New(newTemplateLoader())
+	env := stick.NewEnv(newTemplateLoader())
+	env.Functions["escape"] = func(ctx stick.Context, args ...stick.Value) stick.Value {
+		if len(args) < 1 {
+			return nil
+		}
+		return html.EscapeString(stick.CoerceString(args[0]))
+	}
 	return func(res http.ResponseWriter, req *http.Request, c martini.Context) {
 		c.Map(&stickHandler{env, res})
 	}
