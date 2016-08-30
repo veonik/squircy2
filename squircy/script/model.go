@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/HouzuoGuo/tiedot/db"
+	"sort"
 )
 
 type ScriptType string
@@ -50,6 +51,20 @@ func flattenScript(script Script) map[string]interface{} {
 	return rawScript
 }
 
+type scriptSlice []Script
+
+func (s scriptSlice) Len() int {
+	return len(s)
+}
+
+func (s scriptSlice) Less(i, j int) bool {
+	return s[i].Title < s[j].Title;
+}
+
+func (s scriptSlice) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
 func (repo *ScriptRepository) FetchAll() []Script {
 	col := repo.database.Use("Scripts")
 	scripts := make([]Script, 0)
@@ -66,6 +81,8 @@ func (repo *ScriptRepository) FetchAll() []Script {
 
 		return
 	})
+
+	sort.Sort(scriptSlice(scripts))
 
 	return scripts
 }
