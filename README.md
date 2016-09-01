@@ -40,6 +40,8 @@ From the Scripts page, you can add and edit scripts.
 
 From the Dashboard page, you can see CLI and IRC history.
 
+From the REPL, you can write, run, and see the result of code.
+
 
 Scripting
 ---------
@@ -60,7 +62,10 @@ Additionally, the following functions are available to interact with the various
 | Irc.Nick(newNick) | Change the bot's nickname |
 | Data.Get(key) | Gets a value with the given from the cross-vm storage |
 | Data.Set(key, val) | Sets a value with the given key in the cross-vm storage |
-| Http.Get(url) | Fetch the given url using a GET HTTP request |
+| Http.Get(url, ...headers) | Fetch the given url using a GET HTTP request |
+| Http.Get(url, body, ...headers) | Fetch the given url using a POST HTTP request |
+| Math.Rand() | Generate a random value from 0-1 |
+| Math.Round(val) | Round val to 0 decimal places. |
 | Config.OwnerNick() | Get the configured Owner Nickname |
 | Config.OwnerHost() | Get the configured Owner Host |
 | bind(eventName, fnName) | Add a handler of the given event type and function name |
