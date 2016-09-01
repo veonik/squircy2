@@ -2,9 +2,9 @@ package script
 
 import (
 	"encoding/json"
+	"sort"
 
 	"github.com/HouzuoGuo/tiedot/db"
-	"sort"
 )
 
 type ScriptType string
@@ -36,6 +36,7 @@ func hydrateScript(rawScript map[string]interface{}) Script {
 	script.Enabled = rawScript["Enabled"].(bool)
 	script.Type = ScriptType(rawScript["Type"].(string))
 	script.Body = rawScript["Body"].(string)
+	script.Enabled = rawScript["Enabled"].(bool)
 
 	return script
 }
@@ -47,6 +48,7 @@ func flattenScript(script Script) map[string]interface{} {
 	rawScript["Enabled"] = script.Enabled
 	rawScript["Type"] = script.Type
 	rawScript["Body"] = script.Body
+	rawScript["Enabled"] = script.Enabled
 
 	return rawScript
 }
@@ -58,7 +60,7 @@ func (s scriptSlice) Len() int {
 }
 
 func (s scriptSlice) Less(i, j int) bool {
-	return s[i].Title < s[j].Title;
+	return s[i].Title < s[j].Title
 }
 
 func (s scriptSlice) Swap(i, j int) {

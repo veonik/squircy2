@@ -1,9 +1,14 @@
 package script
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
+	"math"
+	"math/rand"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/tyler-sommer/squircy2/squircy/config"
 	"github.com/tyler-sommer/squircy2/squircy/event"
@@ -13,17 +18,66 @@ import (
 
 type httpHelper struct{}
 
-func (client *httpHelper) Get(url string) string {
-	resp, err := http.Get(url)
+func (client *httpHelper) Get(uri string, headers ...string) string {
+	h := map[string][]string{}
+	for _, v := range headers {
+		p := strings.Split(v, ":")
+		if len(p) != 2 {
+			continue
+		}
+		if _, ok := h[p[0]]; !ok {
+			h[p[0]] = make([]string, 0)
+		}
+		h[p[0]] = append(h[p[0]], p[1])
+	}
+	req := &http.Request{
+		Method: "GET",
+		Header: http.Header(h),
+	}
+	req.URL, _ = url.Parse(uri)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return ""
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return ""
 	}
-	return string(body)
+	return string(b)
+}
+
+func (client *httpHelper) Post(uri string, body string, headers ...string) string {
+	h := map[string][]string{}
+	for _, v := range headers {
+		p := strings.Split(v, ":")
+		if len(p) != 2 {
+			continue
+		}
+		if _, ok := h[p[0]]; !ok {
+			h[p[0]] = make([]string, 0)
+		}
+		h[p[0]] = append(h[p[0]], p[1])
+	}
+	req := &http.Request{
+		Method:        "POST",
+		Body:          ioutil.NopCloser(bytes.NewBufferString(body)),
+		Header:        http.Header(h),
+		ContentLength: int64(len(body)),
+	}
+	req.URL, _ = url.Parse(uri)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+		return ""
+	}
+	return string(b)
 }
 
 type configHelper struct {
@@ -151,4 +205,14 @@ type osHelper struct{}
 
 func (h *osHelper) SystemInfo() sysinfo.SystemInfo {
 	return sysinfo.New()
+}
+
+type mathHelper struct{}
+
+func (h *mathHelper) Rand() float64 {
+	return rand.Float64()
+}
+
+func (h *mathHelper) Round(v float64) int {
+	return int(math.Floor(v + .5))
 }

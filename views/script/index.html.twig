@@ -19,6 +19,11 @@
 				<a href="/script/{{ el.ID }}/edit" class="btn btn-sm btn-default">Edit</a>
 				<a href="/script/{{ el.ID }}/remove" class="remove btn btn-sm btn-warning">Remove</a>
 			</div>
+			{% if el.Enabled %}
+				<a href="/script/{{ el.ID }}/toggle" class="toggle btn btn-sm btn-default">Disable</a>
+			{% else %}
+				<a href="/script/{{ el.ID }}/toggle" class="toggle btn btn-sm btn-success">Enable</a>
+			{% endif %}
 		</td>
 	</tr>
 	{% endfor %}
@@ -39,9 +44,22 @@ $(function() {
 				success: function() {
 					window.location.reload();
 				}
-			})
+			});
 		}
-	})
+	});
+
+	$('.toggle').on('click', function(e) {
+		e.preventDefault();
+
+		var url = $(this).attr('href');
+		$.ajax({
+			url: url,
+			type: 'post',
+			success: function() {
+				window.location.reload();
+			}
+		});
+	});
 });
 </script>
 {% endblock %}

@@ -17,6 +17,7 @@ type ScriptManager struct {
 	ircHelper    ircHelper
 	dataHelper   dataHelper
 	scriptHelper scriptHelper
+	mathHelper   mathHelper
 	osHelper     osHelper
 	repo         ScriptRepository
 	l            *log.Logger
@@ -31,6 +32,7 @@ func NewScriptManager(repo ScriptRepository, l *log.Logger, e event.EventManager
 		ircHelper{ircmanager},
 		dataHelper{make(map[string]interface{})},
 		scriptHelper{},
+		mathHelper{},
 		osHelper{},
 		repo,
 		l,
@@ -85,6 +87,9 @@ func (m *ScriptManager) init() {
 
 	scripts := m.repo.FetchAll()
 	for _, script := range scripts {
+		if !script.Enabled {
+			continue
+		}
 		m.l.Println("Running", script.Type, "script", script.Title)
 		m.RunUnsafe(script.Type, script.Body)
 	}

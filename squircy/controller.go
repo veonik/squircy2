@@ -42,7 +42,7 @@ func newStickHandler() martini.Handler {
 	}
 }
 
-func configureWeb(manager *Manager, conf *config.Configuration) {
+func configureWeb(manager *Manager) {
 	manager.Handlers(
 		newStaticHandler(),
 		newStickHandler(),
@@ -67,6 +67,7 @@ func configureWeb(manager *Manager, conf *config.Configuration) {
 		r.Get("/:id/edit", editScriptAction)
 		r.Post("/:id/update", updateScriptAction)
 		r.Post("/:id/remove", removeScriptAction)
+		r.Post("/:id/toggle", toggleScriptAction)
 	})
 	manager.Group("/repl", func(r martini.Router) {
 		r.Get("", replAction)
@@ -138,6 +139,16 @@ func removeScriptAction(r render.Render, repo script.ScriptRepository, params ma
 	id, _ := strconv.ParseInt(params["id"], 0, 64)
 
 	repo.Delete(int(id))
+
+	r.JSON(200, nil)
+}
+
+func toggleScriptAction(r render.Render, repo script.ScriptRepository, params martini.Params) {
+	id, _ := strconv.ParseInt(params["id"], 0, 64)
+
+	script := repo.Fetch(int(id))
+	script.Enabled = !script.Enabled
+	repo.Save(script)
 
 	r.JSON(200, nil)
 }

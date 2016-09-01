@@ -24,7 +24,6 @@ func main() {
 		go mgr.Run()
 
 		mgr.LoopCli()
-
 	} else {
 		mgr.Run()
 	}

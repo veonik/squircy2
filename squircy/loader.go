@@ -3,11 +3,12 @@
 package squircy
 
 import (
+	"bytes"
+	"io"
+
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/staticbin"
 	"github.com/tyler-sommer/stick"
-	"io"
-	"bytes"
 )
 
 type stringTemplate struct {

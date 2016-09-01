@@ -5,6 +5,7 @@ package squircy
 import (
 	"encoding/json"
 	"strconv"
+	"time"
 
 	"github.com/antage/eventsource"
 	"github.com/go-martini/martini"
@@ -58,7 +59,9 @@ func (manager *Manager) invokeAndMap(fn interface{}) interface{} {
 }
 
 func newEventSource(evm event.EventManager) eventsource.EventSource {
-	es := eventsource.New(nil, nil)
+	s := eventsource.DefaultSettings()
+	s.IdleTimeout = 30 * time.Second
+	es := eventsource.New(s, nil)
 
 	var id int = -1
 	evm.Bind(event.AllEvents, func(es eventsource.EventSource, ev event.Event) {
