@@ -25,10 +25,11 @@ type jsVm struct {
 
 	registry map[*timer]*timer
 	ready    chan *timer
+	quit     chan struct{}
 }
 
 func newJavascriptVm(m *ScriptManager) *jsVm {
-	jsVm := &jsVm{otto.New(), make(map[*timer]*timer), make(chan *timer)}
+	jsVm := &jsVm{otto.New(), make(map[*timer]*timer), make(chan *timer), make(chan struct{})}
 
 	getFnName := func(fn otto.Value) (name string) {
 		if fn.IsFunction() {
@@ -226,8 +227,8 @@ func (vm *jsVm) Loop() {
 			} else {
 				delete(vm.registry, ti)
 			}
-		default:
-			// no op
+		case <-vm.quit:
+			return
 		}
 	}
 }

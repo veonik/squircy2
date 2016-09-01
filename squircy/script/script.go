@@ -72,6 +72,7 @@ func (m *ScriptManager) RunUnsafe(t ScriptType, code string) (result interface{}
 }
 
 func (m *ScriptManager) ReInit() {
+	close(m.jsDriver.vm.quit)
 	m.init()
 }
 

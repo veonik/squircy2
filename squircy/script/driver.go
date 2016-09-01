@@ -9,7 +9,7 @@ import (
 	"github.com/tyler-sommer/squircy2/squircy/event"
 )
 
-const maxExecutionTime = 30 // in seconds
+const maxExecutionTime = 5 // in seconds
 var Halt = errors.New("Execution limit exceeded")
 var UnknownScriptType = errors.New("Unknown script type")
 
