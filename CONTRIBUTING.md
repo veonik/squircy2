@@ -109,7 +109,7 @@ git checkout -b new-and-awesome master
 This will checkout a new branch named `new-and-awesome` based on the current master branch.
 
 
-### 2. Implement your change, and publish the branch to your forked repository.
+### 2. Implement and publish your change.
 
 ```bash
 git add .
@@ -118,7 +118,7 @@ git push origin new-and-awesome
 ```
 
 
-### 3. Create a pull request from your feature branch to the master branch of this project.
+### 3. Create a pull request.
 
 From your repository on the GitHub interface, click the pull request button. Select your feature branch and ensure
 the master branch of squIRCy2 is selected.
