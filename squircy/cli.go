@@ -8,8 +8,11 @@ import (
 	"os"
 	"time"
 
+	"strings"
+
 	"github.com/tyler-sommer/squircy2/squircy/event"
 	"github.com/tyler-sommer/squircy2/squircy/irc"
+	"github.com/tyler-sommer/squircy2/squircy/script"
 )
 
 const (
@@ -21,37 +24,42 @@ func (man *Manager) LoopCli() {
 	man.Invoke(loopCli)
 }
 
-func loopCli(l *log.Logger, ircmgr *irc.IrcConnectionManager, evm event.EventManager) {
+func loopCli(l *log.Logger, ircmgr *irc.IrcConnectionManager, evm event.EventManager, scmgr *script.ScriptManager) {
 	help := func() {
-		fmt.Println(`Commands:
+		l.Println(`Commands:
 
 exit		Quits IRC, if connected, and exits the program
+reload		Reload the scripting engine
+repl		Start a JavaScript REPL
 debug		Toggles debug on or off`)
 		if ircmgr.Status() != irc.Disconnected {
-			fmt.Println("disconnect	Disconnect from IRC\n")
+			l.Println(`disconnect	Disconnect from IRC
+reconnect	Force a reconnection to IRC`)
 		} else {
-			fmt.Println("connect		Connect to IRC\n")
+			l.Println("connect		Connect to IRC")
 		}
+		l.Println()
 	}
 
 	help()
 
 	bin := bufio.NewReader(os.Stdin)
 	for {
-		str, _ := bin.ReadString('\n')
+		cmd, _ := bin.ReadString('\n')
+		cmd = strings.TrimSuffix(cmd, "\n")
 		evm.Trigger(InputEvent, map[string]interface{}{
-			"Message": str,
+			"Message": cmd,
 		})
 		switch {
-		case str == "exit\n" || str == "quit\n":
+		case cmd == "exit" || cmd == "quit":
 			go ircmgr.Quit()
 			time.Sleep(2 * time.Second)
 			l.Println("Exiting")
 			return
 
-		case str == "debug\n":
+		case cmd == "debug":
 			if ircmgr.Status() == irc.Disconnected {
-				fmt.Println("Not connected")
+				l.Println("Not connected")
 			} else {
 				conn := ircmgr.Connection()
 				debugging := !conn.Debug
@@ -64,17 +72,45 @@ debug		Toggles debug on or off`)
 				}
 			}
 
-		case str == "connect\n" || str == "disconnect\n":
+		case cmd == "reload":
+			l.Println("Reloading...")
+			scmgr.ReInit()
+			l.Println("Reloaded.")
+
+		case cmd == "repl":
+			cursorHandler := func(ev event.Event) {
+				fmt.Print("> ")
+			}
+			evm.Bind(OutputEvent, cursorHandler)
+			fmt.Println("Starting javascript REPL...")
+			fmt.Println("Type 'exit' and hit enter to exit the REPL.")
+			for {
+				fmt.Print("> ")
+				str, _ := bin.ReadString('\n')
+				if str == "exit\n" {
+					evm.Unbind(OutputEvent, cursorHandler)
+					fmt.Println("Closing REPL...")
+					break
+				}
+				v, _ := scmgr.RunUnsafe(script.Javascript, str)
+				fmt.Println(v)
+			}
+
+		case cmd == "connect" || cmd == "disconnect":
 			if ircmgr.Status() != irc.Disconnected {
-				fmt.Println("Disconnecting...")
+				l.Println("Disconnecting...")
 				ircmgr.Quit()
 			} else {
-				fmt.Println("Connecting...")
+				l.Println("Connecting...")
 				ircmgr.Connect()
 			}
 
+		case cmd == "reconnect":
+			l.Println("Reconnecting...")
+			ircmgr.Reconnect()
+
 		default:
-			fmt.Print("Unknown input. ")
+			l.Print("Unknown input. ")
 			help()
 		}
 	}
@@ -83,7 +119,7 @@ debug		Toggles debug on or off`)
 func configureLog(manager *Manager, evm event.EventManager) {
 	hist := &triggerLogger{evm}
 	out := io.MultiWriter(os.Stdout, hist)
-	logger := log.New(out, "", log.Ltime)
+	logger := log.New(out, "", 0)
 	manager.Map(logger)
 	manager.Map(hist)
 }

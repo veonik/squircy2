@@ -49,5 +49,7 @@ func newEventData(ev *ircevent.Event) map[string]interface{} {
 		"Message": ev.Message(),
 		"Nick":    ev.Nick,
 		"Target":  ev.Arguments[0],
+		"Raw":     ev.Raw,
+		"Args":    ev.Arguments,
 	}
 }

@@ -3,6 +3,8 @@ package data
 import (
 	"encoding/json"
 
+	"fmt"
+
 	"github.com/HouzuoGuo/tiedot/db"
 )
 
@@ -13,7 +15,7 @@ type GenericRepository struct {
 
 type GenericModel map[string]interface{}
 
-func NewGenericRepository(database *db.DB, coll string) GenericRepository {
+func NewGenericRepository(database *db.DB, coll string) *GenericRepository {
 	col := database.Use(coll)
 	if col == nil {
 		err := database.Create(coll)
@@ -24,7 +26,7 @@ func NewGenericRepository(database *db.DB, coll string) GenericRepository {
 		col = database.Use(coll)
 	}
 
-	return GenericRepository{database, coll}
+	return &GenericRepository{database, coll}
 }
 
 func hydrateGeneric(rawGeneric map[string]interface{}) GenericModel {
@@ -73,11 +75,17 @@ func (repo *GenericRepository) Save(generic GenericModel) {
 	data := flattenGeneric(generic)
 
 	if _, ok := generic["ID"]; !ok {
-		id, _ := col.Insert(data)
+		id, err := col.Insert(data)
 		generic["ID"] = id
+		if err != nil {
+			fmt.Println("An error occurred while inserting the model: ", err)
+		}
 
 	} else {
-		col.Update(generic["ID"].(int), data)
+		err := col.Update(generic["ID"].(int), data)
+		if err != nil {
+			fmt.Println("An error occurred while updating the model: ", err)
+		}
 	}
 }
 

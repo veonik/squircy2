@@ -111,7 +111,7 @@ func createScriptAction(r render.Render, repo script.ScriptRepository, request *
 	title := request.FormValue("title")
 	body := request.FormValue("body")
 
-	repo.Save(script.Script{0, script.ScriptType(sType), title, body, true})
+	repo.Save(&script.Script{0, script.ScriptType(sType), title, body, true})
 
 	r.Redirect("/script", 302)
 }
@@ -130,7 +130,7 @@ func updateScriptAction(r render.Render, repo script.ScriptRepository, params ma
 	title := request.FormValue("title")
 	body := request.FormValue("body")
 
-	repo.Save(script.Script{int(id), script.ScriptType(sType), title, body, true})
+	repo.Save(&script.Script{int(id), script.ScriptType(sType), title, body, true})
 
 	r.Redirect("/script", 302)
 }

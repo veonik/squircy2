@@ -29,8 +29,8 @@ func NewScriptRepository(database *db.DB) ScriptRepository {
 	return ScriptRepository{database}
 }
 
-func hydrateScript(rawScript map[string]interface{}) Script {
-	script := Script{}
+func hydrateScript(rawScript map[string]interface{}) *Script {
+	script := &Script{}
 
 	script.Title = rawScript["Title"].(string)
 	script.Enabled = rawScript["Enabled"].(bool)
@@ -41,7 +41,7 @@ func hydrateScript(rawScript map[string]interface{}) Script {
 	return script
 }
 
-func flattenScript(script Script) map[string]interface{} {
+func flattenScript(script *Script) map[string]interface{} {
 	rawScript := make(map[string]interface{})
 
 	rawScript["Title"] = script.Title
@@ -53,7 +53,7 @@ func flattenScript(script Script) map[string]interface{} {
 	return rawScript
 }
 
-type scriptSlice []Script
+type scriptSlice []*Script
 
 func (s scriptSlice) Len() int {
 	return len(s)
@@ -67,9 +67,9 @@ func (s scriptSlice) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-func (repo *ScriptRepository) FetchAll() []Script {
+func (repo *ScriptRepository) FetchAll() []*Script {
 	col := repo.database.Use("Scripts")
-	scripts := make([]Script, 0)
+	scripts := make([]*Script, 0)
 	col.ForEachDoc(func(id int, doc []byte) (moveOn bool) {
 		moveOn = true
 
@@ -89,7 +89,7 @@ func (repo *ScriptRepository) FetchAll() []Script {
 	return scripts
 }
 
-func (repo *ScriptRepository) Fetch(id int) Script {
+func (repo *ScriptRepository) Fetch(id int) *Script {
 	col := repo.database.Use("Scripts")
 
 	rawScript, err := col.Read(id)
@@ -102,7 +102,7 @@ func (repo *ScriptRepository) Fetch(id int) Script {
 	return script
 }
 
-func (repo *ScriptRepository) Save(script Script) {
+func (repo *ScriptRepository) Save(script *Script) {
 	col := repo.database.Use("Scripts")
 	data := flattenScript(script)
 

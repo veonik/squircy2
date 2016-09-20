@@ -1,7 +1,6 @@
 package script
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/tyler-sommer/squircy2/squircy/config"
@@ -26,7 +25,7 @@ type ScriptManager struct {
 func NewScriptManager(repo ScriptRepository, l *log.Logger, e event.EventManager, ircmanager *irc.IrcConnectionManager, config *config.Configuration) *ScriptManager {
 	mgr := ScriptManager{
 		e,
-		javascriptDriver{},
+		javascriptDriver{nil, l},
 		httpHelper{},
 		configHelper{config},
 		ircHelper{ircmanager},
@@ -51,13 +50,11 @@ func (m *ScriptManager) RunUnsafe(t ScriptType, code string) (result interface{}
 			err = e.(error)
 			return
 		}
-	}()
-
-	defer func() {
 		if err != nil {
-			fmt.Println("An error occurred: ", err)
+			m.l.Println("An error occurred: ", err)
 		}
 	}()
+
 	var d scriptDriver
 	switch {
 	case t == Javascript:

@@ -30,7 +30,6 @@ type jsVm struct {
 
 func newJavascriptVm(m *ScriptManager) *jsVm {
 	jsVm := &jsVm{otto.New(), make(map[*timer]*timer), make(chan *timer), make(chan struct{})}
-
 	getFnName := func(fn otto.Value) (name string) {
 		if fn.IsFunction() {
 			name = fmt.Sprintf("__Handler%x", sha1.Sum([]byte(fn.String())))
@@ -113,11 +112,11 @@ func newJavascriptVm(m *ScriptManager) *jsVm {
 	})
 	jsVm.Set("trigger", func(call otto.FunctionCall) otto.Value {
 		eventType := call.Argument(0).String()
-		data, _ := call.Argument(1).Export()
-		if data == nil {
-			data = make(map[string]interface{}, 0)
+		dat, _ := call.Argument(1).Export()
+		if dat == nil {
+			dat = make(map[string]interface{}, 0)
 		}
-		m.scriptHelper.Trigger(event.EventType(eventType), data.(map[string]interface{}))
+		m.scriptHelper.Trigger(event.EventType(eventType), dat.(map[string]interface{}))
 		return otto.UndefinedValue()
 	})
 	jsVm.Set("use", func(call otto.FunctionCall) otto.Value {
@@ -142,12 +141,22 @@ func newJavascriptVm(m *ScriptManager) *jsVm {
 
 			case int:
 				model["ID"] = t
+
+			case float64:
+				model["ID"] = int(t)
 			}
 			db.Save(model)
 
 			id, _ := jsVm.ToValue(model["ID"])
 
 			return id
+		})
+		obj.Set("Delete", func(call otto.FunctionCall) otto.Value {
+			i, _ := call.Argument(0).ToInteger()
+			db.Delete(int(i))
+
+			res, _ := jsVm.ToValue(true)
+			return res
 		})
 		obj.Set("Fetch", func(call otto.FunctionCall) otto.Value {
 			i, _ := call.Argument(0).ToInteger()
@@ -165,7 +174,7 @@ func newJavascriptVm(m *ScriptManager) *jsVm {
 			v, err := jsVm.ToValue(vals)
 
 			if err != nil {
-				panic(err)
+				m.l.Println("An error occurred: ", err)
 			}
 
 			return v
@@ -186,7 +195,7 @@ func newJavascriptVm(m *ScriptManager) *jsVm {
 			v, err := jsVm.ToValue(vals)
 
 			if err != nil {
-				panic(err)
+				m.l.Println("An error occurred: ", err)
 			}
 
 			return v
