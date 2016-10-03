@@ -30,7 +30,7 @@ func (h *stickHandler) HTML(status int, name string, ctx map[string]stick.Value)
 }
 
 func newStickHandler() martini.Handler {
-	env := stick.NewEnv(newTemplateLoader())
+	env := stick.New(newTemplateLoader())
 	env.Functions["escape"] = func(ctx stick.Context, args ...stick.Value) stick.Value {
 		if len(args) < 1 {
 			return nil

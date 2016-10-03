@@ -216,3 +216,11 @@ func (h *mathHelper) Rand() float64 {
 func (h *mathHelper) Round(v float64) int {
 	return int(math.Floor(v + .5))
 }
+
+func (h *mathHelper) Ceil(v float64) int {
+	return int(math.Ceil(v))
+}
+
+func (h *mathHelper) Floor(v float64) int {
+	return int(math.Floor(v))
+}

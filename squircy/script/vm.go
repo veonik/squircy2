@@ -85,11 +85,65 @@ func newJavascriptVm(m *ScriptManager) *jsVm {
 	jsVm.Set("clearTimeout", clearTimer)
 	jsVm.Set("clearInterval", clearTimer)
 	jsVm.Set("Http", &m.httpHelper)
+	v, _ := jsVm.Object("Http")
+	v.Set("Send", func(call otto.FunctionCall) otto.Value {
+		o := call.Argument(0).Object()
+		if o == nil {
+			fmt.Printf("Expected argument 0 to be object, got: %v\n", o)
+			return otto.UndefinedValue()
+		}
+		urlVal, err := o.Get("url")
+		if err != nil {
+			fmt.Printf("'url' is a required option\n")
+			return otto.UndefinedValue()
+		}
+		url, err := urlVal.ToString()
+		if err != nil {
+			fmt.Printf("Could not coerce 'url' into string\n")
+			return otto.UndefinedValue()
+		}
+		typVal, _ := o.Get("type")
+		typ, _ := typVal.ToString()
+		successCb, _ := o.Get("success")
+		datVal, _ := o.Get("data")
+		dat, _ := datVal.ToString()
+		headerVal, _ := o.Get("headers")
+		headers := make([]string, 0)
+		if headerVal.IsString() {
+			h, _ := headerVal.ToString()
+			headers = append(headers, h)
+		} else if headerVal.IsObject() {
+			h := headerVal.Object()
+			for _, k := range h.Keys() {
+				v, _ := h.Get(k)
+				headers = append(headers, fmt.Sprintf("%s: %s", k, v))
+			}
+		}
+		go func() {
+			var res string
+			switch typ {
+			case "post":
+				res = m.httpHelper.Post(url, dat, headers...)
+			default:
+				res = m.httpHelper.Get(url, headers...)
+			}
+			if successCb.IsFunction() {
+				successCb.Call(successCb, res)
+			}
+		}()
+
+		return otto.UndefinedValue()
+	})
 	jsVm.Set("Config", &m.configHelper)
 	jsVm.Set("Data", &m.dataHelper)
 	jsVm.Set("Irc", &m.ircHelper)
 	jsVm.Set("Os", &m.osHelper)
 	jsVm.Set("Math", &m.mathHelper)
+	v, _ = jsVm.Object("Math")
+	v.Set("rand", (&m.mathHelper).Rand)
+	v.Set("round", (&m.mathHelper).Round)
+	v.Set("ceil", (&m.mathHelper).Ceil)
+	v.Set("floor", (&m.mathHelper).Floor)
 	jsVm.Set("bind", func(call otto.FunctionCall) otto.Value {
 		eventType := call.Argument(0).String()
 		fn := call.Argument(1)

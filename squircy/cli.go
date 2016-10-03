@@ -1,15 +1,16 @@
 package squircy
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
-	"strings"
-
+	"github.com/peterh/liner"
+	"github.com/tyler-sommer/squircy2/squircy/config"
 	"github.com/tyler-sommer/squircy2/squircy/event"
 	"github.com/tyler-sommer/squircy2/squircy/irc"
 	"github.com/tyler-sommer/squircy2/squircy/script"
@@ -24,7 +25,34 @@ func (man *Manager) LoopCli() {
 	man.Invoke(loopCli)
 }
 
-func loopCli(l *log.Logger, ircmgr *irc.IrcConnectionManager, evm event.EventManager, scmgr *script.ScriptManager) {
+func loopCli(conf *config.Configuration, l *log.Logger, ircmgr *irc.IrcConnectionManager, evm event.EventManager, scmgr *script.ScriptManager) {
+	hist := filepath.Join(conf.RootPath, ".history")
+
+	cli := liner.NewLiner()
+	defer func() {
+		if f, err := os.Create(hist); err == nil {
+			cli.WriteHistory(f)
+			f.Close()
+		}
+		cli.Close()
+	}()
+
+	if f, err := os.Open(hist); err == nil {
+		cli.ReadHistory(f)
+		f.Close()
+	}
+
+	commands := []string{"exit", "reload", "repl", "debug", "connect", "reconnect", "disconnect"}
+	cli.SetCompleter(func(line string) []string {
+		res := []string{}
+		for _, v := range commands {
+			if strings.HasPrefix(v, line) {
+				res = append(res, v)
+			}
+		}
+		return res
+	})
+
 	help := func() {
 		l.Println(`Commands:
 
@@ -43,13 +71,16 @@ reconnect	Force a reconnection to IRC`)
 
 	help()
 
-	bin := bufio.NewReader(os.Stdin)
 	for {
-		cmd, _ := bin.ReadString('\n')
-		cmd = strings.TrimSuffix(cmd, "\n")
+		cmd, err := cli.Prompt("cmd> ")
+		if err != nil {
+			// TODO: do something useful
+			continue
+		}
 		evm.Trigger(InputEvent, map[string]interface{}{
 			"Message": cmd,
 		})
+		cli.AppendHistory(cmd)
 		switch {
 		case cmd == "exit" || cmd == "quit":
 			go ircmgr.Quit()
@@ -58,18 +89,12 @@ reconnect	Force a reconnection to IRC`)
 			return
 
 		case cmd == "debug":
-			if ircmgr.Status() == irc.Disconnected {
-				l.Println("Not connected")
+			debugging := !ircmgr.Debug()
+			ircmgr.SetDebug(debugging)
+			if debugging {
+				l.Println("Debug ENABLED")
 			} else {
-				conn := ircmgr.Connection()
-				debugging := !conn.Debug
-				conn.Debug = debugging
-				conn.VerboseCallbackHandler = debugging
-				if debugging {
-					l.Println("Debug ENABLED")
-				} else {
-					l.Println("Debug DISABLED")
-				}
+				l.Println("Debug DISABLED")
 			}
 
 		case cmd == "reload":
@@ -78,23 +103,7 @@ reconnect	Force a reconnection to IRC`)
 			l.Println("Reloaded.")
 
 		case cmd == "repl":
-			cursorHandler := func(ev event.Event) {
-				fmt.Print("> ")
-			}
-			evm.Bind(OutputEvent, cursorHandler)
-			fmt.Println("Starting javascript REPL...")
-			fmt.Println("Type 'exit' and hit enter to exit the REPL.")
-			for {
-				fmt.Print("> ")
-				str, _ := bin.ReadString('\n')
-				if str == "exit\n" {
-					evm.Unbind(OutputEvent, cursorHandler)
-					fmt.Println("Closing REPL...")
-					break
-				}
-				v, _ := scmgr.RunUnsafe(script.Javascript, str)
-				fmt.Println(v)
-			}
+			loopRepl(conf, scmgr)
 
 		case cmd == "connect" || cmd == "disconnect":
 			if ircmgr.Status() != irc.Disconnected {
@@ -113,6 +122,37 @@ reconnect	Force a reconnection to IRC`)
 			l.Print("Unknown input. ")
 			help()
 		}
+	}
+}
+
+func loopRepl(conf *config.Configuration, scmgr *script.ScriptManager) {
+	hist := filepath.Join(conf.RootPath, ".history_repl")
+
+	cli := liner.NewLiner()
+	defer func() {
+		if f, err := os.Create(hist); err == nil {
+			cli.WriteHistory(f)
+			f.Close()
+		}
+		cli.Close()
+	}()
+
+	if f, err := os.Open(hist); err == nil {
+		cli.ReadHistory(f)
+		f.Close()
+	}
+
+	fmt.Println("Starting javascript REPL...")
+	fmt.Println("Type 'exit' and hit enter to exit the REPL.")
+	for {
+		str, _ := cli.Prompt("repl> ")
+		if str == "exit" {
+			fmt.Println("Closing REPL...")
+			break
+		}
+		cli.AppendHistory(str)
+		v, _ := scmgr.RunUnsafe(script.Javascript, str)
+		fmt.Println(v)
 	}
 }
 

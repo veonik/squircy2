@@ -26,10 +26,11 @@ type IrcConnectionManager struct {
 	injector inject.Injector
 	conn     *ircevent.Connection
 	status   ConnectionStatus
+	debug    bool
 }
 
 func NewIrcConnectionManager(injector inject.Injector) (mgr *IrcConnectionManager) {
-	mgr = &IrcConnectionManager{injector, nil, Disconnected}
+	mgr = &IrcConnectionManager{injector, nil, Disconnected, false}
 
 	return
 }
@@ -41,6 +42,18 @@ func (mgr *IrcConnectionManager) Connect() {
 func (mgr *IrcConnectionManager) Reconnect() {
 	mgr.Quit()
 	mgr.Connect()
+}
+
+func (mgr *IrcConnectionManager) Debug() bool {
+	return mgr.debug
+}
+
+func (mgr *IrcConnectionManager) SetDebug(debug bool) {
+	mgr.debug = debug
+	if mgr.conn != nil {
+		mgr.conn.Debug = mgr.debug
+		mgr.conn.VerboseCallbackHandler = mgr.debug
+	}
 }
 
 func (mgr *IrcConnectionManager) Quit() {
@@ -91,6 +104,9 @@ func connect(mgr *IrcConnectionManager, conf *config.Configuration, l *log.Logge
 		mgr.injector.Map(mgr.conn)
 		mgr.injector.Invoke(bindEvents)
 	}
+
+	mgr.conn.Debug = mgr.debug
+	mgr.conn.VerboseCallbackHandler = mgr.debug
 
 	if conf.TLS {
 		mgr.conn.UseTLS = true
