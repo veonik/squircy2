@@ -92,22 +92,6 @@ func (h *configHelper) OwnerHost() string {
 	return h.conf.OwnerHost
 }
 
-type dataHelper struct {
-	d map[string]interface{}
-}
-
-func (db *dataHelper) Get(key string) interface{} {
-	if val, ok := db.d[key]; ok {
-		return val
-	}
-
-	return nil
-}
-
-func (db *dataHelper) Set(key string, val interface{}) {
-	db.d[key] = val
-}
-
 type ircHelper struct {
 	manager *irc.IrcConnectionManager
 }

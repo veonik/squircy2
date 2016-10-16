@@ -60,10 +60,9 @@ Additionally, the following functions are available to interact with the various
 | Irc.Privmsg(target, message) | Messages target with message. Target can be a user or a channel |
 | Irc.CurrentNick() | Get the bot's current nickname |
 | Irc.Nick(newNick) | Change the bot's nickname |
-| Data.Get(key) | Gets a value with the given from the cross-vm storage |
-| Data.Set(key, val) | Sets a value with the given key in the cross-vm storage |
 | Http.Get(url, ...headers) | Fetch the given url using a GET HTTP request |
 | Http.Get(url, body, ...headers) | Fetch the given url using a POST HTTP request |
+| Http.Send(options) | Send an HTTP request with the configured options. |
 | Math.Rand() | Generate a random value from 0-1 |
 | Math.Round(val) | Round val to 0 decimal places. |
 | Config.OwnerNick() | Get the configured Owner Nickname |

@@ -10,11 +10,11 @@ import (
 
 type ScriptManager struct {
 	e            event.EventManager
+	conf         *config.Configuration
 	jsDriver     javascriptDriver
 	httpHelper   httpHelper
 	configHelper configHelper
 	ircHelper    ircHelper
-	dataHelper   dataHelper
 	scriptHelper scriptHelper
 	mathHelper   mathHelper
 	osHelper     osHelper
@@ -25,11 +25,11 @@ type ScriptManager struct {
 func NewScriptManager(repo ScriptRepository, l *log.Logger, e event.EventManager, ircmanager *irc.IrcConnectionManager, config *config.Configuration) *ScriptManager {
 	mgr := ScriptManager{
 		e,
+		config,
 		javascriptDriver{nil, l},
 		httpHelper{},
 		configHelper{config},
 		ircHelper{ircmanager},
-		dataHelper{make(map[string]interface{})},
 		scriptHelper{},
 		mathHelper{},
 		osHelper{},

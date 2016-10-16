@@ -1,7 +1,6 @@
 package squircy
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -103,7 +102,7 @@ reconnect	Force a reconnection to IRC`)
 			l.Println("Reloaded.")
 
 		case cmd == "repl":
-			loopRepl(conf, scmgr)
+			scmgr.Repl()
 
 		case cmd == "connect" || cmd == "disconnect":
 			if ircmgr.Status() != irc.Disconnected {
@@ -125,43 +124,11 @@ reconnect	Force a reconnection to IRC`)
 	}
 }
 
-func loopRepl(conf *config.Configuration, scmgr *script.ScriptManager) {
-	hist := filepath.Join(conf.RootPath, ".history_repl")
-
-	cli := liner.NewLiner()
-	defer func() {
-		if f, err := os.Create(hist); err == nil {
-			cli.WriteHistory(f)
-			f.Close()
-		}
-		cli.Close()
-	}()
-
-	if f, err := os.Open(hist); err == nil {
-		cli.ReadHistory(f)
-		f.Close()
-	}
-
-	fmt.Println("Starting javascript REPL...")
-	fmt.Println("Type 'exit' and hit enter to exit the REPL.")
-	for {
-		str, _ := cli.Prompt("repl> ")
-		if str == "exit" {
-			fmt.Println("Closing REPL...")
-			break
-		}
-		cli.AppendHistory(str)
-		v, _ := scmgr.RunUnsafe(script.Javascript, str)
-		fmt.Println(v)
-	}
-}
-
 func configureLog(manager *Manager, evm event.EventManager) {
 	hist := &triggerLogger{evm}
 	out := io.MultiWriter(os.Stdout, hist)
 	logger := log.New(out, "", 0)
 	manager.Map(logger)
-	manager.Map(hist)
 }
 
 type triggerLogger struct {

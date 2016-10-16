@@ -135,7 +135,6 @@ func newJavascriptVm(m *ScriptManager) *jsVm {
 		return otto.UndefinedValue()
 	})
 	jsVm.Set("Config", &m.configHelper)
-	jsVm.Set("Data", &m.dataHelper)
 	jsVm.Set("Irc", &m.ircHelper)
 	jsVm.Set("Os", &m.osHelper)
 	jsVm.Set("Math", &m.mathHelper)

@@ -48,6 +48,7 @@ func (d javascriptDriver) RunUnsafe(unsafe string) (val interface{}, err error) 
 			}
 			err = e.(error)
 		}
+		d.vm.Interrupt = make(chan func(), 1)
 	}()
 
 	d.vm.Interrupt = make(chan func(), 1)
