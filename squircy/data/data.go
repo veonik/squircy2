@@ -32,4 +32,12 @@ func initDatabase(database *db.DB) {
 			panic(err)
 		}
 	}
+
+	col = database.Use("Webhooks")
+	if col == nil {
+		err := database.Create("Webhooks")
+		if err != nil {
+			panic(err)
+		}
+	}
 }
