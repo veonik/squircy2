@@ -96,7 +96,16 @@ func configureWeb(manager *Manager) {
 		r.Get("", replAction)
 		r.Post("/execute", replExecuteAction)
 	})
-	manager.Post("/webhooks", webhookAction)
+	manager.Group("/webhook", func(r martini.Router) {
+		r.Get("", webhookAction)
+		r.Get("/new", newWebhookAction)
+		r.Post("/create", createWebhookAction)
+		r.Get("/:id/edit", editWebhookAction)
+		r.Post("/:id/update", updateWebhookAction)
+		r.Post("/:id/remove", removeWebhookAction)
+		r.Post("/:id/toggle", toggleWebhookAction)
+	})
+	manager.Post("/webhooks", webhookReceiveAction)
 }
 
 func indexAction(s *stickHandler, t *eventTracer) {
@@ -227,8 +236,68 @@ func manageUpdateAction(r render.Render, database *db.DB, conf *config.Configura
 	r.Redirect("/manage", 302)
 }
 
+// Manage webhook definitions
+func webhookAction(s *stickHandler, repo webhook.WebhookRepository) {
+	webhooks := repo.FetchAll()
+
+	s.HTML(200, "webhook/index.html.twig", map[string]stick.Value{"webhooks": webhooks})
+}
+
+func newWebhookAction(s *stickHandler) {
+	s.HTML(200, "webhook/new.html.twig", nil)
+}
+
+func createWebhookAction(r render.Render, repo webhook.WebhookRepository, request *http.Request) {
+	sType := request.FormValue("type")
+	title := request.FormValue("title")
+	body := request.FormValue("body")
+	key := request.FormValue("key")
+
+	repo.Save(&webhook.Webhook{0, script.ScriptType(sType), title, key, body, true})
+
+	r.Redirect("/webhook", 302)
+}
+
+func editWebhookAction(s *stickHandler, repo webhook.WebhookRepository, params martini.Params) {
+	id, _ := strconv.ParseInt(params["id"], 0, 64)
+
+	webhook := repo.Fetch(int(id))
+
+	s.HTML(200, "webhook/edit.html.twig", map[string]stick.Value{"webhook": webhook})
+}
+
+func updateWebhookAction(r render.Render, repo webhook.WebhookRepository, params martini.Params, request *http.Request) {
+	id, _ := strconv.ParseInt(params["id"], 0, 64)
+	sType := request.FormValue("type")
+	title := request.FormValue("title")
+	body := request.FormValue("body")
+	key := request.FormValue("key")
+
+	repo.Save(&webhook.Webhook{int(id), script.ScriptType(sType), title, key, body, true})
+
+	r.Redirect("/webhook", 302)
+}
+
+func removeWebhookAction(r render.Render, repo webhook.WebhookRepository, params martini.Params) {
+	id, _ := strconv.ParseInt(params["id"], 0, 64)
+
+	repo.Delete(int(id))
+
+	r.JSON(200, nil)
+}
+
+func toggleWebhookAction(r render.Render, repo webhook.WebhookRepository, params martini.Params) {
+	id, _ := strconv.ParseInt(params["id"], 0, 64)
+
+	webhook := repo.Fetch(int(id))
+	webhook.Enabled = !webhook.Enabled
+	repo.Save(webhook)
+
+	r.JSON(200, nil)
+}
+
 // Manage webhook events
-func webhookAction(render render.Render, mgr *irc.IrcConnectionManager, request *http.Request) {
+func webhookReceiveAction(render render.Render, mgr *irc.IrcConnectionManager, request *http.Request) {
 	// Parse body
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
