@@ -1,0 +1,33 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+<form method="post" class="form form-horizontal" action="/webhook/create">
+<div class="row">
+	<div class="col-md-4">
+  		<input class="form-control" name="title" placeholder="Title">
+	</div>
+	<div class="col-md-4">
+  		<select class="form-control" id="webhook_type" name="type">
+			<option>Javascript</option>
+		</select>
+	</div>
+</div>
+<br>
+<div class="row">
+	<div class="col-md-12" style="height: 400px">
+  		<div id="editor" style="width: 100%; height: 100%"></div>
+		<input type="hidden" name="body" id="webhook_body">
+	</div>
+</div>
+<br>
+<div class="row">
+	<div class="col-md-4">
+		<button class="form-control btn btn-primary">Save</button>
+	</div>
+</div>
+</form>
+{% endblock %}
+
+{% block additional_javascripts %}
+	{% include "webhook/_javascripts.html.twig" %}
+{% endblock %}
