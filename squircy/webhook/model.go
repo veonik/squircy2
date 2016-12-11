@@ -120,3 +120,20 @@ func (repo *WebhookRepository) Delete(id int) {
 	col := repo.database.Use("Webhooks")
 	col.Delete(id)
 }
+
+func (repo *WebhookRepository) FetchByUrl(url string) *Webhook {
+	col := repo.database.Use("Webhooks")
+	webhook := &Webhook{}
+	col.ForEachDoc(func(id int, doc []byte) (moveOn bool) {
+		moveOn = true
+		val := make(map[string]interface{}, 0)
+		json.Unmarshal(doc, &val)
+		webhook := hydrateWebhook(val)
+		webhook.ID = id
+		if val["Url"] == url {
+			return false
+		}
+		return
+	})
+	return webhook
+}
