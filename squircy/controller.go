@@ -254,8 +254,7 @@ func webhookAction(render render.Render, mgr *irc.IrcConnectionManager, request 
 		render.JSON(400, "Invalid content-type")
 	}
 	// All is good
-	hook := webhook.WebhookEvent{}
-	hook.Message = "test"
+	hook := webhook.WebhookEvent{Payload: payload}
 	err = hook.Process(mgr)
 	render.JSON(200, nil)
 }
