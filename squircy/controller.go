@@ -1,11 +1,8 @@
 package squircy
 
 import (
+	"encoding/json"
 	"fmt"
-	"html"
-	"net/http"
-	"strconv"
-
 	"github.com/HouzuoGuo/tiedot/db"
 	"github.com/antage/eventsource"
 	"github.com/go-martini/martini"
@@ -13,7 +10,14 @@ import (
 	"github.com/tyler-sommer/squircy2/squircy/config"
 	"github.com/tyler-sommer/squircy2/squircy/irc"
 	"github.com/tyler-sommer/squircy2/squircy/script"
+	"github.com/tyler-sommer/squircy2/squircy/webhook"
 	"github.com/tyler-sommer/stick"
+	"html"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"strconv"
+	"strings"
 )
 
 type stickHandler struct {
@@ -42,11 +46,30 @@ func newStickHandler() martini.Handler {
 	}
 }
 
+type webhookHandler struct {
+	env *stick.Env
+	res http.ResponseWriter
+}
+
+func newWebhookHandler() martini.Handler {
+	env := stick.New(newTemplateLoader())
+	env.Functions["escape"] = func(ctx stick.Context, args ...stick.Value) stick.Value {
+		if len(args) < 1 {
+			return nil
+		}
+		return html.EscapeString(stick.CoerceString(args[0]))
+	}
+	return func(res http.ResponseWriter, req *http.Request, c martini.Context) {
+		c.Map(&webhookHandler{env, res})
+	}
+}
+
 func configureWeb(manager *Manager) {
 	manager.Handlers(
 		newStaticHandler(),
 		newStickHandler(),
 		render.Renderer(),
+		newWebhookHandler(),
 	)
 	manager.Get("/event", func(es eventsource.EventSource, w http.ResponseWriter, r *http.Request) {
 		es.ServeHTTP(w, r)
@@ -73,6 +96,7 @@ func configureWeb(manager *Manager) {
 		r.Get("", replAction)
 		r.Post("/execute", replExecuteAction)
 	})
+	manager.Post("/webhooks", webhookAction)
 }
 
 func indexAction(s *stickHandler, t *eventTracer) {
@@ -201,4 +225,37 @@ func manageUpdateAction(r render.Render, database *db.DB, conf *config.Configura
 	config.SaveConfig(database, conf)
 
 	r.Redirect("/manage", 302)
+}
+
+// Manage webhook events
+func webhookAction(render render.Render, mgr *irc.IrcConnectionManager, request *http.Request) {
+	// Parse body
+	body, err := ioutil.ReadAll(request.Body)
+	if err != nil {
+		log.Printf("error reading the request body. %+v\n", err)
+		render.JSON(400, "Invalid data")
+	}
+	// Process json
+	contentType := request.Header.Get("Content-Type")
+
+	var payload map[string]interface{}
+
+	if strings.Contains(contentType, "json") {
+		decoder := json.NewDecoder(strings.NewReader(string(body)))
+		decoder.UseNumber()
+
+		err := decoder.Decode(&payload)
+
+		if err != nil {
+			log.Printf("error parsing JSON payload %+v\n", err)
+			render.JSON(400, "Invalid json")
+		}
+	} else {
+		render.JSON(400, "Invalid content-type")
+	}
+	// All is good
+	hook := webhook.WebhookEvent{}
+	hook.Message = "test"
+	err = hook.Process(mgr)
+	render.JSON(200, nil)
 }
