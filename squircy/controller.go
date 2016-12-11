@@ -7,6 +7,7 @@ import (
 	"github.com/antage/eventsource"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
+	"github.com/nu7hatch/gouuid"
 	"github.com/tyler-sommer/squircy2/squircy/config"
 	"github.com/tyler-sommer/squircy2/squircy/irc"
 	"github.com/tyler-sommer/squircy2/squircy/script"
@@ -105,7 +106,9 @@ func configureWeb(manager *Manager) {
 		r.Post("/:id/remove", removeWebhookAction)
 		r.Post("/:id/toggle", toggleWebhookAction)
 	})
-	manager.Post("/webhooks", webhookReceiveAction)
+	manager.Group("/webhooks", func(r martini.Router) {
+		r.Post("/webhooks/:webhook_url", webhookReceiveAction)
+	})
 }
 
 func indexAction(s *stickHandler, t *eventTracer) {
@@ -251,10 +254,20 @@ func createWebhookAction(r render.Render, repo webhook.WebhookRepository, reques
 	sType := request.FormValue("type")
 	body := request.FormValue("body")
 	title := request.FormValue("title")
-	url := request.FormValue("url")
-	key := request.FormValue("key")
+
+	// Generate url and key values
+	urlkey, err := uuid.NewV4()
+	if err != nil {
+		r.JSON(500, "Error generating url UUID")
+	}
+	url := "/webhooks/" + urlkey.String()
+
+	key, err := uuid.NewV4()
+	if err != nil {
+		r.JSON(500, "Error generating key UUID")
+	}
 	sign := request.FormValue("signature")
-	hook := &webhook.Webhook{0, script.ScriptType(sType), body, title, url, key, sign, true}
+	hook := &webhook.Webhook{0, script.ScriptType(sType), body, title, url, key.String(), sign, true}
 	repo.Save(hook)
 	log.Printf("Created webhook %d", hook.ID)
 	r.Redirect("/webhook", 302)
@@ -301,7 +314,7 @@ func toggleWebhookAction(r render.Render, repo webhook.WebhookRepository, params
 }
 
 // Manage webhook events
-func webhookReceiveAction(render render.Render, mgr *irc.IrcConnectionManager, request *http.Request) {
+func webhookReceiveAction(render render.Render, mgr *irc.IrcConnectionManager, request *http.Request, params martini.Params) {
 	// Parse body
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
