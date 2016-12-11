@@ -249,12 +249,14 @@ func newWebhookAction(s *stickHandler) {
 
 func createWebhookAction(r render.Render, repo webhook.WebhookRepository, request *http.Request) {
 	sType := request.FormValue("type")
-	title := request.FormValue("title")
 	body := request.FormValue("body")
+	title := request.FormValue("title")
+	url := request.FormValue("url")
 	key := request.FormValue("key")
-
-	repo.Save(&webhook.Webhook{0, script.ScriptType(sType), title, key, body, true})
-
+	sign := request.FormValue("signature")
+	hook := &webhook.Webhook{0, script.ScriptType(sType), body, title, url, key, sign, true}
+	repo.Save(hook)
+	log.Printf("Created webhook %d", hook.ID)
 	r.Redirect("/webhook", 302)
 }
 
@@ -271,9 +273,11 @@ func updateWebhookAction(r render.Render, repo webhook.WebhookRepository, params
 	sType := request.FormValue("type")
 	title := request.FormValue("title")
 	body := request.FormValue("body")
+	url := request.FormValue("url")
 	key := request.FormValue("key")
+	sign := request.FormValue("signature")
 
-	repo.Save(&webhook.Webhook{int(id), script.ScriptType(sType), title, key, body, true})
+	repo.Save(&webhook.Webhook{int(id), script.ScriptType(sType), body, title, url, key, sign, true})
 
 	r.Redirect("/webhook", 302)
 }

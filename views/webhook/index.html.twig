@@ -4,14 +4,20 @@
 <h4>Webhooks</h4>
 <table class="table table-bordered table-striped">
 	<tr>
-		<th>Title</th>
+		<th>Type</th>
+		<th>Url</th>
+		<th>Key</th>
+		<th>Header</th>
 		<th>Type</th>
 		<th>Body</th>
 		<th><a href="/webhook/new" class="btn btn-primary btn-sm">New Webhook</a></th>
 	</tr>
 	{% for el in webhooks %}
 	<tr>
-		<td>{{ el.Title }}</td>
+		<td>{{ el.Type }}</td>
+		<td>{{ el.Url }}</td>
+		<td>{{ el.Key }}</td>
+		<td>{{ el.SignatureHeader }}</td>
 		<td>{{ el.Type }}</td>
 		<td class="code-preview">{{ el.Body }}</td>
 		<td>

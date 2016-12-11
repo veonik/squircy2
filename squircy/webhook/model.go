@@ -8,12 +8,14 @@ import (
 )
 
 type Webhook struct {
-	ID      int
-	Type    script.ScriptType
-	Title   string
-	Key     string
-	Body    string // script to execute for processing
-	Enabled bool
+	ID              int
+	Type            script.ScriptType
+	Body            string // script to execute for processing
+	Title           string
+	Url             string
+	Key             string
+	SignatureHeader string // header containing signature
+	Enabled         bool
 }
 
 type WebhookRepository struct {
@@ -27,11 +29,12 @@ func NewWebhookRepository(database *db.DB) WebhookRepository {
 func hydrateWebhook(rawWebhook map[string]interface{}) *Webhook {
 	webhook := &Webhook{}
 
-	webhook.Title = rawWebhook["Title"].(string)
-	webhook.Enabled = rawWebhook["Enabled"].(bool)
 	webhook.Type = script.ScriptType(rawWebhook["Type"].(string))
-	webhook.Key = rawWebhook["Key"].(string)
 	webhook.Body = rawWebhook["Body"].(string)
+	webhook.Title = rawWebhook["Title"].(string)
+	webhook.Url = rawWebhook["Url"].(string)
+	webhook.Key = rawWebhook["Key"].(string)
+	webhook.SignatureHeader = rawWebhook["SignatureHeader"].(string)
 	webhook.Enabled = rawWebhook["Enabled"].(bool)
 
 	return webhook
@@ -40,11 +43,12 @@ func hydrateWebhook(rawWebhook map[string]interface{}) *Webhook {
 func flattenWebhook(webhook *Webhook) map[string]interface{} {
 	rawWebhook := make(map[string]interface{})
 
-	rawWebhook["Title"] = webhook.Title
-	rawWebhook["Type"] = webhook.Type
 	rawWebhook["Type"] = webhook.Type
 	rawWebhook["Body"] = webhook.Body
+	rawWebhook["Title"] = webhook.Title
+	rawWebhook["Url"] = webhook.Url
 	rawWebhook["Key"] = webhook.Key
+	rawWebhook["SignatureHeader"] = webhook.SignatureHeader
 	rawWebhook["Enabled"] = webhook.Enabled
 
 	return rawWebhook
