@@ -4,6 +4,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha1"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"github.com/tyler-sommer/squircy2/squircy/irc"
 	"log"
@@ -11,12 +12,35 @@ import (
 )
 
 type WebhookEvent struct {
-	Body []byte
+	Body        []byte
+	ContentType string
+	Signature   string
+	Webhook     Webhook
 }
 
 // Process a webhook event
 func (e *WebhookEvent) Process(mgr *irc.IrcConnectionManager) error {
-	log.Printf("Processing webhook with %+v", e.Body)
+	_, err := e.CheckPayloadSignature()
+	if err != nil {
+		log.Printf("Check payload failed, %s", err)
+		return err
+	}
+	// Parse JSON
+	var payload map[string]interface{}
+
+	if strings.Contains(e.ContentType, "json") {
+		decoder := json.NewDecoder(strings.NewReader(string(e.Body)))
+		decoder.UseNumber()
+
+		err := decoder.Decode(&payload)
+
+		if err != nil {
+			return errors.New("Invalid JSON")
+		}
+	} else {
+		return errors.New("Invalid Content-Type")
+	}
+	log.Printf("Processing webhook with payload %+v", payload)
 	// conn := mgr.Connection()
 	// conn.Notice("chamal", e.Message)
 	return nil
@@ -36,11 +60,11 @@ func (e *SignatureError) Error() string {
 }
 
 // CheckPayloadSignature calculates and verifies SHA1 signature of the given payload
-func (e *WebhookEvent) CheckPayloadSignature(key string, signature string) (string, error) {
-	if strings.HasPrefix(signature, "sha1=") {
-		signature = signature[5:]
+func (e *WebhookEvent) CheckPayloadSignature() (string, error) {
+	if strings.HasPrefix(e.Signature, "sha1=") {
+		signature := e.Signature[5:]
 
-		mac := hmac.New(sha1.New, []byte(key))
+		mac := hmac.New(sha1.New, []byte(e.Webhook.Key))
 		_, err := mac.Write(e.Body)
 		if err != nil {
 			return "", err

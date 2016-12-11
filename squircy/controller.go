@@ -1,7 +1,6 @@
 package squircy
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/HouzuoGuo/tiedot/db"
 	"github.com/antage/eventsource"
@@ -107,7 +106,7 @@ func configureWeb(manager *Manager) {
 		r.Post("/:id/toggle", toggleWebhookAction)
 	})
 	manager.Group("/webhooks", func(r martini.Router) {
-		r.Post("/webhooks/:webhook_url", webhookReceiveAction)
+		r.Post("/:webhook_url", webhookReceiveAction)
 	})
 }
 
@@ -250,6 +249,21 @@ func newWebhookAction(s *stickHandler) {
 	s.HTML(200, "webhook/new.html.twig", nil)
 }
 
+func formatSignatureHeader(header string) string {
+	// Format header in Camel case
+	parts := strings.Split(header, "-")
+	log.Printf("Have parts %+v", parts)
+	for i := 0; i < len(parts); i++ {
+		if len(parts[i]) > 1 {
+			first := strings.ToUpper(parts[i][0:1])
+			last := strings.ToLower(parts[i][1:len(parts[i])])
+			log.Printf("First %s last %s", first, last)
+			parts[i] = first + last
+		}
+	}
+	return strings.Join(parts, "-")
+}
+
 func createWebhookAction(r render.Render, repo webhook.WebhookRepository, request *http.Request) {
 	sType := request.FormValue("type")
 	body := request.FormValue("body")
@@ -266,8 +280,10 @@ func createWebhookAction(r render.Render, repo webhook.WebhookRepository, reques
 	if err != nil {
 		r.JSON(500, "Error generating key UUID")
 	}
-	sign := request.FormValue("signature")
-	hook := &webhook.Webhook{0, script.ScriptType(sType), body, title, url, key.String(), sign, true}
+	signature := request.FormValue("signature")
+	signature = formatSignatureHeader(request.FormValue("signature"))
+
+	hook := &webhook.Webhook{0, script.ScriptType(sType), body, title, url, key.String(), signature, true}
 	repo.Save(hook)
 	log.Printf("Created webhook %d", hook.ID)
 	r.Redirect("/webhook", 302)
@@ -288,9 +304,10 @@ func updateWebhookAction(r render.Render, repo webhook.WebhookRepository, params
 	body := request.FormValue("body")
 	url := request.FormValue("url")
 	key := request.FormValue("key")
-	sign := request.FormValue("signature")
+	signature := request.FormValue("signature")
+	signature = formatSignatureHeader(request.FormValue("signature"))
 
-	repo.Save(&webhook.Webhook{int(id), script.ScriptType(sType), body, title, url, key, sign, true})
+	repo.Save(&webhook.Webhook{int(id), script.ScriptType(sType), body, title, url, key, signature, true})
 
 	r.Redirect("/webhook", 302)
 }
@@ -314,33 +331,32 @@ func toggleWebhookAction(r render.Render, repo webhook.WebhookRepository, params
 }
 
 // Manage webhook events
-func webhookReceiveAction(render render.Render, mgr *irc.IrcConnectionManager, request *http.Request, params martini.Params) {
+func webhookReceiveAction(render render.Render, mgr *irc.IrcConnectionManager, repo webhook.WebhookRepository, request *http.Request, params martini.Params) {
+	// Find webhook by it's url
+	findHook := repo.FetchByUrl("/webhooks/" + params["webhook_url"])
+	if findHook == nil {
+		render.JSON(404, "Webhook not found")
+		return
+	}
+	// Get signature
+	signature := request.Header.Get(findHook.SignatureHeader)
+	if signature == "" {
+		render.JSON(400, "Signature header not found")
+		return
+	}
+
 	// Parse body
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
 		log.Printf("error reading the request body. %+v\n", err)
 		render.JSON(400, "Invalid data")
+		return
 	}
 	// Process json
 	contentType := request.Header.Get("Content-Type")
 
-	var payload map[string]interface{}
-
-	if strings.Contains(contentType, "json") {
-		decoder := json.NewDecoder(strings.NewReader(string(body)))
-		decoder.UseNumber()
-
-		err := decoder.Decode(&payload)
-
-		if err != nil {
-			log.Printf("error parsing JSON payload %+v\n", err)
-			render.JSON(400, "Invalid json")
-		}
-	} else {
-		render.JSON(400, "Invalid content-type")
-	}
 	// All is good
-	hook := webhook.WebhookEvent{Body: body}
+	hook := webhook.WebhookEvent{Body: body, Webhook: *findHook, ContentType: contentType, Signature: signature}
 	err = hook.Process(mgr)
 	render.JSON(200, nil)
 }
