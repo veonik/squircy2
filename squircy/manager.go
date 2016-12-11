@@ -15,6 +15,7 @@ import (
 	"github.com/tyler-sommer/squircy2/squircy/event"
 	"github.com/tyler-sommer/squircy2/squircy/irc"
 	"github.com/tyler-sommer/squircy2/squircy/script"
+	"github.com/tyler-sommer/squircy2/squircy/webhook"
 )
 
 type Manager struct {
@@ -32,6 +33,7 @@ func NewManager(rootPath string) (manager *Manager) {
 
 	manager.Map(database)
 	manager.Map(script.NewScriptRepository(database))
+	manager.Map(webhook.NewWebhookRepository(database))
 	manager.Map(conf)
 
 	manager.invokeAndMap(event.NewEventManager)
@@ -42,6 +44,7 @@ func NewManager(rootPath string) (manager *Manager) {
 	manager.invokeAndMap(newEventSource)
 	manager.invokeAndMap(irc.NewIrcConnectionManager)
 	manager.invokeAndMap(script.NewScriptManager)
+	manager.invokeAndMap(webhook.NewWebhookManager)
 
 	return
 }
