@@ -12,7 +12,6 @@ type Webhook struct {
 	Type            script.ScriptType
 	Body            string // script to execute for processing
 	Title           string
-	Url             string
 	Key             string
 	SignatureHeader string // header containing signature
 	Enabled         bool
@@ -32,7 +31,6 @@ func hydrateWebhook(rawWebhook map[string]interface{}) *Webhook {
 	webhook.Type = script.ScriptType(rawWebhook["Type"].(string))
 	webhook.Body = rawWebhook["Body"].(string)
 	webhook.Title = rawWebhook["Title"].(string)
-	webhook.Url = rawWebhook["Url"].(string)
 	webhook.Key = rawWebhook["Key"].(string)
 	webhook.SignatureHeader = rawWebhook["SignatureHeader"].(string)
 	webhook.Enabled = rawWebhook["Enabled"].(bool)
@@ -46,7 +44,6 @@ func flattenWebhook(webhook *Webhook) map[string]interface{} {
 	rawWebhook["Type"] = webhook.Type
 	rawWebhook["Body"] = webhook.Body
 	rawWebhook["Title"] = webhook.Title
-	rawWebhook["Url"] = webhook.Url
 	rawWebhook["Key"] = webhook.Key
 	rawWebhook["SignatureHeader"] = webhook.SignatureHeader
 	rawWebhook["Enabled"] = webhook.Enabled
@@ -119,21 +116,4 @@ func (repo *WebhookRepository) Save(webhook *Webhook) {
 func (repo *WebhookRepository) Delete(id int) {
 	col := repo.database.Use("Webhooks")
 	col.Delete(id)
-}
-
-func (repo *WebhookRepository) FetchByUrl(url string) *Webhook {
-	col := repo.database.Use("Webhooks")
-	webhook := &Webhook{}
-	col.ForEachDoc(func(id int, doc []byte) (moveOn bool) {
-		moveOn = true
-		val := make(map[string]interface{}, 0)
-		json.Unmarshal(doc, &val)
-		webhook := hydrateWebhook(val)
-		webhook.ID = id
-		if val["Url"] == url {
-			return false
-		}
-		return
-	})
-	return webhook
 }

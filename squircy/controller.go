@@ -106,7 +106,7 @@ func configureWeb(manager *Manager) {
 		r.Post("/:id/toggle", toggleWebhookAction)
 	})
 	manager.Group("/webhooks", func(r martini.Router) {
-		r.Post("/:webhook_url", webhookReceiveAction)
+		r.Post("/:webhook_id", webhookReceiveAction)
 	})
 }
 
@@ -268,13 +268,7 @@ func createWebhookAction(r render.Render, repo webhook.WebhookRepository, reques
 	body := request.FormValue("body")
 	title := request.FormValue("title")
 
-	// Generate url and key values
-	urlkey, err := uuid.NewV4()
-	if err != nil {
-		r.JSON(500, "Error generating url UUID")
-	}
-	url := "/webhooks/" + urlkey.String()
-
+	// Generate key value as an uuid
 	key, err := uuid.NewV4()
 	if err != nil {
 		r.JSON(500, "Error generating key UUID")
@@ -282,7 +276,7 @@ func createWebhookAction(r render.Render, repo webhook.WebhookRepository, reques
 	signature := request.FormValue("signature")
 	signature = formatSignatureHeader(request.FormValue("signature"))
 
-	hook := &webhook.Webhook{0, script.ScriptType(sType), body, title, url, key.String(), signature, true}
+	hook := &webhook.Webhook{0, script.ScriptType(sType), body, title, key.String(), signature, true}
 	repo.Save(hook)
 	log.Printf("Created webhook %d", hook.ID)
 	r.Redirect("/webhook", 302)
@@ -301,12 +295,11 @@ func updateWebhookAction(r render.Render, repo webhook.WebhookRepository, params
 	sType := request.FormValue("type")
 	title := request.FormValue("title")
 	body := request.FormValue("body")
-	url := request.FormValue("url")
 	key := request.FormValue("key")
 	signature := request.FormValue("signature")
 	signature = formatSignatureHeader(request.FormValue("signature"))
 
-	repo.Save(&webhook.Webhook{int(id), script.ScriptType(sType), body, title, url, key, signature, true})
+	repo.Save(&webhook.Webhook{int(id), script.ScriptType(sType), body, title, key, signature, true})
 
 	r.Redirect("/webhook", 302)
 }
@@ -332,7 +325,12 @@ func toggleWebhookAction(r render.Render, repo webhook.WebhookRepository, params
 // Manage webhook events
 func webhookReceiveAction(render render.Render, mgr *irc.IrcConnectionManager, repo webhook.WebhookRepository, request *http.Request, params martini.Params) {
 	// Find webhook by it's url
-	findHook := repo.FetchByUrl("/webhooks/" + params["webhook_url"])
+	webhookId, err := strconv.Atoi(params["webhook_id"])
+	if err != nil {
+		render.JSON(400, "Invalid ID")
+		return
+	}
+	findHook := repo.Fetch(webhookId)
 	if findHook == nil {
 		render.JSON(404, "Webhook not found")
 		return
