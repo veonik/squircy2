@@ -252,16 +252,15 @@ func newWebhookAction(s *stickHandler) {
 func formatSignatureHeader(header string) string {
 	// Format header in Camel case
 	parts := strings.Split(header, "-")
-	log.Printf("Have parts %+v", parts)
 	for i := 0; i < len(parts); i++ {
 		if len(parts[i]) > 1 {
 			first := strings.ToUpper(parts[i][0:1])
 			last := strings.ToLower(parts[i][1:len(parts[i])])
-			log.Printf("First %s last %s", first, last)
 			parts[i] = first + last
 		}
 	}
-	return strings.Join(parts, "-")
+	res := strings.Join(parts, "-")
+	return res
 }
 
 func createWebhookAction(r render.Render, repo webhook.WebhookRepository, request *http.Request) {
@@ -341,7 +340,8 @@ func webhookReceiveAction(render render.Render, mgr *irc.IrcConnectionManager, r
 	// Get signature
 	signature := request.Header.Get(findHook.SignatureHeader)
 	if signature == "" {
-		render.JSON(400, "Signature header not found")
+		err := "Signature header not found " + findHook.SignatureHeader
+		render.JSON(400, err)
 		return
 	}
 
