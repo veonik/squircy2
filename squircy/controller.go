@@ -2,22 +2,24 @@ package squircy
 
 import (
 	"fmt"
-	"github.com/HouzuoGuo/tiedot/db"
-	"github.com/antage/eventsource"
-	"github.com/go-martini/martini"
-	"github.com/martini-contrib/render"
-	"github.com/nu7hatch/gouuid"
-	"github.com/tyler-sommer/squircy2/squircy/config"
-	"github.com/tyler-sommer/squircy2/squircy/irc"
-	"github.com/tyler-sommer/squircy2/squircy/script"
-	"github.com/tyler-sommer/squircy2/squircy/webhook"
-	"github.com/tyler-sommer/stick"
 	"html"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/HouzuoGuo/tiedot/db"
+	"github.com/antage/eventsource"
+	"github.com/go-martini/martini"
+	"github.com/martini-contrib/render"
+	"github.com/nu7hatch/gouuid"
+	"github.com/tyler-sommer/squircy2/squircy/config"
+	"github.com/tyler-sommer/squircy2/squircy/event"
+	"github.com/tyler-sommer/squircy2/squircy/irc"
+	"github.com/tyler-sommer/squircy2/squircy/script"
+	"github.com/tyler-sommer/squircy2/squircy/webhook"
+	"github.com/tyler-sommer/stick"
 )
 
 type stickHandler struct {
@@ -46,30 +48,11 @@ func newStickHandler() martini.Handler {
 	}
 }
 
-type webhookHandler struct {
-	env *stick.Env
-	res http.ResponseWriter
-}
-
-func newWebhookHandler() martini.Handler {
-	env := stick.New(newTemplateLoader())
-	env.Functions["escape"] = func(ctx stick.Context, args ...stick.Value) stick.Value {
-		if len(args) < 1 {
-			return nil
-		}
-		return html.EscapeString(stick.CoerceString(args[0]))
-	}
-	return func(res http.ResponseWriter, req *http.Request, c martini.Context) {
-		c.Map(&webhookHandler{env, res})
-	}
-}
-
 func configureWeb(manager *Manager) {
 	manager.Handlers(
 		newStaticHandler(),
 		newStickHandler(),
 		render.Renderer(),
-		newWebhookHandler(),
 	)
 	manager.Get("/event", func(es eventsource.EventSource, w http.ResponseWriter, r *http.Request) {
 		es.ServeHTTP(w, r)
@@ -264,8 +247,6 @@ func formatSignatureHeader(header string) string {
 }
 
 func createWebhookAction(r render.Render, repo webhook.WebhookRepository, request *http.Request) {
-	sType := request.FormValue("type")
-	body := request.FormValue("body")
 	title := request.FormValue("title")
 
 	// Generate key value as an uuid
@@ -273,10 +254,9 @@ func createWebhookAction(r render.Render, repo webhook.WebhookRepository, reques
 	if err != nil {
 		r.JSON(500, "Error generating key UUID")
 	}
-	signature := request.FormValue("signature")
-	signature = formatSignatureHeader(request.FormValue("signature"))
+	signature := formatSignatureHeader(request.FormValue("signature"))
 
-	hook := &webhook.Webhook{0, script.ScriptType(sType), body, title, key.String(), signature, true}
+	hook := &webhook.Webhook{0, title, key.String(), signature, true}
 	repo.Save(hook)
 	log.Printf("Created webhook %d", hook.ID)
 	r.Redirect("/webhook", 302)
@@ -292,14 +272,18 @@ func editWebhookAction(s *stickHandler, repo webhook.WebhookRepository, params m
 
 func updateWebhookAction(r render.Render, repo webhook.WebhookRepository, params martini.Params, request *http.Request) {
 	id, _ := strconv.ParseInt(params["id"], 0, 64)
-	sType := request.FormValue("type")
 	title := request.FormValue("title")
-	body := request.FormValue("body")
-	key := request.FormValue("key")
-	signature := request.FormValue("signature")
-	signature = formatSignatureHeader(request.FormValue("signature"))
+	signature := formatSignatureHeader(request.FormValue("signature"))
 
-	repo.Save(&webhook.Webhook{int(id), script.ScriptType(sType), body, title, key, signature, true})
+	hook := repo.Fetch(int(id))
+	if hook == nil {
+		r.Error(404)
+		return
+	}
+	hook.Title = title
+	hook.SignatureHeader = signature
+
+	repo.Save(hook)
 
 	r.Redirect("/webhook", 302)
 }
@@ -323,22 +307,22 @@ func toggleWebhookAction(r render.Render, repo webhook.WebhookRepository, params
 }
 
 // Manage webhook events
-func webhookReceiveAction(render render.Render, mgr *irc.IrcConnectionManager, repo webhook.WebhookRepository, request *http.Request, params martini.Params) {
+func webhookReceiveAction(render render.Render, evm event.EventManager, repo webhook.WebhookRepository, request *http.Request, params martini.Params) {
 	// Find webhook by it's url
 	webhookId, err := strconv.Atoi(params["webhook_id"])
 	if err != nil {
 		render.JSON(400, "Invalid ID")
 		return
 	}
-	findHook := repo.Fetch(webhookId)
-	if findHook == nil {
+	hook := repo.Fetch(webhookId)
+	if hook == nil {
 		render.JSON(404, "Webhook not found")
 		return
 	}
 	// Get signature
-	signature := request.Header.Get(findHook.SignatureHeader)
+	signature := request.Header.Get(hook.SignatureHeader)
 	if signature == "" {
-		err := "Signature header not found " + findHook.SignatureHeader
+		err := "Signature header not found " + hook.SignatureHeader
 		render.JSON(400, err)
 		return
 	}
@@ -354,7 +338,10 @@ func webhookReceiveAction(render render.Render, mgr *irc.IrcConnectionManager, r
 	contentType := request.Header.Get("Content-Type")
 
 	// All is good
-	hook := webhook.WebhookEvent{Body: body, Webhook: *findHook, ContentType: contentType, Signature: signature}
-	err = hook.Process(mgr)
-	render.JSON(200, nil)
+	evt := webhook.WebhookEvent{Body: body, Webhook: hook, ContentType: contentType, Signature: signature}
+	err = evt.Process(evm)
+	if err != nil {
+		render.JSON(500, "An error occurred while processing the webhook.")
+	}
+	render.JSON(200, "OK")
 }

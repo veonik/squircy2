@@ -4,22 +4,18 @@
 <h4>Webhooks</h4>
 <table class="table table-bordered table-striped">
 	<tr>
-		<th>Type</th>
+	    <th>Title</th>
 		<th>Url</th>
 		<th>Key</th>
 		<th>Header</th>
-		<th>Type</th>
-		<th>Body</th>
 		<th><a href="/webhook/new" class="btn btn-primary btn-sm">New Webhook</a></th>
 	</tr>
 	{% for el in webhooks %}
 	<tr>
-		<td>{{ el.Type }}</td>
+	    <td>{{ el.Title }}</td>
 		<td>/webhooks/{{ el.ID }}</td>
 		<td>{{ el.Key }}</td>
 		<td>{{ el.SignatureHeader }}</td>
-		<td>{{ el.Type }}</td>
-		<td class="code-preview">{{ el.Body }}</td>
 		<td>
 			<div class="btn-group">
 				<a href="/webhook/{{ el.ID }}/edit" class="btn btn-sm btn-default">Edit</a>
@@ -67,5 +63,5 @@ $(function() {
 		});
 	});
 });
-</webhook>
+</script>
 {% endblock %}

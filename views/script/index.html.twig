@@ -5,14 +5,12 @@
 <table class="table table-bordered table-striped">
 	<tr>
 		<th>Title</th>
-		<th>Type</th>
 		<th>Body</th>
 		<th><a href="/script/new" class="btn btn-primary btn-sm">New Script</a></th>
 	</tr>
 	{% for el in scripts %}
 	<tr>
 		<td>{{ el.Title }}</td>
-		<td>{{ el.Type }}</td>
 		<td class="code-preview">{{ el.Body }}</td>
 		<td>
 			<div class="btn-group">

@@ -44,7 +44,6 @@ func NewManager(rootPath string) (manager *Manager) {
 	manager.invokeAndMap(newEventSource)
 	manager.invokeAndMap(irc.NewIrcConnectionManager)
 	manager.invokeAndMap(script.NewScriptManager)
-	manager.invokeAndMap(webhook.NewWebhookManager)
 
 	return
 }

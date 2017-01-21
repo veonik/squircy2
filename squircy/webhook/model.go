@@ -2,15 +2,13 @@ package webhook
 
 import (
 	"encoding/json"
-	"github.com/HouzuoGuo/tiedot/db"
-	"github.com/tyler-sommer/squircy2/squircy/script"
 	"sort"
+
+	"github.com/HouzuoGuo/tiedot/db"
 )
 
 type Webhook struct {
 	ID              int
-	Type            script.ScriptType
-	Body            string // script to execute for processing
 	Title           string
 	Key             string
 	SignatureHeader string // header containing signature
@@ -28,8 +26,6 @@ func NewWebhookRepository(database *db.DB) WebhookRepository {
 func hydrateWebhook(rawWebhook map[string]interface{}) *Webhook {
 	webhook := &Webhook{}
 
-	webhook.Type = script.ScriptType(rawWebhook["Type"].(string))
-	webhook.Body = rawWebhook["Body"].(string)
 	webhook.Title = rawWebhook["Title"].(string)
 	webhook.Key = rawWebhook["Key"].(string)
 	webhook.SignatureHeader = rawWebhook["SignatureHeader"].(string)
@@ -41,8 +37,6 @@ func hydrateWebhook(rawWebhook map[string]interface{}) *Webhook {
 func flattenWebhook(webhook *Webhook) map[string]interface{} {
 	rawWebhook := make(map[string]interface{})
 
-	rawWebhook["Type"] = webhook.Type
-	rawWebhook["Body"] = webhook.Body
 	rawWebhook["Title"] = webhook.Title
 	rawWebhook["Key"] = webhook.Key
 	rawWebhook["SignatureHeader"] = webhook.SignatureHeader
