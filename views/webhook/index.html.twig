@@ -1,0 +1,71 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+<h4>Webhooks</h4>
+<table class="table table-bordered table-striped">
+	<tr>
+		<th>Type</th>
+		<th>Url</th>
+		<th>Key</th>
+		<th>Header</th>
+		<th>Type</th>
+		<th>Body</th>
+		<th><a href="/webhook/new" class="btn btn-primary btn-sm">New Webhook</a></th>
+	</tr>
+	{% for el in webhooks %}
+	<tr>
+		<td>{{ el.Type }}</td>
+		<td>/webhooks/{{ el.ID }}</td>
+		<td>{{ el.Key }}</td>
+		<td>{{ el.SignatureHeader }}</td>
+		<td>{{ el.Type }}</td>
+		<td class="code-preview">{{ el.Body }}</td>
+		<td>
+			<div class="btn-group">
+				<a href="/webhook/{{ el.ID }}/edit" class="btn btn-sm btn-default">Edit</a>
+				<a href="/webhook/{{ el.ID }}/remove" class="remove btn btn-sm btn-warning">Remove</a>
+			</div>
+			{% if el.Enabled %}
+				<a href="/webhook/{{ el.ID }}/toggle" class="toggle btn btn-sm btn-default">Disable</a>
+			{% else %}
+				<a href="/webhook/{{ el.ID }}/toggle" class="toggle btn btn-sm btn-success">Enable</a>
+			{% endif %}
+		</td>
+	</tr>
+	{% endfor %}
+</table>
+{% endblock %}
+
+{% block additional_javascripts %}
+<script type="text/javascript">
+$(function() {
+	$('.remove').on('click', function(e) {
+		e.preventDefault();
+		
+		if (confirm('Are you sure you want to delete this webhook?')) {
+			var url = $(this).attr('href');
+			$.ajax({
+				url: url,
+				type: 'post',
+				success: function() {
+					window.location.reload();
+				}
+			});
+		}
+	});
+
+	$('.toggle').on('click', function(e) {
+		e.preventDefault();
+
+		var url = $(this).attr('href');
+		$.ajax({
+			url: url,
+			type: 'post',
+			success: function() {
+				window.location.reload();
+			}
+		});
+	});
+});
+</webhook>
+{% endblock %}
