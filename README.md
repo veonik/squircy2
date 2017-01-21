@@ -139,9 +139,9 @@ bind("irc.PRIVMSG", privmsgHandler);
 | irc.PRIVMSG | A message received, in a channel or a private message |
 | irc.NOTICE | A notice received |
 | irc.WILDCARD | Any IRC event |
-| irc.<code> | A specific IRC event, given its RFC Code. For example, 001 `irc.001` or NICK is `irc.NICK`. |
+| irc.[code] | A specific IRC event, given its RFC Code. For example, 001 `irc.001` or NICK is `irc.NICK`. |
 | hook.WILDCARD | Fired whenever a valid webhook is received. |
-| hook.<ID> | Fired when the webhook with <ID> is received. |
+| hook.[ID] | Fired when the webhook with [ID] is received. |
 
 
 Example Scripts
