@@ -20,11 +20,11 @@ const (
 	InputEvent                  = "cli.INPUT"
 )
 
-func (man *Manager) LoopCli() {
-	man.Invoke(loopCli)
+func (man *Manager) LoopCLI() {
+	man.Invoke(loopCLI)
 }
 
-func loopCli(conf *config.Configuration, l *log.Logger, ircmgr *irc.IrcConnectionManager, evm event.EventManager, scmgr *script.ScriptManager) {
+func loopCLI(conf *config.Configuration, l *log.Logger, ircmgr *irc.IrcConnectionManager, evm event.EventManager, scmgr *script.ScriptManager) {
 	hist := filepath.Join(conf.RootPath, ".history")
 
 	cli := liner.NewLiner()

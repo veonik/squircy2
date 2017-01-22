@@ -10,12 +10,14 @@ import (
 	"strings"
 
 	"github.com/HouzuoGuo/tiedot/db"
-	"github.com/antage/eventsource"
 	"github.com/go-martini/martini"
+	"github.com/martini-contrib/auth"
 	"github.com/martini-contrib/render"
+	"github.com/martini-contrib/secure"
 	"github.com/nu7hatch/gouuid"
 	"github.com/tyler-sommer/squircy2/squircy/config"
 	"github.com/tyler-sommer/squircy2/squircy/event"
+	"github.com/tyler-sommer/squircy2/squircy/eventsource"
 	"github.com/tyler-sommer/squircy2/squircy/irc"
 	"github.com/tyler-sommer/squircy2/squircy/script"
 	"github.com/tyler-sommer/squircy2/squircy/webhook"
@@ -48,49 +50,67 @@ func newStickHandler() martini.Handler {
 	}
 }
 
-func configureWeb(manager *Manager) {
+func configureWeb(manager *Manager, conf *config.Configuration) {
 	manager.Handlers(
 		newStaticHandler(),
 		newStickHandler(),
 		render.Renderer(),
+		secure.Secure(secure.Options{
+			BrowserXssFilter: true,
+			FrameDeny:        true,
+			SSLRedirect:      conf.RequireHTTPS,
+			SSLHost:          conf.SSLHostPort,
+			DisableProdCheck: true,
+		}),
 	)
-	manager.Get("/event", func(es eventsource.EventSource, w http.ResponseWriter, r *http.Request) {
-		es.ServeHTTP(w, r)
+	manager.NotFound(func(req *http.Request, r render.Render, l *log.Logger) {
+		l.Printf("%+v\n", req)
+		r.Error(404)
 	})
-	manager.Get("/", indexAction)
-	manager.Get("/status", statusAction)
-	manager.Group("/manage", func(r martini.Router) {
-		r.Get("", manageAction)
-		r.Post("/update", manageUpdateAction)
-	})
-	manager.Post("/connect", connectAction)
-	manager.Post("/disconnect", disconnectAction)
-	manager.Group("/script", func(r martini.Router) {
-		r.Get("", scriptAction)
-		r.Post("/reinit", scriptReinitAction)
-		r.Get("/new", newScriptAction)
-		r.Post("/create", createScriptAction)
-		r.Get("/:id/edit", editScriptAction)
-		r.Post("/:id/update", updateScriptAction)
-		r.Post("/:id/remove", removeScriptAction)
-		r.Post("/:id/toggle", toggleScriptAction)
-	})
-	manager.Group("/repl", func(r martini.Router) {
-		r.Get("", replAction)
-		r.Post("/execute", replExecuteAction)
-	})
-	manager.Group("/webhook", func(r martini.Router) {
-		r.Get("", webhookAction)
-		r.Get("/new", newWebhookAction)
-		r.Post("/create", createWebhookAction)
-		r.Get("/:id/edit", editWebhookAction)
-		r.Post("/:id/update", updateWebhookAction)
-		r.Post("/:id/remove", removeWebhookAction)
-		r.Post("/:id/toggle", toggleWebhookAction)
-	})
-	manager.Group("/webhooks", func(r martini.Router) {
-		r.Post("/:webhook_id", webhookReceiveAction)
-	})
+
+	manager.Post("/webhooks/:webhook_id", webhookReceiveAction)
+
+	// Admin web interface
+	handlers := []martini.Handler{}
+	if conf.HTTPAuth && len(conf.AuthUsername) > 0 && len(conf.AuthPassword) > 0 {
+		handlers = append(handlers, auth.Basic(conf.AuthUsername, conf.AuthPassword))
+	}
+	manager.Group("", func(rm martini.Router) {
+		rm.Get("/event", func(es *eventsource.Broker, w http.ResponseWriter, r *http.Request) {
+			es.ServeHTTP(w, r)
+		})
+		rm.Get("/", indexAction)
+		rm.Get("/status", statusAction)
+		rm.Group("/manage", func(r martini.Router) {
+			r.Get("", manageAction)
+			r.Post("/update", manageUpdateAction)
+		})
+		rm.Post("/connect", connectAction)
+		rm.Post("/disconnect", disconnectAction)
+		rm.Group("/script", func(r martini.Router) {
+			r.Get("", scriptAction)
+			r.Post("/reinit", scriptReinitAction)
+			r.Get("/new", newScriptAction)
+			r.Post("/create", createScriptAction)
+			r.Get("/:id/edit", editScriptAction)
+			r.Post("/:id/update", updateScriptAction)
+			r.Post("/:id/remove", removeScriptAction)
+			r.Post("/:id/toggle", toggleScriptAction)
+		})
+		rm.Group("/repl", func(r martini.Router) {
+			r.Get("", replAction)
+			r.Post("/execute", replExecuteAction)
+		})
+		rm.Group("/webhook", func(r martini.Router) {
+			r.Get("", webhookAction)
+			r.Get("/new", newWebhookAction)
+			r.Post("/create", createWebhookAction)
+			r.Get("/:id/edit", editWebhookAction)
+			r.Post("/:id/update", updateWebhookAction)
+			r.Post("/:id/remove", removeWebhookAction)
+			r.Post("/:id/toggle", toggleWebhookAction)
+		})
+	}, handlers...)
 }
 
 func indexAction(s *stickHandler, t *eventTracer) {
@@ -209,12 +229,26 @@ func manageAction(s *stickHandler, config *config.Configuration) {
 }
 
 func manageUpdateAction(r render.Render, database *db.DB, conf *config.Configuration, request *http.Request) {
+	conf.TLS = request.FormValue("tls") == "on"
+	conf.AutoConnect = request.FormValue("auto_connect") == "on"
 	conf.Network = request.FormValue("network")
 	conf.Nick = request.FormValue("nick")
 	conf.Username = request.FormValue("username")
 	conf.OwnerNick = request.FormValue("owner_nick")
 	conf.OwnerHost = request.FormValue("owner_host")
-	conf.TLS = (request.FormValue("tls") == "on")
+
+	conf.WebInterface = request.FormValue("web_interface") == "on"
+	conf.HTTPHostPort = request.FormValue("http_host_port")
+
+	conf.RequireHTTPS = request.FormValue("require_https") == "on"
+	conf.HTTPS = conf.RequireHTTPS || request.FormValue("https") == "on"
+	conf.SSLHostPort = request.FormValue("ssl_host_port")
+	conf.SSLCertFile = request.FormValue("ssl_cert_file")
+	conf.SSLCertKey = request.FormValue("ssl_cert_key")
+
+	conf.HTTPAuth = request.FormValue("http_auth") == "on"
+	conf.AuthUsername = request.FormValue("auth_username")
+	conf.AuthPassword = request.FormValue("auth_password")
 
 	config.SaveConfig(database, conf)
 

@@ -20,11 +20,20 @@ func main() {
 
 	mgr := squircy.NewManager(root)
 
-	if !*daemonizeFlag {
-		go mgr.Run()
+	go mgr.ListenAndServe()
+	mgr.AutoConnect()
 
-		mgr.LoopCli()
-	} else {
-		mgr.Run()
+	quit := make(chan struct{})
+	if !*daemonizeFlag {
+		go func() {
+			mgr.LoopCLI()
+			close(quit)
+		}()
+	}
+
+	select {
+	case <-quit:
+		// Exit
+		// TODO: Non-interactive mode may end up disconnected and without a web server running.
 	}
 }

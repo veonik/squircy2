@@ -5,37 +5,63 @@ import (
 )
 
 type Configuration struct {
-	ID        int
-	Network   string
-	Nick      string
-	Username  string
-	OwnerNick string
-	OwnerHost string
-	RootPath  string
-	TLS       bool
+	ID int
+
+	RootPath string
+
+	Network     string // Hostname and port, format: hostname:1234
+	TLS         bool   // Enable TLS/SSL for IRC
+	AutoConnect bool
+	Nick        string
+	Username    string
+	OwnerNick   string
+	OwnerHost   string
+
+	WebInterface bool
+	HTTPHostPort string // Hostname and port, format: hostname:1234
+
+	HTTPS        bool
+	RequireHTTPS bool
+	SSLCertFile  string
+	SSLCertKey   string
+	SSLHostPort  string // Hostname and port, format: hostname:1234
+
+	HTTPAuth     bool
+	AuthUsername string
+	AuthPassword string
 }
 
 func NewConfiguration(rootPath string) *Configuration {
-	config := &Configuration{
-		-1,
-		"irc.freenode.net:6667",
-		"mrsquishy",
-		"squishyj",
-		"",
-		"",
-		rootPath,
-		false,
+	return &Configuration{
+		ID:           -1,
+		RootPath:     rootPath,
+		Network:      "irc.freenode.net:6667",
+		TLS:          false,
+		AutoConnect:  false,
+		Nick:         "mrsquishy",
+		Username:     "squishyj",
+		OwnerNick:    "",
+		OwnerHost:    "",
+		WebInterface: true,
+		HTTPHostPort: ":3000",
+		HTTPS:        false,
+		RequireHTTPS: false,
+		SSLCertFile:  "",
+		SSLCertKey:   "",
+		SSLHostPort:  "",
+		HTTPAuth:     false,
+		AuthUsername: "",
+		AuthPassword: "",
 	}
-	return config
 }
 
-func LoadConfig(database *db.DB, config *Configuration) {
+func LoadConfig(database *db.DB, conf *Configuration) {
 	repo := configRepository{database}
-	repo.fetchInto(config)
-	SaveConfig(database, config)
+	repo.fetchInto(conf)
+	SaveConfig(database, conf)
 }
 
-func SaveConfig(database *db.DB, config *Configuration) {
+func SaveConfig(database *db.DB, conf *Configuration) {
 	repo := configRepository{database}
-	repo.save(config)
+	repo.save(conf)
 }

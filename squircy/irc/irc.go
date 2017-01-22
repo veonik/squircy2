@@ -29,10 +29,8 @@ type IrcConnectionManager struct {
 	debug    bool
 }
 
-func NewIrcConnectionManager(injector inject.Injector) (mgr *IrcConnectionManager) {
-	mgr = &IrcConnectionManager{injector, nil, Disconnected, false}
-
-	return
+func NewIrcConnectionManager(injector inject.Injector) *IrcConnectionManager {
+	return &IrcConnectionManager{injector, nil, Disconnected, false}
 }
 
 func (mgr *IrcConnectionManager) Connect() {
@@ -110,6 +108,7 @@ func connect(mgr *IrcConnectionManager, conf *config.Configuration, l *log.Logge
 
 	if conf.TLS {
 		mgr.conn.UseTLS = true
+		// TODO: Don't skip cert verification
 		mgr.conn.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 

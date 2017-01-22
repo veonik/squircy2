@@ -5,14 +5,18 @@ package squircy
 import (
 	"encoding/json"
 	"strconv"
-	"time"
 
-	"github.com/antage/eventsource"
+	"errors"
+	"log"
+	"net/http"
+	"sync"
+
 	"github.com/go-martini/martini"
 	_ "github.com/jteeuwen/go-bindata"
 	"github.com/tyler-sommer/squircy2/squircy/config"
 	"github.com/tyler-sommer/squircy2/squircy/data"
 	"github.com/tyler-sommer/squircy2/squircy/event"
+	"github.com/tyler-sommer/squircy2/squircy/eventsource"
 	"github.com/tyler-sommer/squircy2/squircy/irc"
 	"github.com/tyler-sommer/squircy2/squircy/script"
 	"github.com/tyler-sommer/squircy2/squircy/webhook"
@@ -48,6 +52,50 @@ func NewManager(rootPath string) (manager *Manager) {
 	return
 }
 
+func (manager *Manager) ListenAndServe() {
+	manager.Invoke(manager.listenAndServe)
+}
+
+func (manager *Manager) listenAndServe(conf *config.Configuration, l *log.Logger) {
+	wg := &sync.WaitGroup{}
+	wg.Add(2)
+	go func() {
+		defer func() {
+			if err, ok := recover().(error); ok {
+				l.Println("Could not start HTTP: ", err)
+			}
+			wg.Done()
+		}()
+		err := listenAndServe(manager, conf, l)
+		if err != nil {
+			panic(err)
+		}
+	}()
+	go func() {
+		defer func() {
+			if err, ok := recover().(error); ok {
+				l.Println("Could not start HTTPS: ", err)
+			}
+			wg.Done()
+		}()
+		err := listenAndServeTLS(manager, conf, l)
+		if err != nil {
+			panic(err)
+		}
+	}()
+	wg.Wait()
+}
+
+func (manager *Manager) AutoConnect() {
+	manager.Invoke(manager.autoConnect)
+}
+
+func (manager *Manager) autoConnect(conf *config.Configuration, ircmgr *irc.IrcConnectionManager) {
+	if conf.AutoConnect {
+		ircmgr.Connect()
+	}
+}
+
 func (manager *Manager) invokeAndMap(fn interface{}) interface{} {
 	res, err := manager.Invoke(fn)
 	if err != nil {
@@ -60,16 +108,34 @@ func (manager *Manager) invokeAndMap(fn interface{}) interface{} {
 	return val
 }
 
-func newEventSource(evm event.EventManager) eventsource.EventSource {
-	s := eventsource.DefaultSettings()
-	s.IdleTimeout = 30 * time.Second
-	es := eventsource.New(s, nil)
+func listenAndServe(manager *Manager, conf *config.Configuration, l *log.Logger) error {
+	if !conf.WebInterface {
+		return errors.New("Web Interface is disabled.")
+	}
+	l.Println("Starting HTTP, listening at", conf.HTTPHostPort)
+	return http.ListenAndServe(conf.HTTPHostPort, manager)
+}
+
+func listenAndServeTLS(manager *Manager, conf *config.Configuration, l *log.Logger) error {
+	if !conf.WebInterface {
+		return errors.New("Web Interface is disabled.")
+	}
+	if !conf.HTTPS {
+		return errors.New("HTTPS is disabled.")
+	}
+	l.Println("Starting HTTPS, listening at", conf.SSLHostPort)
+	return http.ListenAndServeTLS(conf.SSLHostPort, conf.SSLCertFile, conf.SSLCertKey, manager)
+}
+
+func newEventSource(evm event.EventManager, l *log.Logger) *eventsource.Broker {
+	es := eventsource.New()
+	es.Logger = l
 
 	var id int = -1
-	evm.Bind(event.AllEvents, func(es eventsource.EventSource, ev event.Event) {
+	evm.Bind(event.AllEvents, func(es *eventsource.Broker, ev event.Event) {
 		id++
-		data, _ := json.Marshal(ev.Data)
-		go es.SendEventMessage(string(data), string(ev.Type), strconv.Itoa(id))
+		d, _ := json.Marshal(ev.Data)
+		es.Notify(&eventsource.Message{strconv.Itoa(id), string(ev.Type), string(d)})
 	})
 
 	return es

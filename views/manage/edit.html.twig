@@ -2,27 +2,35 @@
 
 {% block content %}
 <h4>Settings</h4>
-<div class="row">
-	<div class="col-md-12">
 <form method="post" action="/manage/update">
 <div class="row">
+	<div class="col-sm-12">
+		<h2>IRC</h2>
+	</div>
+</div>
+<div class="row">
 	<div class="col-md-4 form-group">
-		<label for="network">IRC Network</label>
+		<label for="network">Network</label>
   		<input class="form-control" name="network" id="network" placeholder="irc.freenode.net:6667" value="{{ config.Network }}">
 		<div class="checkbox">
 			<label for="tls">
 				<input type="checkbox" name="tls" id="tls" value="on" {% if config.TLS %}checked {% endif %}> Use TLS
 			</label>
 		</div>
+		<div class="checkbox">
+			<label for="auto_connect">
+				<input type="checkbox" name="auto_connect" id="auto_connect" value="on" {% if config.AutoConnect %}checked {% endif %}> Connect to IRC when squIRCy2 starts
+			</label>
+		</div>
 	</div>
 </div>
 <div class="row">
 	<div class="col-md-4 form-group">
-		<label for="nick">IRC Nickname</label>
+		<label for="nick">Bot Nickname</label>
   		<input class="form-control" name="nick" id="nick" placeholder="mrsquishy" value="{{ config.Nick }}">
 	</div>
 	<div class="col-md-4 form-group">
-		<label for="username">IRC Username</label>
+		<label for="username">Bot Username</label>
   		<input class="form-control" name="username" id="username" placeholder="mrjones" value="{{ config.Username }}">
 	</div>
 </div>
@@ -37,11 +45,96 @@
 	</div>
 </div>
 <div class="row">
+	<div class="col-sm-12">
+		<h2>Web Server</h2>
+	</div>
+</div>
+<div class="row">
 	<div class="col-md-4 form-group">
-		<button class="btn btn-primary form-control" id="save_button">Save</button>
+		<div class="checkbox">
+			<label for="web_interface">
+				<input type="checkbox" name="web_interface" id="web_interface" value="on" {% if config.WebInterface %}checked {% endif %}> Enable Web Interface
+			</label>
+		</div>
+		<label for="http_host_port">HTTP Listen Host and Port</label>
+		<input class="form-control" name="http_host_port" id="http_host_port" placeholder=":3000" value="{{ config.HTTPHostPort }}">
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
+		<h3>HTTP(S) Authentication</h3>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
+		<div class="checkbox">
+			<label for="http_auth">
+				<input type="checkbox" name="http_auth" id="http_auth" value="on" {% if config.HTTPAuth %}checked {% endif %}> Enable HTTP BasicAuth
+			</label>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-4 form-group">
+		<label for="auth_username">Username</label>
+		<input class="form-control" name="auth_username" id="auth_username" placeholder="Username" value="{{ config.AuthUsername }}">
+	</div>
+	<div class="col-md-4 form-group">
+		<label for="auth_password">Password</label>
+		<input class="form-control" name="auth_password" id="auth_password" placeholder="Password" value="{{ config.AuthPassword }}">
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
+		<h3>HTTPS</h3>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
+		<div class="checkbox">
+			<label for="https">
+				<input type="checkbox" name="https" id="https" value="on" {% if config.HTTPS %}checked {% endif %}> Enable HTTPS
+			</label>
+		</div>
+		<div class="checkbox">
+			<label for="require_https">
+				<input type="checkbox" name="require_https" id="require_https" value="on" {% if config.RequireHTTPS %}checked {% endif %}> Require HTTPS
+			</label>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-4 form-group">
+		<label for="nick">SSL Listen Host and Port</label>
+		<input class="form-control" name="ssl_host_port" id="ssl_host_port" placeholder=":3443" value="{{ config.SSLHostPort }}">
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-4 form-group">
+		<label for="nick">SSL Certificate File</label>
+		<input class="form-control" name="ssl_cert_file" id="ssl_cert_file" placeholder="/path/to/cert.pem" value="{{ config.SSLCertFile }}">
+	</div>
+	<div class="col-md-4 form-group">
+		<label for="username">SSL Certificate Key File</label>
+		<input class="form-control" name="ssl_cert_key" id="ssl_cert_key" placeholder="/path/to/key.pem" value="{{ config.SSLCertKey }}">
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-6 form-group">
+		<div class="alert alert-warning">
+			<div class="row">
+				<div class="col-md-10">
+					<h4><i class="fa fa-exclamation-triangle"></i> Notice</h4>
+					<p>squIRCy2 may need to be restarted for changes to take effect.</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-md-10">
+					<button class="btn btn-primary form-control" id="save_button">Save</button>
+				</div>
+			</div>
+		</div>
 	</div>
 </div>
 </form>
-	</div>
-</div>
 {% endblock %}
