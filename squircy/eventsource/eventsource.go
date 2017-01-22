@@ -1,8 +1,9 @@
-// v2 of the great example of SSE in go by @ismasan.
-// includes fixes:
-//    * infinite loop ending in panic
-//    * closing a client twice
-//    * potentially blocked listen() from closing a connection during multiplex step.
+// Package eventsource provides HTTP/1.1 and HTTP/2 support for server-side events.
+//
+// Based on:
+// https://gist.github.com/schmohlio/d7bdb255ba61d3f5e51a512a7c0d6a85
+// https://gist.github.com/ismasan/3fb75381cd2deb6bfa9c
+// https://github.com/antage/eventsource
 package eventsource
 
 import (
