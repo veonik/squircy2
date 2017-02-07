@@ -64,7 +64,6 @@ func configureWeb(manager *Manager, conf *config.Configuration) {
 		}),
 	)
 	manager.NotFound(func(req *http.Request, r render.Render, l *log.Logger) {
-		l.Printf("%+v\n", req)
 		r.Error(404)
 	})
 
@@ -84,6 +83,8 @@ func configureWeb(manager *Manager, conf *config.Configuration) {
 		rm.Group("/manage", func(r martini.Router) {
 			r.Get("", manageAction)
 			r.Post("/update", manageUpdateAction)
+			r.Post("/export-scripts", manageExportScriptsAction)
+			r.Post("/import-scripts", manageImportScriptsAction)
 		})
 		rm.Post("/connect", connectAction)
 		rm.Post("/disconnect", disconnectAction)
@@ -128,7 +129,7 @@ func statusAction(r render.Render, mgr *irc.IrcConnectionManager) {
 	r.JSON(200, appStatus{mgr.Status()})
 }
 
-func scriptAction(s *stickHandler, repo script.ScriptRepository) {
+func scriptAction(s *stickHandler, repo *script.ScriptRepository) {
 	scripts := repo.FetchAll()
 
 	s.HTML(200, "script/index.html.twig", map[string]stick.Value{"scripts": scripts})
@@ -144,7 +145,7 @@ func newScriptAction(s *stickHandler) {
 	s.HTML(200, "script/new.html.twig", nil)
 }
 
-func createScriptAction(r render.Render, repo script.ScriptRepository, request *http.Request) {
+func createScriptAction(r render.Render, repo *script.ScriptRepository, request *http.Request) {
 	sType := request.FormValue("type")
 	title := request.FormValue("title")
 	body := request.FormValue("body")
@@ -154,7 +155,7 @@ func createScriptAction(r render.Render, repo script.ScriptRepository, request *
 	r.Redirect("/script", 302)
 }
 
-func editScriptAction(s *stickHandler, repo script.ScriptRepository, params martini.Params) {
+func editScriptAction(s *stickHandler, repo *script.ScriptRepository, params martini.Params) {
 	id, _ := strconv.ParseInt(params["id"], 0, 64)
 
 	script := repo.Fetch(int(id))
@@ -162,7 +163,7 @@ func editScriptAction(s *stickHandler, repo script.ScriptRepository, params mart
 	s.HTML(200, "script/edit.html.twig", map[string]stick.Value{"script": script})
 }
 
-func updateScriptAction(r render.Render, repo script.ScriptRepository, params martini.Params, request *http.Request) {
+func updateScriptAction(r render.Render, repo *script.ScriptRepository, params martini.Params, request *http.Request) {
 	id, _ := strconv.ParseInt(params["id"], 0, 64)
 	sType := request.FormValue("type")
 	title := request.FormValue("title")
@@ -173,7 +174,7 @@ func updateScriptAction(r render.Render, repo script.ScriptRepository, params ma
 	r.Redirect("/script", 302)
 }
 
-func removeScriptAction(r render.Render, repo script.ScriptRepository, params martini.Params) {
+func removeScriptAction(r render.Render, repo *script.ScriptRepository, params martini.Params) {
 	id, _ := strconv.ParseInt(params["id"], 0, 64)
 
 	repo.Delete(int(id))
@@ -181,7 +182,7 @@ func removeScriptAction(r render.Render, repo script.ScriptRepository, params ma
 	r.JSON(200, nil)
 }
 
-func toggleScriptAction(r render.Render, repo script.ScriptRepository, params martini.Params) {
+func toggleScriptAction(r render.Render, repo *script.ScriptRepository, params martini.Params) {
 	id, _ := strconv.ParseInt(params["id"], 0, 64)
 
 	script := repo.Fetch(int(id))
@@ -229,6 +230,9 @@ func manageAction(s *stickHandler, config *config.Configuration) {
 }
 
 func manageUpdateAction(r render.Render, database *db.DB, conf *config.Configuration, request *http.Request) {
+	conf.ScriptsAsFiles = request.FormValue("scripts_as_files") == "on"
+	conf.ScriptsPath = request.FormValue("scripts_path")
+
 	conf.TLS = request.FormValue("tls") == "on"
 	conf.AutoConnect = request.FormValue("auto_connect") == "on"
 	conf.Network = request.FormValue("network")
@@ -253,6 +257,16 @@ func manageUpdateAction(r render.Render, database *db.DB, conf *config.Configura
 	config.SaveConfig(database, conf)
 
 	r.Redirect("/manage", 302)
+}
+
+func manageExportScriptsAction(r render.Render, database *db.DB, conf *config.Configuration, request *http.Request) {
+	// TODO: Implement
+	r.Error(501)
+}
+
+func manageImportScriptsAction(r render.Render, database *db.DB, conf *config.Configuration, request *http.Request) {
+	// TODO: Implement
+	r.Error(501)
 }
 
 // Manage webhook definitions

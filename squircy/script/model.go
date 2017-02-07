@@ -5,6 +5,9 @@ import (
 	"sort"
 
 	"github.com/HouzuoGuo/tiedot/db"
+	"github.com/tyler-sommer/squircy2/squircy/config"
+	"io/ioutil"
+	"fmt"
 )
 
 type ScriptType string
@@ -22,11 +25,21 @@ type Script struct {
 }
 
 type ScriptRepository struct {
+	conf *config.Configuration
+	files *fileRepository
+	db *dbRepository
+}
+
+type fileRepository struct {
+	conf *config.Configuration
+}
+
+type dbRepository struct {
 	database *db.DB
 }
 
-func NewScriptRepository(database *db.DB) ScriptRepository {
-	return ScriptRepository{database}
+func NewScriptRepository(database *db.DB, conf *config.Configuration) *ScriptRepository {
+	return &ScriptRepository{conf, &fileRepository{conf}, &dbRepository{database}}
 }
 
 func hydrateScript(rawScript map[string]interface{}) *Script {
@@ -68,6 +81,36 @@ func (s scriptSlice) Swap(i, j int) {
 }
 
 func (repo *ScriptRepository) FetchAll() []*Script {
+	if repo.conf.ScriptsAsFiles {
+		return repo.files.FetchAll()
+	}
+	return repo.db.FetchAll()
+}
+
+func (repo *ScriptRepository) Fetch(id int) *Script {
+	if repo.conf.ScriptsAsFiles {
+		return repo.files.Fetch(id)
+	}
+	return repo.db.Fetch(id)
+}
+
+func (repo *ScriptRepository) Save(script *Script) {
+	if repo.conf.ScriptsAsFiles {
+		repo.files.Save(script)
+		return
+	}
+	repo.db.Save(script)
+}
+
+func (repo *ScriptRepository) Delete(id int) {
+	if repo.conf.ScriptsAsFiles {
+		repo.files.Delete(id)
+	}
+	repo.db.Delete(id)
+}
+
+
+func (repo *dbRepository) FetchAll() []*Script {
 	col := repo.database.Use("Scripts")
 	scripts := make([]*Script, 0)
 	col.ForEachDoc(func(id int, doc []byte) (moveOn bool) {
@@ -89,7 +132,7 @@ func (repo *ScriptRepository) FetchAll() []*Script {
 	return scripts
 }
 
-func (repo *ScriptRepository) Fetch(id int) *Script {
+func (repo *dbRepository) Fetch(id int) *Script {
 	col := repo.database.Use("Scripts")
 
 	rawScript, err := col.Read(id)
@@ -102,7 +145,7 @@ func (repo *ScriptRepository) Fetch(id int) *Script {
 	return script
 }
 
-func (repo *ScriptRepository) Save(script *Script) {
+func (repo *dbRepository) Save(script *Script) {
 	col := repo.database.Use("Scripts")
 	data := flattenScript(script)
 
@@ -115,7 +158,46 @@ func (repo *ScriptRepository) Save(script *Script) {
 	}
 }
 
-func (repo *ScriptRepository) Delete(id int) {
+func (repo *dbRepository) Delete(id int) {
 	col := repo.database.Use("Scripts")
 	col.Delete(id)
+}
+
+
+func (repo *fileRepository) FetchAll() []*Script {
+	var scripts []*Script
+	files, err := ioutil.ReadDir(repo.conf.ScriptsPath)
+	if err != nil {
+		return scripts
+	}
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		contents, err := ioutil.ReadFile(file.Name())
+		if err != nil {
+			fmt.Println(file)
+			scripts = append(scripts, &Script{
+				Title: file.Name(),
+				Body: string(contents),
+				Type: Javascript,
+				ID: -1,
+			})
+		}
+	}
+	return scripts
+}
+
+func (repo *fileRepository) Fetch(id int) *Script {
+
+
+	return &Script{Type: Javascript}
+}
+
+func (repo *fileRepository) Save(script *Script) {
+
+}
+
+func (repo *fileRepository) Delete(id int) {
+
 }

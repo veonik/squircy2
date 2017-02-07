@@ -46,6 +46,33 @@
 </div>
 <div class="row">
 	<div class="col-sm-12">
+		<h2>Script Management</h2>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-4 form-group">
+		<div class="checkbox">
+			<label for="scripts_as_files">
+				<input type="checkbox" name="scripts_as_files" id="scripts_as_files" value="on" {% if config.ScriptsAsFiles %}checked {% endif %}> Store Scripts on the Filesystem
+			</label>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-4 form-group">
+		<label for="scripts_path">Scripts Storage Path</label>
+		<input class="form-control" name="scripts_path" id="scripts_path" placeholder="{{ config.RootPath }}/scripts/" value="{{ config.ScriptsPath }}">
+	</div>
+	<div class="col-md-4 form-group">
+		<label>Script Utilities</label><br>
+		<div class="btn-group">
+			<a id="export-scripts" class="btn btn-warning">Export to Filesystem</a>
+			<a id="import-scripts" class="btn btn-danger">Import from Filesystem</a>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
 		<h2>Web Server</h2>
 	</div>
 </div>
@@ -137,4 +164,72 @@
 	</div>
 </div>
 </form>
+<form action="/manage/import-scripts" method="post">
+<div id="confirm-import" class="modal fade" tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">Import Scripts from Filesystem</h4>
+			</div>
+			<div class="modal-body">
+				<p>Continue importing scripts from filesystem?</p>
+				<div class="alert alert-warning"><strong><i class="fa fa-info-circle"></i> Note —</strong> Existing scripts will be updated.</div>
+				<div class="form-group">
+					<label for="scripts_import_path">Scripts stored in squIRCy2's database will be imported from:</label>
+					<input class="form-control" name="scripts_import_path" id="scripts_import_path" value="{{ config.ScriptsPath }}">
+				</div>
+
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="submit" class="btn btn-primary">Import!</button>
+			</div>
+		</div>
+	</div>
+</div>
+<form action="/manage/export-scripts" method="post">
+<div id="confirm-export" class="modal fade" tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title">Export Scripts to Filesystem</h4>
+			</div>
+			<div class="modal-body">
+				<p>Continue exporting scripts to filesystem?</p>
+				<div class="alert alert-warning">
+					<p><strong><i class="fa fa-info-circle"></i> Note —</strong> Existing scripts will be updated.</p>
+				</div>
+				<div class="form-group">
+					<label for="scripts_export_path">Scripts stored in squIRCy2's database will be exported to:</label>
+					<input class="form-control" name="scripts_export_path" id="scripts_export_path" value="{{ config.ScriptsPath }}">
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="submit" class="btn btn-primary">Export!</button>
+			</div>
+		</div>
+	</div>
+</div>
+</form>
+{% endblock %}
+
+{% block additional_javascripts %}
+<script type="text/javascript">
+	$(function() {
+	    $('#import-scripts').on('click', function(e) {
+	        e.preventDefault();
+	        e.stopPropagation();
+	        $('#confirm-import').modal('show');
+		});
+
+        $('#export-scripts').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $('#confirm-export').modal('show');
+        });
+	})
+</script>
 {% endblock %}

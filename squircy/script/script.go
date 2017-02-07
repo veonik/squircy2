@@ -18,11 +18,11 @@ type ScriptManager struct {
 	scriptHelper scriptHelper
 	mathHelper   mathHelper
 	osHelper     osHelper
-	repo         ScriptRepository
+	repo         *ScriptRepository
 	logger       *log.Logger
 }
 
-func NewScriptManager(repo ScriptRepository, l *log.Logger, e event.EventManager, ircmanager *irc.IrcConnectionManager, config *config.Configuration) *ScriptManager {
+func NewScriptManager(repo *ScriptRepository, l *log.Logger, e event.EventManager, ircmanager *irc.IrcConnectionManager, config *config.Configuration) *ScriptManager {
 	mgr := ScriptManager{
 		events:       e,
 		conf:         config,

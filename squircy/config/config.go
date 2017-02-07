@@ -9,6 +9,9 @@ type Configuration struct {
 
 	RootPath string
 
+	ScriptsAsFiles bool   // Store scripts on the filesystem
+	ScriptsPath    string // Path to script storage
+
 	Network     string // Hostname and port, format: hostname:1234
 	TLS         bool   // Enable TLS/SSL for IRC
 	AutoConnect bool
@@ -33,25 +36,27 @@ type Configuration struct {
 
 func NewConfiguration(rootPath string) *Configuration {
 	return &Configuration{
-		ID:           -1,
-		RootPath:     rootPath,
-		Network:      "irc.freenode.net:6667",
-		TLS:          false,
-		AutoConnect:  false,
-		Nick:         "mrsquishy",
-		Username:     "squishyj",
-		OwnerNick:    "",
-		OwnerHost:    "",
-		WebInterface: true,
-		HTTPHostPort: ":3000",
-		HTTPS:        false,
-		RequireHTTPS: false,
-		SSLCertFile:  "",
-		SSLCertKey:   "",
-		SSLHostPort:  "",
-		HTTPAuth:     false,
-		AuthUsername: "",
-		AuthPassword: "",
+		ID:             -1,
+		RootPath:       rootPath,
+		ScriptsAsFiles: false,
+		ScriptsPath:    "",
+		Network:        "irc.freenode.net:6667",
+		TLS:            false,
+		AutoConnect:    false,
+		Nick:           "mrsquishy",
+		Username:       "squishyj",
+		OwnerNick:      "",
+		OwnerHost:      "",
+		WebInterface:   true,
+		HTTPHostPort:   ":3000",
+		HTTPS:          false,
+		RequireHTTPS:   false,
+		SSLCertFile:    "",
+		SSLCertKey:     "",
+		SSLHostPort:    "",
+		HTTPAuth:       false,
+		AuthUsername:   "",
+		AuthPassword:   "",
 	}
 }
 

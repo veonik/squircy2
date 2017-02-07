@@ -176,7 +176,7 @@ func newJavascriptVm(m *ScriptManager) *jsVm {
 		coll := call.Argument(0).String()
 
 		// Todo: get the Database properly
-		db := data.NewGenericRepository(m.repo.database, coll)
+		db := data.NewGenericRepository(m.repo.db.database, coll)
 		obj, _ := jsVm.Object("({})")
 		obj.Set("Save", func(call otto.FunctionCall) otto.Value {
 			exp, _ := call.Argument(0).Export()

@@ -36,7 +36,7 @@ func NewManager(rootPath string) (manager *Manager) {
 	config.LoadConfig(database, conf)
 
 	manager.Map(database)
-	manager.Map(script.NewScriptRepository(database))
+	manager.Map(script.NewScriptRepository(database, conf))
 	manager.Map(webhook.NewWebhookRepository(database))
 	manager.Map(conf)
 
