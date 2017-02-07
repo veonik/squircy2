@@ -7,7 +7,9 @@ import (
 	"github.com/HouzuoGuo/tiedot/db"
 	"github.com/tyler-sommer/squircy2/squircy/config"
 	"io/ioutil"
-	"fmt"
+	"path/filepath"
+	"math/rand"
+	"log"
 )
 
 type ScriptType string
@@ -24,22 +26,27 @@ type Script struct {
 	Enabled bool
 }
 
-type ScriptRepository struct {
-	conf *config.Configuration
-	files *fileRepository
-	db *dbRepository
+type ScriptRepository interface {
+	FetchAll() []*Script
+	Fetch(id int) *Script
+	Save(script *Script)
+	Delete(id int)
 }
 
-type fileRepository struct {
-	conf *config.Configuration
+func newDBRepository(database *db.DB, logger *log.Logger) *dbRepository {
+	return &dbRepository{database, logger}
 }
 
 type dbRepository struct {
 	database *db.DB
+	logger *log.Logger
 }
 
-func NewScriptRepository(database *db.DB, conf *config.Configuration) *ScriptRepository {
-	return &ScriptRepository{conf, &fileRepository{conf}, &dbRepository{database}}
+func NewScriptRepository(database *db.DB, conf *config.Configuration, logger *log.Logger) ScriptRepository {
+	if conf.ScriptsAsFiles {
+		return newFileRepository(conf, logger)
+	}
+	return newDBRepository(database, logger)
 }
 
 func hydrateScript(rawScript map[string]interface{}) *Script {
@@ -80,35 +87,6 @@ func (s scriptSlice) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 
-func (repo *ScriptRepository) FetchAll() []*Script {
-	if repo.conf.ScriptsAsFiles {
-		return repo.files.FetchAll()
-	}
-	return repo.db.FetchAll()
-}
-
-func (repo *ScriptRepository) Fetch(id int) *Script {
-	if repo.conf.ScriptsAsFiles {
-		return repo.files.Fetch(id)
-	}
-	return repo.db.Fetch(id)
-}
-
-func (repo *ScriptRepository) Save(script *Script) {
-	if repo.conf.ScriptsAsFiles {
-		repo.files.Save(script)
-		return
-	}
-	repo.db.Save(script)
-}
-
-func (repo *ScriptRepository) Delete(id int) {
-	if repo.conf.ScriptsAsFiles {
-		repo.files.Delete(id)
-	}
-	repo.db.Delete(id)
-}
-
 
 func (repo *dbRepository) FetchAll() []*Script {
 	col := repo.database.Use("Scripts")
@@ -137,6 +115,7 @@ func (repo *dbRepository) Fetch(id int) *Script {
 
 	rawScript, err := col.Read(id)
 	if err != nil {
+		// TODO: Handle error properly
 		panic(err)
 	}
 	script := hydrateScript(rawScript)
@@ -164,40 +143,104 @@ func (repo *dbRepository) Delete(id int) {
 }
 
 
+type fileRepository struct {
+	idx map[int]string
+	conf *config.Configuration
+	logger *log.Logger
+}
+
+func newFileRepository(conf *config.Configuration, logger *log.Logger) *fileRepository {
+	repo := &fileRepository{make(map[int]string), conf, logger}
+	repo.loadIndex()
+	return repo
+}
+
+func (repo *fileRepository) loadIndex() {
+	j, err := ioutil.ReadFile(filepath.Join(repo.conf.ScriptsPath, "index.json"))
+	if err != nil {
+		// TODO: Handle error properly
+		repo.logger.Println(err.Error())
+		return
+	}
+	err = json.Unmarshal(j, &repo.idx)
+	if err != nil {
+		// TODO: Handle error properly
+		repo.logger.Println(err.Error())
+		return
+	}
+}
+
+func (repo *fileRepository) saveIndex() {
+	d, err := json.Marshal(repo.idx)
+	if err != nil {
+		// TODO: Handle error properly
+		repo.logger.Println(err.Error())
+		return
+	}
+	err = ioutil.WriteFile(filepath.Join(repo.conf.ScriptsPath, "index.json"), d, 0644)
+	if err != nil {
+		// TODO: Handle error properly
+		repo.logger.Println(err.Error())
+		return
+	}
+}
+
 func (repo *fileRepository) FetchAll() []*Script {
 	var scripts []*Script
-	files, err := ioutil.ReadDir(repo.conf.ScriptsPath)
-	if err != nil {
-		return scripts
-	}
-	for _, file := range files {
-		if file.IsDir() {
+	for id, file := range repo.idx {
+		contents, err := ioutil.ReadFile(filepath.Join(repo.conf.ScriptsPath, file))
+		if err != nil {
+			// TODO: Handle error properly
+			repo.logger.Println(err.Error())
 			continue
 		}
-		contents, err := ioutil.ReadFile(file.Name())
-		if err != nil {
-			fmt.Println(file)
-			scripts = append(scripts, &Script{
-				Title: file.Name(),
-				Body: string(contents),
-				Type: Javascript,
-				ID: -1,
-			})
-		}
+		scripts = append(scripts, &Script{
+			Title: file,
+			Body: string(contents),
+			Type: Javascript,
+			ID: id,
+			Enabled: true,
+		})
 	}
+	sort.Sort(scriptSlice(scripts))
 	return scripts
 }
 
 func (repo *fileRepository) Fetch(id int) *Script {
+	if file, ok := repo.idx[id]; ok {
+		contents, err := ioutil.ReadFile(filepath.Join(repo.conf.ScriptsPath, file))
+		if err != nil {
+			// TODO: Handle error properly
+			repo.logger.Println(err.Error())
+			return nil
+		}
+		return &Script{
+			Title: file,
+			Body: string(contents),
+			Type: Javascript,
+			ID: id,
+			Enabled: true,
+		}
+	}
 
-
-	return &Script{Type: Javascript}
+	return nil
 }
 
 func (repo *fileRepository) Save(script *Script) {
-
+	if script.ID <= 0 {
+		script.ID = rand.Int()
+	}
+	repo.idx[script.ID] = script.Title
+	err := ioutil.WriteFile(filepath.Join(repo.conf.ScriptsPath, script.Title), []byte(script.Body), 0644)
+	if err != nil {
+		// TODO: Handle error properly
+		repo.logger.Println(err.Error())
+		return
+	}
+	repo.saveIndex()
 }
 
 func (repo *fileRepository) Delete(id int) {
-
+	delete(repo.idx, id)
+	repo.saveIndex()
 }

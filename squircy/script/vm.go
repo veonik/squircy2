@@ -139,7 +139,7 @@ func newJavascriptVm(m *ScriptManager) *jsVm {
 	jsVm.Set("Os", &m.osHelper)
 	jsVm.Set("Math", &m.mathHelper)
 	v, _ = jsVm.Object("Math")
-	v.Set("rand", (&m.mathHelper).Rand)
+	v.Set("random", (&m.mathHelper).Rand)
 	v.Set("round", (&m.mathHelper).Round)
 	v.Set("ceil", (&m.mathHelper).Ceil)
 	v.Set("floor", (&m.mathHelper).Floor)
@@ -175,8 +175,7 @@ func newJavascriptVm(m *ScriptManager) *jsVm {
 	jsVm.Set("use", func(call otto.FunctionCall) otto.Value {
 		coll := call.Argument(0).String()
 
-		// Todo: get the Database properly
-		db := data.NewGenericRepository(m.repo.db.database, coll)
+		db := data.NewGenericRepository(m.database, coll)
 		obj, _ := jsVm.Object("({})")
 		obj.Set("Save", func(call otto.FunctionCall) otto.Value {
 			exp, _ := call.Argument(0).Export()

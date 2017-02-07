@@ -129,7 +129,7 @@ func statusAction(r render.Render, mgr *irc.IrcConnectionManager) {
 	r.JSON(200, appStatus{mgr.Status()})
 }
 
-func scriptAction(s *stickHandler, repo *script.ScriptRepository) {
+func scriptAction(s *stickHandler, repo script.ScriptRepository) {
 	scripts := repo.FetchAll()
 
 	s.HTML(200, "script/index.html.twig", map[string]stick.Value{"scripts": scripts})
@@ -145,7 +145,7 @@ func newScriptAction(s *stickHandler) {
 	s.HTML(200, "script/new.html.twig", nil)
 }
 
-func createScriptAction(r render.Render, repo *script.ScriptRepository, request *http.Request) {
+func createScriptAction(r render.Render, repo script.ScriptRepository, request *http.Request) {
 	sType := request.FormValue("type")
 	title := request.FormValue("title")
 	body := request.FormValue("body")
@@ -155,7 +155,7 @@ func createScriptAction(r render.Render, repo *script.ScriptRepository, request 
 	r.Redirect("/script", 302)
 }
 
-func editScriptAction(s *stickHandler, repo *script.ScriptRepository, params martini.Params) {
+func editScriptAction(s *stickHandler, repo script.ScriptRepository, params martini.Params) {
 	id, _ := strconv.ParseInt(params["id"], 0, 64)
 
 	script := repo.Fetch(int(id))
@@ -163,7 +163,7 @@ func editScriptAction(s *stickHandler, repo *script.ScriptRepository, params mar
 	s.HTML(200, "script/edit.html.twig", map[string]stick.Value{"script": script})
 }
 
-func updateScriptAction(r render.Render, repo *script.ScriptRepository, params martini.Params, request *http.Request) {
+func updateScriptAction(r render.Render, repo script.ScriptRepository, params martini.Params, request *http.Request) {
 	id, _ := strconv.ParseInt(params["id"], 0, 64)
 	sType := request.FormValue("type")
 	title := request.FormValue("title")
@@ -174,7 +174,7 @@ func updateScriptAction(r render.Render, repo *script.ScriptRepository, params m
 	r.Redirect("/script", 302)
 }
 
-func removeScriptAction(r render.Render, repo *script.ScriptRepository, params martini.Params) {
+func removeScriptAction(r render.Render, repo script.ScriptRepository, params martini.Params) {
 	id, _ := strconv.ParseInt(params["id"], 0, 64)
 
 	repo.Delete(int(id))
@@ -182,7 +182,7 @@ func removeScriptAction(r render.Render, repo *script.ScriptRepository, params m
 	r.JSON(200, nil)
 }
 
-func toggleScriptAction(r render.Render, repo *script.ScriptRepository, params martini.Params) {
+func toggleScriptAction(r render.Render, repo script.ScriptRepository, params martini.Params) {
 	id, _ := strconv.ParseInt(params["id"], 0, 64)
 
 	script := repo.Fetch(int(id))
@@ -259,14 +259,30 @@ func manageUpdateAction(r render.Render, database *db.DB, conf *config.Configura
 	r.Redirect("/manage", 302)
 }
 
-func manageExportScriptsAction(r render.Render, database *db.DB, conf *config.Configuration, request *http.Request) {
-	// TODO: Implement
-	r.Error(501)
+func manageExportScriptsAction(r render.Render, m *script.ScriptManager, conf *config.Configuration, request *http.Request) {
+	oldPath := conf.ScriptsPath
+	defer func() {
+		conf.ScriptsPath = oldPath
+	}()
+	conf.ScriptsPath = request.FormValue("scripts_export_path")
+	err := m.Export()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	r.Redirect("/manage", 302)
 }
 
-func manageImportScriptsAction(r render.Render, database *db.DB, conf *config.Configuration, request *http.Request) {
-	// TODO: Implement
-	r.Error(501)
+func manageImportScriptsAction(r render.Render, m *script.ScriptManager, conf *config.Configuration, request *http.Request) {
+	oldPath := conf.ScriptsPath
+	defer func() {
+		conf.ScriptsPath = oldPath
+	}()
+	conf.ScriptsPath = request.FormValue("scripts_import_path")
+	err := m.Import()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	r.Redirect("/manage", 302)
 }
 
 // Manage webhook definitions

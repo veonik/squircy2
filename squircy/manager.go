@@ -34,17 +34,17 @@ func NewManager(rootPath string) (manager *Manager) {
 	conf := config.NewConfiguration(rootPath)
 	database := data.NewDatabaseConnection(conf.RootPath)
 	config.LoadConfig(database, conf)
-
-	manager.Map(database)
-	manager.Map(script.NewScriptRepository(database, conf))
-	manager.Map(webhook.NewWebhookRepository(database))
 	manager.Map(conf)
 
 	manager.invokeAndMap(event.NewEventManager)
 	manager.invokeAndMap(newEventTracer)
 	manager.Invoke(configureLog)
-	manager.Invoke(configureWeb)
 
+	manager.Map(database)
+	manager.invokeAndMap(script.NewScriptRepository)
+	manager.Map(webhook.NewWebhookRepository(database))
+
+	manager.Invoke(configureWeb)
 	manager.invokeAndMap(newEventSource)
 	manager.invokeAndMap(irc.NewIrcConnectionManager)
 	manager.invokeAndMap(script.NewScriptManager)
