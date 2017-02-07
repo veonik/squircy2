@@ -2,9 +2,8 @@ package script
 
 import (
 	"errors"
-	"time"
-
 	"log"
+	"time"
 
 	"github.com/robertkrimen/otto"
 	"github.com/tyler-sommer/squircy2/event"

@@ -3,11 +3,10 @@ package main
 import (
 	"flag"
 
-	"github.com/tyler-sommer/squircy2"
 	"gopkg.in/mattes/go-expand-tilde.v1"
 )
 
-var daemonizeFlag = flag.Bool("daemonize", false, "Run as a daemon.")
+var nonInteractiveFlag = flag.Bool("no-interactive", false, "Run without user interaction.")
 var rootPathFlag = flag.String("root-path", "~/.squircy2", "Specify a custom root path.")
 
 func main() {
@@ -24,7 +23,7 @@ func main() {
 	mgr.AutoConnect()
 
 	quit := make(chan struct{})
-	if !*daemonizeFlag {
+	if !*nonInteractiveFlag {
 		go func() {
 			mgr.LoopCLI()
 			close(quit)

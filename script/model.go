@@ -2,14 +2,14 @@ package script
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"log"
+	"math/rand"
+	"path/filepath"
 	"sort"
 
 	"github.com/HouzuoGuo/tiedot/db"
 	"github.com/tyler-sommer/squircy2/config"
-	"io/ioutil"
-	"path/filepath"
-	"math/rand"
-	"log"
 )
 
 type ScriptType string
@@ -39,7 +39,7 @@ func newDBRepository(database *db.DB, logger *log.Logger) *dbRepository {
 
 type dbRepository struct {
 	database *db.DB
-	logger *log.Logger
+	logger   *log.Logger
 }
 
 func NewScriptRepository(database *db.DB, conf *config.Configuration, logger *log.Logger) ScriptRepository {
@@ -86,7 +86,6 @@ func (s scriptSlice) Less(i, j int) bool {
 func (s scriptSlice) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
-
 
 func (repo *dbRepository) FetchAll() []*Script {
 	col := repo.database.Use("Scripts")
@@ -142,10 +141,9 @@ func (repo *dbRepository) Delete(id int) {
 	col.Delete(id)
 }
 
-
 type fileRepository struct {
-	idx map[int]string
-	conf *config.Configuration
+	idx    map[int]string
+	conf   *config.Configuration
 	logger *log.Logger
 }
 
@@ -195,10 +193,10 @@ func (repo *fileRepository) FetchAll() []*Script {
 			continue
 		}
 		scripts = append(scripts, &Script{
-			Title: file,
-			Body: string(contents),
-			Type: Javascript,
-			ID: id,
+			Title:   file,
+			Body:    string(contents),
+			Type:    Javascript,
+			ID:      id,
 			Enabled: true,
 		})
 	}
@@ -215,10 +213,10 @@ func (repo *fileRepository) Fetch(id int) *Script {
 			return nil
 		}
 		return &Script{
-			Title: file,
-			Body: string(contents),
-			Type: Javascript,
-			ID: id,
+			Title:   file,
+			Body:    string(contents),
+			Type:    Javascript,
+			ID:      id,
 			Enabled: true,
 		}
 	}

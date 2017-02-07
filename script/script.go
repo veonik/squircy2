@@ -2,16 +2,16 @@ package script
 
 import (
 	"log"
+	"os"
 
+	"github.com/HouzuoGuo/tiedot/db"
 	"github.com/tyler-sommer/squircy2/config"
 	"github.com/tyler-sommer/squircy2/event"
 	"github.com/tyler-sommer/squircy2/irc"
-	"github.com/HouzuoGuo/tiedot/db"
-	"os"
 )
 
 type ScriptManager struct {
-	database	 *db.DB
+	database     *db.DB
 	events       event.EventManager
 	conf         *config.Configuration
 	driver       javascriptDriver

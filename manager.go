@@ -1,15 +1,18 @@
 package squircy2
 
-//go:generate go-bindata -prefix "../" -pkg squircy -tags "!debug" ../views/... ../public/...
+//go:generate go-bindata -prefix "./" -pkg squircy -tags "!debug" ./views/... ./public/...
 
 import (
+	"crypto/tls"
 	"encoding/json"
-	"strconv"
-
 	"errors"
+	"io"
 	"log"
+	"net"
 	"net/http"
+	"strconv"
 	"sync"
+	"time"
 
 	"github.com/go-martini/martini"
 	_ "github.com/jteeuwen/go-bindata"
@@ -20,16 +23,12 @@ import (
 	"github.com/tyler-sommer/squircy2/irc"
 	"github.com/tyler-sommer/squircy2/script"
 	"github.com/tyler-sommer/squircy2/webhook"
-	"io"
-	"net"
-	"time"
-	"crypto/tls"
 )
 
 type Manager struct {
 	*martini.ClassicMartini
 
-	httpListener io.Closer
+	httpListener  io.Closer
 	httpsListener io.Closer
 }
 
