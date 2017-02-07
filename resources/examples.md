@@ -42,3 +42,30 @@ bind("irc.WILDCARD", function(e) {
 ### Keep track of channel participants
 
 An example script that keeps track of who is participating in channels the bot is on is defined in [examples/channel-names.js](examples/channel-names.js).
+
+### In-chat REPL
+
+This example shows how to check a user's nickname and hostname to provide a little bit of security around a feature exposed to IRC.
+
+```js
+(function() {
+    var repl = false;
+
+    bind("irc.PRIVMSG", function handleChat(e) {
+        if (e.Nick !== Config.OwnerNick() || e.Host !== Config.OwnerHost()) {
+            return;
+        }
+        
+        if (e.Message !== "!repl") {
+            if (repl) {
+                eval(e.Message);
+            }
+            
+            return;
+        }
+        
+        repl = !repl;
+        Irc.Privmsg(e.Target, "Javascript REPL " + (repl ? "started" : "ended"));
+    });
+})();
+```
