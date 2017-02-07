@@ -15,11 +15,15 @@ Installation
 
 Installing squIRCy2 is as easy as running:
 
-```
-go get -u github.com/tyler-sommer/squircy2
+```bash
+go get -u github.com/tyler-sommer/squircy2/...
 ```
 
-With squIRCy2 is installed, you can run it immediately with `squircy2` and a default configuration will be initialized in `~/.squircy2`.
+With squIRCy2 is installed, a default configuration will be initialized in `~/.squircy2`. You can run it immediately with `squircy2`:
+
+```bash
+squircy2
+```
 
 > For information on modifying and customizing squIRcy2, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
