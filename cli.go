@@ -24,7 +24,7 @@ func (man *Manager) LoopCLI() {
 	man.Invoke(loopCLI)
 }
 
-func loopCLI(conf *config.Configuration, l *log.Logger, ircmgr *irc.IrcConnectionManager, evm event.EventManager, scmgr *script.ScriptManager) {
+func loopCLI(conf *config.Configuration, l *log.Logger, ircmgr *irc.IrcConnectionManager, evm event.EventManager, scmgr *script.ScriptManager, manager *Manager) {
 	hist := filepath.Join(conf.RootPath, ".history")
 
 	cli := liner.NewLiner()
@@ -56,6 +56,8 @@ func loopCLI(conf *config.Configuration, l *log.Logger, ircmgr *irc.IrcConnectio
 		l.Println(`Commands:
 
 exit		Quits IRC, if connected, and exits the program
+listen		Start HTTP (and HTTPS, if configured) server
+stop		Stop HTTP and HTTPS server, if they are running
 reload		Reload the scripting engine
 repl		Start a JavaScript REPL
 debug		Toggles debug on or off`)
@@ -86,6 +88,19 @@ reconnect	Force a reconnection to IRC`)
 			time.Sleep(2 * time.Second)
 			l.Println("Exiting")
 			return
+
+		case cmd == "listen":
+			manager.ListenAndServe()
+
+		case cmd == "stop":
+			err = manager.StopListenAndServe()
+			if err != nil {
+				l.Println(err.Error())
+			}
+			err = manager.StopListenAndServeTLS()
+			if err != nil {
+				l.Println(err.Error())
+			}
 
 		case cmd == "debug":
 			debugging := !ircmgr.Debug()

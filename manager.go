@@ -20,14 +20,21 @@ import (
 	"github.com/tyler-sommer/squircy2/irc"
 	"github.com/tyler-sommer/squircy2/script"
 	"github.com/tyler-sommer/squircy2/webhook"
+	"io"
+	"net"
+	"time"
+	"crypto/tls"
 )
 
 type Manager struct {
 	*martini.ClassicMartini
+
+	httpListener io.Closer
+	httpsListener io.Closer
 }
 
 func NewManager(rootPath string) (manager *Manager) {
-	manager = &Manager{martini.Classic()}
+	manager = &Manager{ClassicMartini: martini.Classic()}
 	manager.Map(manager)
 	manager.Map(manager.Injector)
 
@@ -54,6 +61,26 @@ func NewManager(rootPath string) (manager *Manager) {
 
 func (manager *Manager) ListenAndServe() {
 	manager.Invoke(manager.listenAndServe)
+}
+
+func (manager *Manager) StopListenAndServe() error {
+	if manager.httpListener == nil {
+		return nil
+	}
+	defer func() {
+		manager.httpListener = nil
+	}()
+	return manager.httpListener.Close()
+}
+
+func (manager *Manager) StopListenAndServeTLS() error {
+	if manager.httpsListener == nil {
+		return nil
+	}
+	defer func() {
+		manager.httpsListener = nil
+	}()
+	return manager.httpsListener.Close()
 }
 
 func (manager *Manager) listenAndServe(conf *config.Configuration, l *log.Logger) {
@@ -108,12 +135,44 @@ func (manager *Manager) invokeAndMap(fn interface{}) interface{} {
 	return val
 }
 
+// tcpKeepAliveListener sets TCP keep-alive timeouts on accepted
+// connections. It's used by ListenAndServe and ListenAndServeTLS so
+// dead TCP connections (e.g. closing laptop mid-download) eventually
+// go away.
+//
+// Taken from stdlib net/http.
+type tcpKeepAliveListener struct {
+	*net.TCPListener
+}
+
+func (ln tcpKeepAliveListener) Accept() (c net.Conn, err error) {
+	tc, err := ln.AcceptTCP()
+	if err != nil {
+		return
+	}
+	tc.SetKeepAlive(true)
+	tc.SetKeepAlivePeriod(3 * time.Minute)
+	return tc, nil
+}
+
 func listenAndServe(manager *Manager, conf *config.Configuration, l *log.Logger) error {
 	if !conf.WebInterface {
 		return errors.New("Web Interface is disabled.")
 	}
 	l.Println("Starting HTTP, listening at", conf.HTTPHostPort)
-	return http.ListenAndServe(conf.HTTPHostPort, manager)
+	s := &http.Server{Addr: conf.HTTPHostPort, Handler: manager}
+	listener, err := net.Listen("tcp", conf.HTTPHostPort)
+	if err != nil {
+		return err
+	}
+	go func() {
+		err := s.Serve(tcpKeepAliveListener{listener.(*net.TCPListener)})
+		if err != nil {
+			l.Println(err.Error())
+		}
+	}()
+	manager.httpListener = listener.(io.Closer)
+	return nil
 }
 
 func listenAndServeTLS(manager *Manager, conf *config.Configuration, l *log.Logger) error {
@@ -124,7 +183,26 @@ func listenAndServeTLS(manager *Manager, conf *config.Configuration, l *log.Logg
 		return errors.New("HTTPS is disabled.")
 	}
 	l.Println("Starting HTTPS, listening at", conf.SSLHostPort)
-	return http.ListenAndServeTLS(conf.SSLHostPort, conf.SSLCertFile, conf.SSLCertKey, manager)
+	s := &http.Server{Addr: conf.SSLHostPort, Handler: manager}
+	var err error
+	s.TLSConfig = &tls.Config{}
+	s.TLSConfig.Certificates = make([]tls.Certificate, 1)
+	s.TLSConfig.Certificates[0], err = tls.LoadX509KeyPair(conf.SSLCertFile, conf.SSLCertKey)
+	if err != nil {
+		return err
+	}
+	listener, err := net.Listen("tcp", conf.SSLHostPort)
+	if err != nil {
+		return err
+	}
+	go func() {
+		err := s.Serve(tls.NewListener(tcpKeepAliveListener{listener.(*net.TCPListener)}, s.TLSConfig))
+		if err != nil {
+			l.Println(err.Error())
+		}
+	}()
+	manager.httpsListener = listener.(io.Closer)
+	return nil
 }
 
 func newEventSource(evm event.EventManager) *eventsource.Broker {
