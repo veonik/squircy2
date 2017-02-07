@@ -3,11 +3,11 @@ squIRCy2
 
 ##### the scriptable IRC bot
 
-squIRCy2 is written in Go and is scriptable using Javascript.
+squIRCy2 is written in Go and is scriptable using an embedded JavaScript runtime.
 
-It sports a web management interface for writing scripts and bot management, as well as dynamic script reloading at 
-runtime. Bind custom scripts to run when events occur in the application. Events can come from IRC, the CLI, or
-even the web.
+It sports a web management interface for writing scripts and bot management, as well as dynamic script reloading at runtime. 
+
+Bind custom scripts to run when events occur in the application. Events can come from IRC, the CLI, or even the web.
 
 
 Installation
@@ -19,10 +19,9 @@ Installing squIRCy2 is as easy as running:
 go get -u github.com/tyler-sommer/squircy2
 ```
 
-With squIRCy2 is installed, you can run it immediately with `squircy2` and a default configuration will be initialized
-in `~/.squircy2`.
+With squIRCy2 is installed, you can run it immediately with `squircy2` and a default configuration will be initialized in `~/.squircy2`.
 
-> For information on modifying and customizing squircy2 itself, see [CONTRIBUTING.md](CONTRIBUTING.md).
+> For information on modifying and customizing squIRcy2, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 
 Configuration
@@ -30,15 +29,19 @@ Configuration
 
 Once the bot is up and running, you can access the web management interface via `localhost:3000`.
 
-The Settings page allows you to modify squishy's nickname, username, and which server he connects to. Configure the 
-Owner nickname and hostname to your information. These values are available from within each scripting language at 
-runtime.
+> squIRCy2 supports SSL and HTTP Basic authentication, too.
 
-> The Owner Nickname and Hostname settings are available within your scripts.
+The Settings page allows you to modify squishy's nickname, username, and which server it connects to. Configure the Owner nickname and hostname to your information.
 
 From the Scripts page, you can add and edit scripts.
 
+> See the [JavaScript API reference](resources/js-api.md) for more details.
+
 From the Dashboard page, you can see CLI and IRC history.
+
+The Webhooks page allows you to create and configure squIRCy2 webhooks.
+
+> See the [Webhooks section](resources/webhooks.md) for more details.
 
 From the REPL, you can write, run, and see the result of code.
 
@@ -46,214 +49,19 @@ From the REPL, you can write, run, and see the result of code.
 Scripting
 ---------
 
-squIRCy2 embeds a Javascript interpreter, allowing you to write scripts to implement various bot behaviors.
+squIRCy2 embeds a JavaScript interpreter, allowing you to write scripts to implement various bot behaviors.
 
-### Javascript API
+### JavaScript API
 
-[otto](https://github.com/robertkrimen/otto) supports ECMAScript 5, less a regular expression incompatibility.
-Additionally, the following functions are available to interact with the various squIRCy2 modules:
+A full introduction to the squIRCy2 JavaScript API can be found in [the JavaScript API reference](resources/js-api.md).
 
-| Method | Description |
-| ------ | ----------- |
-| Irc.Join(channel) | Joins the given channel |
-| Irc.Part(channel) | Parts the given channel |
-| Irc.Privmsg(target, message) | Messages target with message. Target can be a user or a channel |
-| Irc.CurrentNick() | Get the bot's current nickname |
-| Irc.Nick(newNick) | Change the bot's nickname |
-| Http.Get(url, ...headers) | Fetch the given url using a GET HTTP request |
-| Http.Get(url, body, ...headers) | Fetch the given url using a POST HTTP request |
-| Http.Send(options) | Send an HTTP request with the configured options. |
-| Math.Rand() | Generate a random value from 0-1 |
-| Math.Round(val) | Round val to 0 decimal places. |
-| Config.OwnerNick() | Get the configured Owner Nickname |
-| Config.OwnerHost() | Get the configured Owner Host |
-| bind(eventName, fnName) | Add a handler of the given event type and function name |
-| unbind(eventName, fnName) | Removes a handler of the given type and function name |
-| setTimeout(fnName, delay) | Executes fnName after delay milliseconds |
-| setInterval(fnName, delay) | Executes fnName every delay milliseconds |
-| use(coll) | Opens and returns a repository for the given collection |
+#### Example scripts
 
-#### Repository methods
+Check the [Example Scripts section](resources/examples.md) for ideas for squIRCy2 scripts.
 
-These are methods available on a repository returned by `use`.
+### Webhooks
 
-| Method | Description |
-| ------ | ----------- |
-| repo.Fetch(id) | Attempts to load and return an entity with the given id |
-| repo.FetchAll() | Returns a collection of all the entities in the repository |
-| repo.Save(entity) | Saves the given entity |
-
-### Event handlers
-
-Event handlers can be registered with `bind` and `unbind`. Bind takes two parameters: the name of the
-event, and the name of the function to call when the given event is triggered. 
-
-Event handlers receive an Event object with additional information. An example Javascript handler:
-
-```js
-function handler(e) {
-    // e is an object with all the transmitted event details
-}
-```
-
-#### Binding a handler
-
-An event handler can either be a named function, or more commonly, a function itself.
-
-```js
-bind("irc.PRIVMSG", function(e) {
-    console.log("Received message from "+e.Nick);
-});
-
-// or
-function privmsgHandler(e) {
-    console.log("Received message from "+e.Nick);
-}
-bind("irc.PRIVMSG", privmsgHandler);
-```
-
-#### Unbinding a handler
-
-To unbind a handler, you must retain a reference to that function. Generally this means keeping
-a reference to the original handler around.
-
-```js
-function privmsgHandler(e) {
-    if (e.Nick == "Someone") {
-        // Unbind after Someone sends a message
-        unbind("irc.PRIVMSG", privmsgHandler);
-    }
-}
-bind("irc.PRIVMSG", privmsgHandler);
-```
-
-#### Events
-
-| Event Name | Description |
-| ---------- | ----------- |
-| cli.INPUT | Input received from terminal |
-| cli.OUTPUT | Output sent to terminal |
-| irc.CONNECTING | Fired when first connecting to the IRC server |
-| irc.CONNECT | Successfully connected to the IRC server |
-| irc.DISCONNECT | Disconnected from the IRC server |
-| irc.PRIVMSG | A message received, in a channel or a private message |
-| irc.NOTICE | A notice received |
-| irc.WILDCARD | Any IRC event |
-| irc.[code] | A specific IRC event, given its RFC Code. For example, 001 `irc.001` or NICK is `irc.NICK`. |
-| hook.WILDCARD | Fired whenever a valid webhook is received. |
-| hook.[ID] | Fired when the webhook with [ID] is received. |
-
-
-Example Scripts
----------------
-
-### Join channels on connect
-
-```js
-bind("irc.CONNECT", function(e) {
-    Irc.Join('#squishyslab')
-});
-```
-
-### Identify with Nickserv
-
-In the example below, a handler is bound to the `irc.NOTICE` event. When NickServ notices you,
-requesting you identify, it will reply with your password.
-
-```js
-function handleNickserv(e) {
-    if (e.Nick == "NickServ" && e.Message.indexOf("identify") >= 0) {
-        Irc.Privmsg("NickServ", "IDENTIFY superlongandsecurepassword");
-        console.log("Identified with Nickserv");
-    }
-}
-bind("irc.NOTICE", handleNickserv);
-```
-
-When your handler function is invoked, an object (`e` in the example) is passed as 
-the first parameter. This object has different properties depending on the event.
-
-### Iterate over an event's properties
-
-```js
-bind("irc.WILDCARD", function(e) {
-    for (var i in e) {
-        console.log(i+": "+e[i]);
-    }
-});
-```
-
-Webhooks
---------
-
-Webhooks allow squIRCy2 to respond to data received by HTTP endpoints.
-
-Webhooks are validated by hashing and signing the payload contents with SHA1 and the generated Webhook key. squIRCy2 will look for this  signature in the Webhook's configured Signature header.
-
-Below is an example Go implementation that hashes and signs the payload before submitting it.
-
-```go
-package main
-
-import (
-	"crypto/hmac"
-	"crypto/sha1"
-	"encoding/hex"
-	"fmt"
-	"net/http"
-	"strings"
-	"io/ioutil"
-)
-
-func main() {
-	// The Webhook's ID
-	id := "8519993742264042640"
- 	// The Webhook's generated key
-	key := "c6983a9f-fbd1-4b9c-67fb-5e4e48a7a838"
-	// The Webhook's signature header
-	header := "X-Signature"
-	// The desired payload
-	payload := "Hello, World!"
-	
-	// Hash and sign the payload
-	mac := hmac.New(sha1.New, []byte(key))
-	_, err := mac.Write([]byte(payload))
-	if err != nil {
-		panic(err)
-	}
-	signature := hex.EncodeToString(mac.Sum(nil))
-
-	// Create the web request
-	req, err := http.NewRequest("POST", fmt.Sprintf("http://localhost:3000/webhooks/%s", id), strings.NewReader(payload))
-	if err != nil {
-		panic(err)
-	}
-	
-	// Set the signature header to the generated signature
-	req.Header.Add(header, fmt.Sprintf("sha1=%s", signature))
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		panic(err)
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(string(body))
-	// Outputs: OK
-}
-```
-
-A simple handler for the above configuration might look like:
-
-```js
-bind('hook.8519993742264042640', function(e) {
-    console.log(e.Body);
-    // Outputs: Hello, World!
-});
-```
+See the [dedicated section on Webhooks](resources/webhooks.md).
 
 Additional Info
 ---------------
@@ -261,5 +69,5 @@ Additional Info
 squIRCy2 leverages [go-irc-event](https://github.com/thoj/go-ircevent) for IRC interaction. 
 It makes use of [martini](https://github.com/go-martini/martini) for serving web requests and 
 dependency injection. [Tiedot](https://github.com/HouzuoGuo/tiedot) is used as the storage engine. 
-squIRCy2 embeds the [otto Javascript VM](https://github.com/robertkrimen/otto). Finally, it uses
+squIRCy2 embeds the [otto JavaScript VM](https://github.com/robertkrimen/otto). Finally, it uses
 [the stick templating engine](https://github.com/tyler-sommer/stick) for rendering HTML templates.
