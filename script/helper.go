@@ -10,10 +10,10 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/tyler-sommer/squircy2/squircy/config"
-	"github.com/tyler-sommer/squircy2/squircy/event"
-	"github.com/tyler-sommer/squircy2/squircy/irc"
-	"github.com/tyler-sommer/squircy2/squircy/sysinfo"
+	"github.com/tyler-sommer/squircy2/config"
+	"github.com/tyler-sommer/squircy2/event"
+	"github.com/tyler-sommer/squircy2/irc"
+	"github.com/tyler-sommer/squircy2/sysinfo"
 )
 
 type httpHelper struct{}

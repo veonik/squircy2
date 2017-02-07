@@ -1,4 +1,4 @@
-package squircy
+package squircy2
 
 import (
 	"fmt"
@@ -15,12 +15,12 @@ import (
 	"github.com/martini-contrib/render"
 	"github.com/martini-contrib/secure"
 	"github.com/nu7hatch/gouuid"
-	"github.com/tyler-sommer/squircy2/squircy/config"
-	"github.com/tyler-sommer/squircy2/squircy/event"
-	"github.com/tyler-sommer/squircy2/squircy/eventsource"
-	"github.com/tyler-sommer/squircy2/squircy/irc"
-	"github.com/tyler-sommer/squircy2/squircy/script"
-	"github.com/tyler-sommer/squircy2/squircy/webhook"
+	"github.com/tyler-sommer/squircy2/config"
+	"github.com/tyler-sommer/squircy2/event"
+	"github.com/tyler-sommer/squircy2/eventsource"
+	"github.com/tyler-sommer/squircy2/irc"
+	"github.com/tyler-sommer/squircy2/script"
+	"github.com/tyler-sommer/squircy2/webhook"
 	"github.com/tyler-sommer/stick"
 )
 

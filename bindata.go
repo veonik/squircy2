@@ -17,7 +17,7 @@
 
 // +build !debug
 
-package squircy
+package squircy2
 
 import (
 	"bytes"

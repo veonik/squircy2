@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 
-	"github.com/tyler-sommer/squircy2/squircy"
+	"github.com/tyler-sommer/squircy2"
 	"gopkg.in/mattes/go-expand-tilde.v1"
 )
 
@@ -18,7 +18,7 @@ func main() {
 		panic(err)
 	}
 
-	mgr := squircy.NewManager(root)
+	mgr := squircy2.NewManager(root)
 
 	go mgr.ListenAndServe()
 	mgr.AutoConnect()

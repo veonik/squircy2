@@ -5,7 +5,7 @@ import (
 	"sort"
 
 	"github.com/HouzuoGuo/tiedot/db"
-	"github.com/tyler-sommer/squircy2/squircy/config"
+	"github.com/tyler-sommer/squircy2/config"
 	"io/ioutil"
 	"path/filepath"
 	"math/rand"

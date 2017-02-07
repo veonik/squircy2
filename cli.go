@@ -1,4 +1,4 @@
-package squircy
+package squircy2
 
 import (
 	"io"
@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/peterh/liner"
-	"github.com/tyler-sommer/squircy2/squircy/config"
-	"github.com/tyler-sommer/squircy2/squircy/event"
-	"github.com/tyler-sommer/squircy2/squircy/irc"
-	"github.com/tyler-sommer/squircy2/squircy/script"
+	"github.com/tyler-sommer/squircy2/config"
+	"github.com/tyler-sommer/squircy2/event"
+	"github.com/tyler-sommer/squircy2/irc"
+	"github.com/tyler-sommer/squircy2/script"
 )
 
 const (

@@ -1,4 +1,4 @@
-package squircy
+package squircy2
 
 //go:generate go-bindata -prefix "../" -pkg squircy -tags "!debug" ../views/... ../public/...
 
@@ -13,13 +13,13 @@ import (
 
 	"github.com/go-martini/martini"
 	_ "github.com/jteeuwen/go-bindata"
-	"github.com/tyler-sommer/squircy2/squircy/config"
-	"github.com/tyler-sommer/squircy2/squircy/data"
-	"github.com/tyler-sommer/squircy2/squircy/event"
-	"github.com/tyler-sommer/squircy2/squircy/eventsource"
-	"github.com/tyler-sommer/squircy2/squircy/irc"
-	"github.com/tyler-sommer/squircy2/squircy/script"
-	"github.com/tyler-sommer/squircy2/squircy/webhook"
+	"github.com/tyler-sommer/squircy2/config"
+	"github.com/tyler-sommer/squircy2/data"
+	"github.com/tyler-sommer/squircy2/event"
+	"github.com/tyler-sommer/squircy2/eventsource"
+	"github.com/tyler-sommer/squircy2/irc"
+	"github.com/tyler-sommer/squircy2/script"
+	"github.com/tyler-sommer/squircy2/webhook"
 )
 
 type Manager struct {
