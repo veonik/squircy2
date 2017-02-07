@@ -148,7 +148,7 @@ func newJavascriptVm(m *ScriptManager) *jsVm {
 		fn := call.Argument(1)
 		fnName := getFnName(fn)
 		if fn.IsFunction() {
-			m.jsDriver.vm.Set(fnName, func(call otto.FunctionCall) otto.Value {
+			m.driver.vm.Set(fnName, func(call otto.FunctionCall) otto.Value {
 				fn.Call(call.This, call.ArgumentList)
 				return otto.UndefinedValue()
 			})
@@ -227,7 +227,7 @@ func newJavascriptVm(m *ScriptManager) *jsVm {
 			v, err := jsVm.ToValue(vals)
 
 			if err != nil {
-				m.l.Println("An error occurred: ", err)
+				m.logger.Println("An error occurred: ", err)
 			}
 
 			return v
@@ -248,7 +248,7 @@ func newJavascriptVm(m *ScriptManager) *jsVm {
 			v, err := jsVm.ToValue(vals)
 
 			if err != nil {
-				m.l.Println("An error occurred: ", err)
+				m.logger.Println("An error occurred: ", err)
 			}
 
 			return v

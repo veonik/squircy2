@@ -34,7 +34,7 @@ func (m *ScriptManager) Repl() {
 		var l []string
 
 		if len(first) == 0 {
-			c := m.jsDriver.vm.Context()
+			c := m.driver.vm.Context()
 
 			l = make([]string, len(c.Symbols))
 
@@ -44,8 +44,8 @@ func (m *ScriptManager) Repl() {
 				i++
 			}
 		} else {
-			m.jsDriver.vm.Interrupt = make(chan func(), 1)
-			r, err := m.jsDriver.vm.Eval(strings.Join(bits[:len(bits)-1], "."))
+			m.driver.vm.Interrupt = make(chan func(), 1)
+			r, err := m.driver.vm.Eval(strings.Join(bits[:len(bits)-1], "."))
 			if err != nil {
 				return line[:pos], []string{}, line[pos:]
 			}

@@ -127,9 +127,8 @@ func listenAndServeTLS(manager *Manager, conf *config.Configuration, l *log.Logg
 	return http.ListenAndServeTLS(conf.SSLHostPort, conf.SSLCertFile, conf.SSLCertKey, manager)
 }
 
-func newEventSource(evm event.EventManager, l *log.Logger) *eventsource.Broker {
+func newEventSource(evm event.EventManager) *eventsource.Broker {
 	es := eventsource.New()
-	es.Logger = l
 
 	var id int = -1
 	evm.Bind(event.AllEvents, func(es *eventsource.Broker, ev event.Event) {

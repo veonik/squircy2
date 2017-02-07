@@ -60,8 +60,14 @@ Building squIRCy2 in debug mode makes it so that changes to views and static ass
 of the squIRCy2 code.
 
 ```bash
-go build -tags debug
+go build -tags debug ./cmd/squircy2/...
 ./squircy2
+```
+
+Alternatively, you can run squIRCy2 with `go run`:
+ 
+```bash
+go run -tags debug ./cmd/squircy2/main.go
 ```
 
 > **Note:** When running in debug mode, squIRCy2 will look in the current working directory for views and assets.
@@ -76,7 +82,7 @@ and must be in your PATH.
 
 ```bash
 go generate ./...
-go build
+go build ./cmd/squircy2/...
 ./squircy2
 ```
 

@@ -9,9 +9,9 @@ import (
 )
 
 type ScriptManager struct {
-	e            event.EventManager
+	events       event.EventManager
 	conf         *config.Configuration
-	jsDriver     javascriptDriver
+	driver       javascriptDriver
 	httpHelper   httpHelper
 	configHelper configHelper
 	ircHelper    ircHelper
@@ -19,22 +19,22 @@ type ScriptManager struct {
 	mathHelper   mathHelper
 	osHelper     osHelper
 	repo         ScriptRepository
-	l            *log.Logger
+	logger       *log.Logger
 }
 
 func NewScriptManager(repo ScriptRepository, l *log.Logger, e event.EventManager, ircmanager *irc.IrcConnectionManager, config *config.Configuration) *ScriptManager {
 	mgr := ScriptManager{
-		e,
-		config,
-		javascriptDriver{nil, l},
-		httpHelper{},
-		configHelper{config},
-		ircHelper{ircmanager},
-		scriptHelper{},
-		mathHelper{},
-		osHelper{},
-		repo,
-		l,
+		events:       e,
+		conf:         config,
+		driver:       javascriptDriver{nil, l},
+		httpHelper:   httpHelper{},
+		configHelper: configHelper{config},
+		ircHelper:    ircHelper{ircmanager},
+		scriptHelper: scriptHelper{},
+		mathHelper:   mathHelper{},
+		osHelper:     osHelper{},
+		repo:         repo,
+		logger:       l,
 	}
 	mgr.init()
 
@@ -51,14 +51,14 @@ func (m *ScriptManager) RunUnsafe(t ScriptType, code string) (result interface{}
 			return
 		}
 		if err != nil {
-			m.l.Println("An error occurred: ", err)
+			m.logger.Println("An error occurred: ", err)
 		}
 	}()
 
 	var d scriptDriver
 	switch {
 	case t == Javascript:
-		d = m.jsDriver
+		d = m.driver
 
 	default:
 		err = UnknownScriptType
@@ -71,23 +71,23 @@ func (m *ScriptManager) RunUnsafe(t ScriptType, code string) (result interface{}
 }
 
 func (m *ScriptManager) ReInit() {
-	close(m.jsDriver.vm.quit)
+	close(m.driver.vm.quit)
 	m.init()
 }
 
 func (m *ScriptManager) init() {
-	m.e.ClearAll()
+	m.events.ClearAll()
 
-	m.jsDriver.vm = newJavascriptVm(m)
+	m.driver.vm = newJavascriptVm(m)
 
-	m.scriptHelper = scriptHelper{m.e, m.jsDriver, make(map[string]event.EventHandler, 0)}
+	m.scriptHelper = scriptHelper{m.events, m.driver, make(map[string]event.EventHandler, 0)}
 
 	scripts := m.repo.FetchAll()
 	for _, script := range scripts {
 		if !script.Enabled {
 			continue
 		}
-		m.l.Println("Running", script.Type, "script", script.Title)
+		m.logger.Println("Running", script.Type, "script", script.Title)
 		m.RunUnsafe(script.Type, script.Body)
 	}
 }
