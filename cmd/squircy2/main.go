@@ -4,6 +4,7 @@ import (
 	"flag"
 
 	"gopkg.in/mattes/go-expand-tilde.v1"
+	"github.com/tyler-sommer/squircy2"
 )
 
 var nonInteractiveFlag = flag.Bool("no-interactive", false, "Run without user interaction.")

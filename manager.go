@@ -1,6 +1,6 @@
 package squircy2
 
-//go:generate go-bindata -prefix "./" -pkg squircy -tags "!debug" ./views/... ./public/...
+//go:generate go-bindata -prefix "./" -pkg squircy2 -tags "!debug" ./views/... ./public/...
 
 import (
 	"crypto/tls"
