@@ -24,7 +24,7 @@ func (man *Manager) LoopCLI() {
 	man.Invoke(loopCLI)
 }
 
-func loopCLI(conf *config.Configuration, l *log.Logger, ircmgr *irc.IrcConnectionManager, evm event.EventManager, scmgr *script.ScriptManager, manager *Manager) {
+func loopCLI(conf *config.Configuration, l *log.Logger, ircmgr *irc.ConnectionManager, evm event.EventManager, scmgr *script.ScriptManager, manager *Manager) {
 	hist := filepath.Join(conf.RootPath, ".history")
 
 	cli := liner.NewLiner()

@@ -16,7 +16,7 @@ const (
 	IrcEvent                        = "irc.WILDCARD"
 )
 
-func bindEvents(mgr *IrcConnectionManager, e event.EventManager) {
+func bindEvents(mgr *ConnectionManager, e event.EventManager) {
 	mgr.conn.AddCallback("*", func(ev *ircevent.Event) {
 		e.Trigger(IrcEvent, newEventData(ev))
 		e.Trigger(event.EventType("irc."+ev.Code), newEventData(ev))
@@ -38,6 +38,10 @@ func bindEvents(mgr *IrcConnectionManager, e event.EventManager) {
 
 func triggerConnecting(e event.EventManager) {
 	e.Trigger(ConnectingEvent, nil)
+}
+
+func triggerDisconnected(e event.EventManager) {
+	e.Trigger(DisconnectEvent, nil)
 }
 
 func newEventData(ev *ircevent.Event) map[string]interface{} {

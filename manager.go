@@ -116,7 +116,7 @@ func (manager *Manager) AutoConnect() {
 	manager.Invoke(manager.autoConnect)
 }
 
-func (manager *Manager) autoConnect(conf *config.Configuration, ircmgr *irc.IrcConnectionManager) {
+func (manager *Manager) autoConnect(conf *config.Configuration, ircmgr *irc.ConnectionManager) {
 	if conf.AutoConnect {
 		ircmgr.Connect()
 	}

@@ -22,31 +22,31 @@ const (
 	Connected
 )
 
-type IrcConnectionManager struct {
+type ConnectionManager struct {
 	injector inject.Injector
 	conn     *ircevent.Connection
 	status   ConnectionStatus
 	debug    bool
 }
 
-func NewIrcConnectionManager(injector inject.Injector) *IrcConnectionManager {
-	return &IrcConnectionManager{injector, nil, Disconnected, false}
+func NewIrcConnectionManager(injector inject.Injector) *ConnectionManager {
+	return &ConnectionManager{injector, nil, Disconnected, false}
 }
 
-func (mgr *IrcConnectionManager) Connect() {
+func (mgr *ConnectionManager) Connect() {
 	mgr.injector.Invoke(connect)
 }
 
-func (mgr *IrcConnectionManager) Reconnect() {
+func (mgr *ConnectionManager) Reconnect() {
 	mgr.Quit()
 	mgr.Connect()
 }
 
-func (mgr *IrcConnectionManager) Debug() bool {
+func (mgr *ConnectionManager) Debug() bool {
 	return mgr.debug
 }
 
-func (mgr *IrcConnectionManager) SetDebug(debug bool) {
+func (mgr *ConnectionManager) SetDebug(debug bool) {
 	mgr.debug = debug
 	if mgr.conn != nil {
 		mgr.conn.Debug = mgr.debug
@@ -54,7 +54,7 @@ func (mgr *IrcConnectionManager) SetDebug(debug bool) {
 	}
 }
 
-func (mgr *IrcConnectionManager) Quit() {
+func (mgr *ConnectionManager) Quit() {
 	defer func() {
 		if err := recover(); err != nil {
 			if err == halt {
@@ -63,6 +63,7 @@ func (mgr *IrcConnectionManager) Quit() {
 				fmt.Println("Unexpected panic: ", err)
 			}
 		}
+		mgr.injector.Invoke(triggerDisconnected)
 		mgr.status = Disconnected
 		mgr.conn = nil
 	}()
@@ -84,18 +85,18 @@ func (mgr *IrcConnectionManager) Quit() {
 	}
 }
 
-func (mgr *IrcConnectionManager) Status() ConnectionStatus {
+func (mgr *ConnectionManager) Status() ConnectionStatus {
 	if mgr.conn == nil || !mgr.conn.Connected() {
 		mgr.status = Disconnected
 	}
 	return mgr.status
 }
 
-func (mgr *IrcConnectionManager) Connection() *ircevent.Connection {
+func (mgr *ConnectionManager) Connection() *ircevent.Connection {
 	return mgr.conn
 }
 
-func connect(mgr *IrcConnectionManager, conf *config.Configuration, l *log.Logger) {
+func connect(mgr *ConnectionManager, conf *config.Configuration, l *log.Logger) {
 	if mgr.conn == nil {
 		mgr.conn = ircevent.IRC(conf.Nick, conf.Username)
 		mgr.conn.Log = l

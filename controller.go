@@ -125,7 +125,7 @@ type appStatus struct {
 	Status irc.ConnectionStatus
 }
 
-func statusAction(r render.Render, mgr *irc.IrcConnectionManager) {
+func statusAction(r render.Render, mgr *irc.ConnectionManager) {
 	r.JSON(200, appStatus{mgr.Status()})
 }
 
@@ -211,13 +211,13 @@ func replExecuteAction(r render.Render, manager *script.ScriptManager, request *
 	})
 }
 
-func connectAction(r render.Render, mgr *irc.IrcConnectionManager) {
+func connectAction(r render.Render, mgr *irc.ConnectionManager) {
 	mgr.Connect()
 
 	r.JSON(200, nil)
 }
 
-func disconnectAction(r render.Render, mgr *irc.IrcConnectionManager) {
+func disconnectAction(r render.Render, mgr *irc.ConnectionManager) {
 	mgr.Quit()
 
 	r.JSON(200, nil)

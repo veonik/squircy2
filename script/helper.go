@@ -93,7 +93,7 @@ func (h *configHelper) OwnerHost() string {
 }
 
 type ircHelper struct {
-	manager *irc.IrcConnectionManager
+	manager *irc.ConnectionManager
 }
 
 func (h *ircHelper) Privmsg(target, message string) {

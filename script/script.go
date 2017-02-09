@@ -25,7 +25,7 @@ type ScriptManager struct {
 	logger       *log.Logger
 }
 
-func NewScriptManager(repo ScriptRepository, l *log.Logger, e event.EventManager, ircmanager *irc.IrcConnectionManager, config *config.Configuration, database *db.DB) *ScriptManager {
+func NewScriptManager(repo ScriptRepository, l *log.Logger, e event.EventManager, ircmanager *irc.ConnectionManager, config *config.Configuration, database *db.DB) *ScriptManager {
 	mgr := ScriptManager{
 		database:     database,
 		events:       e,
