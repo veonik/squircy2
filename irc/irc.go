@@ -27,10 +27,11 @@ type ConnectionManager struct {
 	conn     *ircevent.Connection
 	status   ConnectionStatus
 	debug    bool
+	lastPong time.Time
 }
 
 func NewIrcConnectionManager(injector inject.Injector) *ConnectionManager {
-	return &ConnectionManager{injector, nil, Disconnected, false}
+	return &ConnectionManager{injector, nil, Disconnected, false, time.Now()}
 }
 
 func (mgr *ConnectionManager) Connect() {
@@ -118,7 +119,29 @@ func connect(mgr *ConnectionManager, conf *config.Configuration, l *log.Logger) 
 		mgr.conn.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 
+	mgr.lastPong = time.Now()
+	mgr.conn.PingFreq = 5 * time.Minute
 	mgr.status = Connecting
 	mgr.injector.Invoke(triggerConnecting)
 	mgr.conn.Connect(conf.Network)
+
+	go func() {
+		wait := 1 * time.Minute
+		t := time.NewTimer(wait)
+		for {
+			select {
+			case <-t.C:
+				if mgr.conn == nil || mgr.status == Disconnected {
+					return
+				} else if time.Now().Sub(mgr.lastPong) > 5 * time.Minute {
+					l.Println("Ping Timeout, disconnecting.")
+					mgr.Quit()
+					return
+				}
+				t.Reset(wait)
+			default:
+				time.Sleep(wait)
+			}
+		}
+	}()
 }

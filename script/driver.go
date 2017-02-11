@@ -39,6 +39,7 @@ func (d javascriptDriver) Handle(e event.Event, fnName string) {
 
 func (d javascriptDriver) RunUnsafe(unsafe string) (val interface{}, err error) {
 	start := time.Now()
+	quit := make(chan struct{})
 	defer func() {
 		if e := recover(); e != nil {
 			if e == Halt {
@@ -47,15 +48,20 @@ func (d javascriptDriver) RunUnsafe(unsafe string) (val interface{}, err error) 
 			}
 			err = e.(error)
 		}
-		d.vm.Interrupt = make(chan func(), 1)
+		close(quit)
 	}()
 
 	d.vm.Interrupt = make(chan func(), 1)
 
 	go func() {
 		time.Sleep(maxExecutionTime * time.Second)
-		d.vm.Interrupt <- func() {
-			panic(Halt)
+		select {
+		case <-quit:
+			return
+		default:
+			d.vm.Interrupt <- func() {
+				panic(Halt)
+			}
 		}
 	}()
 

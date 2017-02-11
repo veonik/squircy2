@@ -5,6 +5,7 @@ import (
 
 	ircevent "github.com/thoj/go-ircevent"
 	"github.com/tyler-sommer/squircy2/event"
+	"time"
 )
 
 const (
@@ -33,6 +34,9 @@ func bindEvents(mgr *ConnectionManager, e event.EventManager) {
 			mgr.Quit()
 		}
 		e.Trigger(DisconnectEvent, newEventData(ev))
+	})
+	mgr.conn.AddCallback("PONG", func(ev *ircevent.Event) {
+		mgr.lastPong = time.Now()
 	})
 }
 
