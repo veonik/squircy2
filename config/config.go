@@ -17,8 +17,13 @@ type Configuration struct {
 	AutoConnect bool
 	Nick        string
 	Username    string
-	OwnerNick   string
-	OwnerHost   string
+
+	SASL         bool   // Enable SASL authentication
+	SASLUsername string
+	SASLPassword string
+
+	OwnerNick string
+	OwnerHost string
 
 	WebInterface bool
 	HTTPHostPort string // Hostname and port, format: hostname:1234
@@ -45,6 +50,9 @@ func NewConfiguration(rootPath string) *Configuration {
 		AutoConnect:    false,
 		Nick:           "mrsquishy",
 		Username:       "squishyj",
+		SASL:           false,
+		SASLUsername:   "",
+		SASLPassword:   "",
 		OwnerNick:      "",
 		OwnerHost:      "",
 		WebInterface:   true,

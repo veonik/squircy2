@@ -44,6 +44,25 @@
   		<input class="form-control" name="owner_host" id="owner_host" placeholder="" value="{{ config.OwnerHost }}">
 	</div>
 </div>
+	<div class="row">
+		<div class="col-md-4 form-group">
+			<div class="checkbox">
+				<label for="enable_sasl">
+					<input type="checkbox" name="enable_sasl" id="enable_sasl" value="on" {% if config.SASL %}checked {% endif %}> Enable SASL Authentication
+				</label>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-4 form-group">
+			<label for="sasl_nickname">SASL Username</label>
+			<input class="form-control" name="sasl_username" id="sasl_username" placeholder="" value="{{ config.SASLUsername }}">
+		</div>
+		<div class="col-md-4 form-group">
+			<label for="sasl_password">SASL Password</label>
+			<input class="form-control" type="password" name="sasl_password" id="sasl_password" value="{{ config.SASLPassword }}">
+		</div>
+	</div>
 <div class="row">
 	<div class="col-sm-12">
 		<h2>Script Management</h2>

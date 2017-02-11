@@ -238,6 +238,11 @@ func manageUpdateAction(r render.Render, database *db.DB, conf *config.Configura
 	conf.Network = request.FormValue("network")
 	conf.Nick = request.FormValue("nick")
 	conf.Username = request.FormValue("username")
+
+	conf.SASL = request.FormValue("enable_sasl") == "on"
+	conf.SASLUsername = request.FormValue("sasl_username")
+	conf.SASLPassword = request.FormValue("sasl_password")
+
 	conf.OwnerNick = request.FormValue("owner_nick")
 	conf.OwnerHost = request.FormValue("owner_host")
 

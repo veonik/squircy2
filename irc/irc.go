@@ -99,6 +99,11 @@ func (mgr *ConnectionManager) Connection() *ircevent.Connection {
 func connect(mgr *ConnectionManager, conf *config.Configuration, l *log.Logger) {
 	if mgr.conn == nil {
 		mgr.conn = ircevent.IRC(conf.Nick, conf.Username)
+		if conf.SASL {
+			mgr.conn.UseSASL = true
+			mgr.conn.SASLLogin = conf.SASLUsername
+			mgr.conn.SASLPassword = conf.SASLPassword
+		}
 		mgr.conn.Log = l
 		mgr.injector.Map(mgr.conn)
 		mgr.injector.Invoke(bindEvents)
