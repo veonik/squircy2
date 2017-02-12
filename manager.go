@@ -185,6 +185,7 @@ func listenAndServeTLS(manager *Manager, conf *config.Configuration, l *log.Logg
 	s := &http.Server{Addr: conf.SSLHostPort, Handler: manager}
 	var err error
 	s.TLSConfig = &tls.Config{}
+	s.TLSConfig.NextProtos = []string{"http", "h2"}
 	s.TLSConfig.Certificates = make([]tls.Certificate, 1)
 	s.TLSConfig.Certificates[0], err = tls.LoadX509KeyPair(conf.SSLCertFile, conf.SSLCertKey)
 	if err != nil {
