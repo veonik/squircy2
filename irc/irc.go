@@ -133,7 +133,7 @@ func connect(mgr *ConnectionManager, conf *config.Configuration, l *log.Logger) 
 			case <-t.C:
 				if mgr.conn == nil || mgr.status == Disconnected {
 					return
-				} else if time.Now().Sub(mgr.lastPong) > 5 * time.Minute {
+				} else if time.Now().Sub(mgr.lastPong) > 5*time.Minute {
 					l.Println("Ping Timeout, disconnecting.")
 					mgr.Quit()
 					return

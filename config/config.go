@@ -18,7 +18,7 @@ type Configuration struct {
 	Nick        string
 	Username    string
 
-	SASL         bool   // Enable SASL authentication
+	SASL         bool // Enable SASL authentication
 	SASLUsername string
 	SASLPassword string
 

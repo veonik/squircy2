@@ -3,9 +3,10 @@ package irc
 import (
 	"fmt"
 
+	"time"
+
 	ircevent "github.com/thoj/go-ircevent"
 	"github.com/tyler-sommer/squircy2/event"
-	"time"
 )
 
 const (

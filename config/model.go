@@ -17,7 +17,7 @@ func flattenConfig(config *Configuration) map[string]interface{} {
 		"AutoConnect":    config.AutoConnect,
 		"Nick":           config.Nick,
 		"Username":       config.Username,
-		"SASL":		config.SASL,
+		"SASL":           config.SASL,
 		"SASLUsername":   config.SASLUsername,
 		"SASLPassword":   config.SASLPassword,
 		"OwnerNick":      config.OwnerNick,

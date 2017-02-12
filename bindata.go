@@ -394,19 +394,19 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"views/_page_javascripts.html.twig": views_page_javascriptsHtmlTwig,
-	"views/index.html.twig": viewsIndexHtmlTwig,
-	"views/layout.html.twig": viewsLayoutHtmlTwig,
-	"views/manage/edit.html.twig": viewsManageEditHtmlTwig,
-	"views/repl/index.html.twig": viewsReplIndexHtmlTwig,
+	"views/_page_javascripts.html.twig":   views_page_javascriptsHtmlTwig,
+	"views/index.html.twig":               viewsIndexHtmlTwig,
+	"views/layout.html.twig":              viewsLayoutHtmlTwig,
+	"views/manage/edit.html.twig":         viewsManageEditHtmlTwig,
+	"views/repl/index.html.twig":          viewsReplIndexHtmlTwig,
 	"views/script/_javascripts.html.twig": viewsScript_javascriptsHtmlTwig,
-	"views/script/edit.html.twig": viewsScriptEditHtmlTwig,
-	"views/script/index.html.twig": viewsScriptIndexHtmlTwig,
-	"views/script/new.html.twig": viewsScriptNewHtmlTwig,
-	"views/webhook/edit.html.twig": viewsWebhookEditHtmlTwig,
-	"views/webhook/index.html.twig": viewsWebhookIndexHtmlTwig,
-	"views/webhook/new.html.twig": viewsWebhookNewHtmlTwig,
-	"public/css/style.css": publicCssStyleCss,
+	"views/script/edit.html.twig":         viewsScriptEditHtmlTwig,
+	"views/script/index.html.twig":        viewsScriptIndexHtmlTwig,
+	"views/script/new.html.twig":          viewsScriptNewHtmlTwig,
+	"views/webhook/edit.html.twig":        viewsWebhookEditHtmlTwig,
+	"views/webhook/index.html.twig":       viewsWebhookIndexHtmlTwig,
+	"views/webhook/new.html.twig":         viewsWebhookNewHtmlTwig,
+	"public/css/style.css":                publicCssStyleCss,
 }
 
 // AssetDir returns the file names below a certain
@@ -448,6 +448,7 @@ type bintree struct {
 	Func     func() (*asset, error)
 	Children map[string]*bintree
 }
+
 var _bintree = &bintree{nil, map[string]*bintree{
 	"public": &bintree{nil, map[string]*bintree{
 		"css": &bintree{nil, map[string]*bintree{
@@ -456,8 +457,8 @@ var _bintree = &bintree{nil, map[string]*bintree{
 	}},
 	"views": &bintree{nil, map[string]*bintree{
 		"_page_javascripts.html.twig": &bintree{views_page_javascriptsHtmlTwig, map[string]*bintree{}},
-		"index.html.twig": &bintree{viewsIndexHtmlTwig, map[string]*bintree{}},
-		"layout.html.twig": &bintree{viewsLayoutHtmlTwig, map[string]*bintree{}},
+		"index.html.twig":             &bintree{viewsIndexHtmlTwig, map[string]*bintree{}},
+		"layout.html.twig":            &bintree{viewsLayoutHtmlTwig, map[string]*bintree{}},
 		"manage": &bintree{nil, map[string]*bintree{
 			"edit.html.twig": &bintree{viewsManageEditHtmlTwig, map[string]*bintree{}},
 		}},
@@ -466,14 +467,14 @@ var _bintree = &bintree{nil, map[string]*bintree{
 		}},
 		"script": &bintree{nil, map[string]*bintree{
 			"_javascripts.html.twig": &bintree{viewsScript_javascriptsHtmlTwig, map[string]*bintree{}},
-			"edit.html.twig": &bintree{viewsScriptEditHtmlTwig, map[string]*bintree{}},
-			"index.html.twig": &bintree{viewsScriptIndexHtmlTwig, map[string]*bintree{}},
-			"new.html.twig": &bintree{viewsScriptNewHtmlTwig, map[string]*bintree{}},
+			"edit.html.twig":         &bintree{viewsScriptEditHtmlTwig, map[string]*bintree{}},
+			"index.html.twig":        &bintree{viewsScriptIndexHtmlTwig, map[string]*bintree{}},
+			"new.html.twig":          &bintree{viewsScriptNewHtmlTwig, map[string]*bintree{}},
 		}},
 		"webhook": &bintree{nil, map[string]*bintree{
-			"edit.html.twig": &bintree{viewsWebhookEditHtmlTwig, map[string]*bintree{}},
+			"edit.html.twig":  &bintree{viewsWebhookEditHtmlTwig, map[string]*bintree{}},
 			"index.html.twig": &bintree{viewsWebhookIndexHtmlTwig, map[string]*bintree{}},
-			"new.html.twig": &bintree{viewsWebhookNewHtmlTwig, map[string]*bintree{}},
+			"new.html.twig":   &bintree{viewsWebhookNewHtmlTwig, map[string]*bintree{}},
 		}},
 	}},
 }}
@@ -524,4 +525,3 @@ func _filePath(dir, name string) string {
 	cannonicalName := strings.Replace(name, "\\", "/", -1)
 	return filepath.Join(append([]string{dir}, strings.Split(cannonicalName, "/")...)...)
 }
-
