@@ -51,8 +51,14 @@ func (repo *configRepository) fetchInto(config *Configuration) {
 
 func (repo *configRepository) save(config *Configuration) {
 	col := repo.database.Use("Settings")
-	data := flattenConfig(config)
-
+	data := map[string]interface{}{}
+	col.ForEachDoc(func (id int, doc []byte) bool {
+		json.Unmarshal(doc, &data)
+		return false
+	})
+	for k, v := range flattenConfig(config) {
+		data[k] = v
+	}
 	if config.ID <= 0 {
 		id, _ := col.Insert(data)
 		config.ID = id
