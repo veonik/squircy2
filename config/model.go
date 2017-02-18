@@ -52,7 +52,7 @@ func (repo *configRepository) fetchInto(config *Configuration) {
 func (repo *configRepository) save(config *Configuration) {
 	col := repo.database.Use("Settings")
 	data := map[string]interface{}{}
-	col.ForEachDoc(func (id int, doc []byte) bool {
+	col.ForEachDoc(func(id int, doc []byte) bool {
 		json.Unmarshal(doc, &data)
 		return false
 	})

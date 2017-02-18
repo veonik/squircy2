@@ -3,6 +3,7 @@ package squircy2
 import (
 	"fmt"
 	"html"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -24,8 +25,23 @@ import (
 	"github.com/tyler-sommer/stick"
 )
 
+type generatedTemplate func(env *stick.Env, output io.Writer, ctx map[string]stick.Value)
+
+type generatedEnv struct {
+	*stick.Env
+	mapping map[string]generatedTemplate
+}
+
+func (env *generatedEnv) Execute(tpl string, out io.Writer, ctx map[string]stick.Value) error {
+	if fn, ok := env.mapping[tpl]; ok {
+		fn(env.Env, out, ctx)
+		return nil
+	}
+	return env.Env.Execute(tpl, out, ctx)
+}
+
 type stickHandler struct {
-	env *stick.Env
+	env *generatedEnv
 	res http.ResponseWriter
 }
 
@@ -45,8 +61,9 @@ func newStickHandler() martini.Handler {
 		}
 		return html.EscapeString(stick.CoerceString(args[0]))
 	}
+	genv := &generatedEnv{env, templateMapping}
 	return func(res http.ResponseWriter, req *http.Request, c martini.Context) {
-		c.Map(&stickHandler{env, res})
+		c.Map(&stickHandler{genv, res})
 	}
 }
 

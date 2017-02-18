@@ -1,6 +1,8 @@
 package squircy2
 
-//go:generate go-bindata -prefix "./" -pkg squircy2 -tags "!debug" ./views/... ./public/...
+//go:generate go-bindata -prefix "./" -pkg squircy2 -tags "!debug" ./public/...
+//go:generate stickgen -path "./views" -out generated index.html.twig
+//go:generate stickgen -path "./views" -out generated **/[a-z]*.twig
 
 import (
 	"crypto/tls"

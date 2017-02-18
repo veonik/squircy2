@@ -9,6 +9,8 @@ import (
 	"github.com/tyler-sommer/stick"
 )
 
+var templateMapping = map[string]generatedTemplate{}
+
 var rootDir string
 
 func init() {
