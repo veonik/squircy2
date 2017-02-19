@@ -12,19 +12,19 @@ The master branch contains active development. It should be considered unstable.
 squIRCy2 is made up of a few different parts:
 
 * The **CLI interface** lets a user interact with squIRCy from the command line.
-  > See `squircy/cli.go` for the CLI related code.
+  > See `cli.go` for the CLI related code.
   
 * The **Web interface** allows a user to work with squIRCy from the web.
-  > See `squircy/controller.go` for code related to all controller actions.
+  > See `controller.go` for code related to all controller actions.
   
 * **Static assets** (like CSS) and **views** are embedded in the squIRCy2 binary using the [go-bindata utility](https://github.com/jteeuwen/go-bindata).
-  > Running `go generate ./...` prior to building squIRCy2 will regenerate the binary forms of the assets into `squircy/bindata.go`. See ["Building the project." for more details](#3-building-the-project).
+  > Running `go generate` prior to building squIRCy2 will regenerate the binary forms of the assets into `bindata.go`. See ["Building the project." for more details](#3-building-the-project).
 
-* A **persistence layer** is available using [tiedot](https://github.com/HouzuoGuo/tiedot). A basic repository is implemented in `squircy/data` with more specific implementations in `squircy/config/model.go` and  `squircy/script/model.go`.
+* A **persistence layer** is available using [tiedot](https://github.com/HouzuoGuo/tiedot). A basic repository is implemented in `data` with more specific implementations in `config/model.go` and  `script/model.go`.
 
-* The **Javascript VM** is a lightly wrapped [otto runtime](https://github.com/robertkrimen/otto). Code related to customizing the VM and executing predefined scripts is in `squircy/script`.
+* The **Javascript VM** is a lightly wrapped [otto runtime](https://github.com/robertkrimen/otto). Code related to customizing the VM and executing predefined scripts is in `script/`.
 
-* Other parts include an event dispatcher in `squircy/event`, a wrapper for [go-ircevent](https://github.com/thoj/go-ircevent) in `squircy/irc`, and an overall "manager" that embeds an [inject.Injector](https://github.com/codegangsta/inject) in `squircy/manager.go`.
+* Other parts include an event dispatcher in `event/`, a wrapper for [go-ircevent](https://github.com/thoj/go-ircevent) in `irc/`, and an overall "manager" that embeds an [inject.Injector](https://github.com/codegangsta/inject) in `manager.go`.
 
 
 Modifying squIRCy2
@@ -51,7 +51,7 @@ There are two options for building squIRCy2: default (release) and debug. Debug 
 Building squIRCy2 in debug mode makes it so that changes to views and static assets do not require a rebuilding of the squIRCy2 code.
 
 ```bash
-go build -tags debug ./cmd/squircy2/...
+go build -tags debug -o squircy2 ./cmd/squircy2/...
 ./squircy2
 ```
 
@@ -71,9 +71,15 @@ Building squIRCy2 for release takes two steps. First, we have to convert our ass
 This relies on the [go-bindata utility](https://github.com/jteeuwen/go-bindata) which is installed along-side squIRCy2 and must be in your PATH.
 
 ```bash
-go generate ./...
-go build ./cmd/squircy2/...
+go generate
+go build  -o squircy2 ./cmd/squircy2/*.go
 ./squircy2
+```
+
+##### Customize squIRCy2's version at build time.
+
+```bash
+go build -o squircy2 -ldflags "-X main.Version=$(git rev-parse --short HEAD)" ./cmd/squircy2/*.go
 ```
 
 ### 4. Make your changes.

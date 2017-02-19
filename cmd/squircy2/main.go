@@ -5,13 +5,34 @@ import (
 
 	"github.com/tyler-sommer/squircy2"
 	"gopkg.in/mattes/go-expand-tilde.v1"
+	"fmt"
+	"runtime"
 )
 
 var nonInteractiveFlag = flag.Bool("no-interactive", false, "Run without user interaction.")
 var rootPathFlag = flag.String("root-path", "~/.squircy2", "Specify a custom root path.")
+var versionFlag = flag.Bool("version", false, "Display the version and exit.")
+
+var Version = "dev"
+var GoVersion = runtime.Version()
+
+func printVersion() {
+	fmt.Printf("squIRcy2 version %s (%s)", Version, GoVersion)
+}
 
 func main() {
+	flag.Usage = func() {
+		printVersion()
+		fmt.Println("\nUsage: squircy2 [-no-interactive] [-root-path <config root>] [-version]\n")
+		flag.PrintDefaults()
+	}
 	flag.Parse()
+
+	if *versionFlag {
+		printVersion()
+		fmt.Println()
+		return
+	}
 
 	root, err := tilde.Expand(*rootPathFlag)
 	if err != nil {
