@@ -36,6 +36,10 @@ header ul.menu {
     }
 }
 
+a code {
+    color: #39c;
+}
+
 @media print, screen and (max-width: 960px) {
     header {
         height: 210px;
