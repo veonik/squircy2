@@ -136,6 +136,9 @@ func connect(mgr *ConnectionManager, conf *config.Configuration, l *log.Logger) 
 				} else if time.Now().Sub(mgr.lastPong) > 5*time.Minute {
 					l.Println("Ping Timeout, disconnecting.")
 					mgr.Quit()
+					if conf.AutoConnect {
+						mgr.Connect()
+					}
 					return
 				}
 				t.Reset(wait)
