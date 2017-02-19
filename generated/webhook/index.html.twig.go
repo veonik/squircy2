@@ -92,6 +92,39 @@ func blockWebhookIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[
 		fmt.Fprint(output, `/remove" class="remove btn btn-sm btn-warning">Remove</a>
 			</div>
 			`)
+		// line 24, offset 6 in webhook/index.html.twig
+		{
+			val, err := stick.GetAttr(el, "Enabled")
+			if err == nil && stick.CoerceBool(val) {
+				// line 24, offset 22 in webhook/index.html.twig
+				fmt.Fprint(output, `
+				<a href="/webhook/`)
+				// line 25, offset 22 in webhook/index.html.twig
+				{
+					val, err := stick.GetAttr(el, "ID")
+					if err == nil {
+						fmt.Fprint(output, val)
+					}
+				}
+				// line 25, offset 33 in webhook/index.html.twig
+				fmt.Fprint(output, `/toggle" class="toggle btn btn-sm btn-default">Disable</a>
+			`)
+			} else {
+				// line 26, offset 13 in webhook/index.html.twig
+				fmt.Fprint(output, `
+				<a href="/webhook/`)
+				// line 27, offset 22 in webhook/index.html.twig
+				{
+					val, err := stick.GetAttr(el, "ID")
+					if err == nil {
+						fmt.Fprint(output, val)
+					}
+				}
+				// line 27, offset 33 in webhook/index.html.twig
+				fmt.Fprint(output, `/toggle" class="toggle btn btn-sm btn-success">Enable</a>
+			`)
+			}
+		}
 		// line 28, offset 14 in webhook/index.html.twig
 		fmt.Fprint(output, `
 		</td>

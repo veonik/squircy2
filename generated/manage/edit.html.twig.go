@@ -36,6 +36,14 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 		<div class="checkbox">
 			<label for="tls">
 				<input type="checkbox" name="tls" id="tls" value="on" `)
+	// line 17, offset 61 in manage/edit.html.twig
+	{
+		val, err := stick.GetAttr(ctx["config"], "TLS")
+		if err == nil && stick.CoerceBool(val) {
+			// line 17, offset 77 in manage/edit.html.twig
+			fmt.Fprint(output, `checked `)
+		}
+	}
 	// line 17, offset 96 in manage/edit.html.twig
 	fmt.Fprint(output, `> Use TLS
 			</label>
@@ -43,6 +51,14 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 		<div class="checkbox">
 			<label for="auto_connect">
 				<input type="checkbox" name="auto_connect" id="auto_connect" value="on" `)
+	// line 22, offset 79 in manage/edit.html.twig
+	{
+		val, err := stick.GetAttr(ctx["config"], "AutoConnect")
+		if err == nil && stick.CoerceBool(val) {
+			// line 22, offset 103 in manage/edit.html.twig
+			fmt.Fprint(output, `checked `)
+		}
+	}
 	// line 22, offset 122 in manage/edit.html.twig
 	fmt.Fprint(output, `> Connect to IRC when squIRCy2 starts
 			</label>
@@ -110,6 +126,14 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 			<div class="checkbox">
 				<label for="enable_sasl">
 					<input type="checkbox" name="enable_sasl" id="enable_sasl" value="on" `)
+	// line 51, offset 78 in manage/edit.html.twig
+	{
+		val, err := stick.GetAttr(ctx["config"], "SASL")
+		if err == nil && stick.CoerceBool(val) {
+			// line 51, offset 95 in manage/edit.html.twig
+			fmt.Fprint(output, `checked `)
+		}
+	}
 	// line 51, offset 114 in manage/edit.html.twig
 	fmt.Fprint(output, `> Enable SASL Authentication
 				</label>
@@ -154,6 +178,14 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 		<div class="checkbox">
 			<label for="scripts_as_files">
 				<input type="checkbox" name="scripts_as_files" id="scripts_as_files" value="on" `)
+	// line 75, offset 87 in manage/edit.html.twig
+	{
+		val, err := stick.GetAttr(ctx["config"], "ScriptsAsFiles")
+		if err == nil && stick.CoerceBool(val) {
+			// line 75, offset 114 in manage/edit.html.twig
+			fmt.Fprint(output, `checked `)
+		}
+	}
 	// line 75, offset 133 in manage/edit.html.twig
 	fmt.Fprint(output, `> Store Scripts on the Filesystem
 			</label>
@@ -201,6 +233,14 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 		<div class="checkbox">
 			<label for="web_interface">
 				<input type="checkbox" name="web_interface" id="web_interface" value="on" `)
+	// line 102, offset 81 in manage/edit.html.twig
+	{
+		val, err := stick.GetAttr(ctx["config"], "WebInterface")
+		if err == nil && stick.CoerceBool(val) {
+			// line 102, offset 106 in manage/edit.html.twig
+			fmt.Fprint(output, `checked `)
+		}
+	}
 	// line 102, offset 125 in manage/edit.html.twig
 	fmt.Fprint(output, `> Enable Web Interface
 			</label>
@@ -228,6 +268,14 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 		<div class="checkbox">
 			<label for="http_auth">
 				<input type="checkbox" name="http_auth" id="http_auth" value="on" `)
+	// line 118, offset 73 in manage/edit.html.twig
+	{
+		val, err := stick.GetAttr(ctx["config"], "HTTPAuth")
+		if err == nil && stick.CoerceBool(val) {
+			// line 118, offset 94 in manage/edit.html.twig
+			fmt.Fprint(output, `checked `)
+		}
+	}
 	// line 118, offset 113 in manage/edit.html.twig
 	fmt.Fprint(output, `> Enable HTTP BasicAuth
 			</label>
@@ -272,6 +320,14 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 		<div class="checkbox">
 			<label for="https">
 				<input type="checkbox" name="https" id="https" value="on" `)
+	// line 142, offset 65 in manage/edit.html.twig
+	{
+		val, err := stick.GetAttr(ctx["config"], "HTTPS")
+		if err == nil && stick.CoerceBool(val) {
+			// line 142, offset 83 in manage/edit.html.twig
+			fmt.Fprint(output, `checked `)
+		}
+	}
 	// line 142, offset 102 in manage/edit.html.twig
 	fmt.Fprint(output, `> Enable HTTPS
 			</label>
@@ -279,6 +335,14 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 		<div class="checkbox">
 			<label for="require_https">
 				<input type="checkbox" name="require_https" id="require_https" value="on" `)
+	// line 147, offset 81 in manage/edit.html.twig
+	{
+		val, err := stick.GetAttr(ctx["config"], "RequireHTTPS")
+		if err == nil && stick.CoerceBool(val) {
+			// line 147, offset 106 in manage/edit.html.twig
+			fmt.Fprint(output, `checked `)
+		}
+	}
 	// line 147, offset 125 in manage/edit.html.twig
 	fmt.Fprint(output, `> Require HTTPS
 			</label>

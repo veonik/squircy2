@@ -39,6 +39,14 @@ func blockScriptEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 	<div class="col-md-4">
   		<select class="form-control" id="script_type" name="type">
 			<option`)
+	// line 11, offset 13 in script/edit.html.twig
+	{
+		val, _ := stick.GetAttr(ctx["script"], "Type")
+		if stick.CoerceBool(stick.Equal(val, "Javascript")) {
+			// line 11, offset 46 in script/edit.html.twig
+			fmt.Fprint(output, ` selected`)
+		}
+	}
 	// line 11, offset 66 in script/edit.html.twig
 	fmt.Fprint(output, `>Javascript</option>
 		</select>

@@ -70,6 +70,39 @@ func blockScriptIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[s
 		fmt.Fprint(output, `/remove" class="remove btn btn-sm btn-warning">Remove</a>
 			</div>
 			`)
+		// line 20, offset 6 in script/index.html.twig
+		{
+			val, err := stick.GetAttr(el, "Enabled")
+			if err == nil && stick.CoerceBool(val) {
+				// line 20, offset 22 in script/index.html.twig
+				fmt.Fprint(output, `
+				<a href="/script/`)
+				// line 21, offset 21 in script/index.html.twig
+				{
+					val, err := stick.GetAttr(el, "ID")
+					if err == nil {
+						fmt.Fprint(output, val)
+					}
+				}
+				// line 21, offset 32 in script/index.html.twig
+				fmt.Fprint(output, `/toggle" class="toggle btn btn-sm btn-default">Disable</a>
+			`)
+			} else {
+				// line 22, offset 13 in script/index.html.twig
+				fmt.Fprint(output, `
+				<a href="/script/`)
+				// line 23, offset 21 in script/index.html.twig
+				{
+					val, err := stick.GetAttr(el, "ID")
+					if err == nil {
+						fmt.Fprint(output, val)
+					}
+				}
+				// line 23, offset 32 in script/index.html.twig
+				fmt.Fprint(output, `/toggle" class="toggle btn btn-sm btn-success">Enable</a>
+			`)
+			}
+		}
 		// line 24, offset 14 in script/index.html.twig
 		fmt.Fprint(output, `
 		</td>
