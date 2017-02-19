@@ -1,4 +1,5 @@
-### Event handlers
+Event handlers
+==============
 
 Event handlers can be registered with `bind` and `unbind`. Bind takes two parameters: the name of the
 event, and the name of the function to call when the given event is triggered. 
@@ -11,7 +12,7 @@ function handler(e) {
 }
 ```
 
-#### Binding a handler
+## Binding a handler
 
 An event handler can either be a named function, or more commonly, a function itself.
 
@@ -27,7 +28,7 @@ function privmsgHandler(e) {
 bind("irc.PRIVMSG", privmsgHandler);
 ```
 
-#### Unbinding a handler
+## Unbinding a handler
 
 To unbind a handler, you must retain a reference to that function. Generally this means keeping
 a reference to the original handler around.
@@ -42,7 +43,8 @@ function privmsgHandler(e) {
 bind("irc.PRIVMSG", privmsgHandler);
 ```
 
-#### Events
+Events
+------
 
 | Event Name | Description |
 | ---------- | ----------- |

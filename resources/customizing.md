@@ -1,5 +1,5 @@
-Contributing Guidelines
-=======================
+Customizing and Contributing
+============================
 
 This document describes how to modify and customize squIRCy2, and optionally contribute your changes back to the original squIRCy2 codebase.
 

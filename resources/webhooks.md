@@ -1,5 +1,5 @@
 Webhooks
---------
+========
 
 Webhooks allow squIRCy2 to respond to data received by HTTP endpoints.
 

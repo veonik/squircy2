@@ -1,6 +1,7 @@
-# Javascript API
+Javascript API
+==============
 
-[otto](https://github.com/robertkrimen/otto) supports ECMAScript 5, less a regular expression incompatibility.
+squIRCy2 embeds [otto](https://github.com/robertkrimen/otto) and supports ECMAScript 5, minus a regular expression incompatibility.
 Additionally, the following functions are available to interact with the various squIRCy2 modules:
 
 | Method | Description |
@@ -23,7 +24,7 @@ Additionally, the following functions are available to interact with the various
 | setInterval(fnName, delay) | Executes fnName every delay milliseconds |
 | use(coll) | Opens and returns a repository for the given collection |
 
-### Repository methods
+## Repository methods
 
 These are methods available on a repository returned by `use`.
 
@@ -33,10 +34,10 @@ These are methods available on a repository returned by `use`.
 | repo.FetchAll() | Returns a collection of all the entities in the repository |
 | repo.Save(entity) | Saves the given entity |
 
-### Stubs
+## Stubs
 
 If you're looking for IDE auto-completion for your squIRCy2 scripts, you can copy the [squircy stubs](stubs/squircy.js) file into your configured squIRCy2 scripts directory.
 
-### Event Handling
+## Event Handling
 
 See the [dedicated section](event-handling.md) for details.

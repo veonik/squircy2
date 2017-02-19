@@ -1,7 +1,7 @@
 Example Scripts
----------------
+===============
 
-### Join channels on connect
+## Join channels on connect
 
 ```js
 bind("irc.CONNECT", function(e) {
@@ -9,7 +9,7 @@ bind("irc.CONNECT", function(e) {
 });
 ```
 
-### Identify with Nickserv
+## Identify with Nickserv
 
 > A more comprehensive example is defined in [examples/nickserv-auth.js](examples/nickserv-auth.js).
 
@@ -29,7 +29,7 @@ bind("irc.NOTICE", handleNickserv);
 When your handler function is invoked, an object (`e` in the example) is passed as 
 the first parameter. This object has different properties depending on the event.
 
-### Iterate over an event's properties
+## Iterate over an event's properties
 
 ```js
 bind("irc.WILDCARD", function(e) {
@@ -39,11 +39,11 @@ bind("irc.WILDCARD", function(e) {
 });
 ```
 
-### Keep track of channel participants
+## Keep track of channel participants
 
 An example script that keeps track of who is participating in channels the bot is on is defined in [examples/channel-names.js](examples/channel-names.js).
 
-### In-chat REPL
+## In-chat REPL
 
 This example shows how to check a user's nickname and hostname to provide a little bit of security around a feature exposed to IRC.
 
