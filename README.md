@@ -25,7 +25,7 @@ After squIRCy2 is installed, you can run it immediately with `squircy2`. On firs
 squircy2
 ```
 
-> For information on modifying and customizing squIRcy2, see [CONTRIBUTING.md](CONTRIBUTING.md).
+> For information on modifying and customizing squIRcy2, see [Contributing](resources/customizing.md).
 
 
 Usage
