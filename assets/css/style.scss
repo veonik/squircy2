@@ -3,6 +3,18 @@
 
 @import "{{ site.theme }}";
 
+body {
+    color: #333;
+}
+
+code, pre {
+    color: #222;
+}
+
+a code {
+    color: #39c;
+}
+
 footer a.author {
 	display: block;
 	font-size: 1.2em;
@@ -34,10 +46,6 @@ header ul.menu {
             }
         }
     }
-}
-
-a code {
-    color: #39c;
 }
 
 @media print, screen and (max-width: 960px) {
