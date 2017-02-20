@@ -249,6 +249,8 @@ func manageAction(s *stickHandler, config *config.Configuration) {
 func manageUpdateAction(r render.Render, database *db.DB, conf *config.Configuration, request *http.Request) {
 	conf.ScriptsAsFiles = request.FormValue("scripts_as_files") == "on"
 	conf.ScriptsPath = request.FormValue("scripts_path")
+	conf.EnableFileAPI = request.FormValue("enable_file_api") == "on"
+	conf.FileAPIRoot = request.FormValue("file_api_root")
 
 	conf.TLS = request.FormValue("tls") == "on"
 	conf.AutoConnect = request.FormValue("auto_connect") == "on"

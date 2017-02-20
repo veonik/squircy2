@@ -137,6 +137,13 @@ func newJavascriptVm(m *ScriptManager) *jsVm {
 	jsVm.Set("Config", &m.configHelper)
 	jsVm.Set("Irc", &m.ircHelper)
 	jsVm.Set("Os", &m.osHelper)
+	v, _ = jsVm.Object("({})")
+	v.Set("ReadAll", func(call otto.FunctionCall) otto.Value {
+		res, _ := m.fileHelper.ReadAll(call.Argument(0).String())
+		ret, _ := jsVm.ToValue(res)
+		return ret
+	})
+	jsVm.Set("File", v)
 	jsVm.Set("Math", &m.mathHelper)
 	v, _ = jsVm.Object("Math")
 	v.Set("random", (&m.mathHelper).Rand)

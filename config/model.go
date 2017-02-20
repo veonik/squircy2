@@ -34,6 +34,8 @@ func flattenConfig(config *Configuration) map[string]interface{} {
 		"AuthPassword":   config.AuthPassword,
 		"ScriptsAsFiles": config.ScriptsAsFiles,
 		"ScriptsPath":    config.ScriptsPath,
+		"EnableFileAPI":  config.EnableFileAPI,
+		"FileAPIRoot":    config.FileAPIRoot,
 	}
 }
 

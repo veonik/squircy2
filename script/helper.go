@@ -2,12 +2,14 @@ package script
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"math"
 	"math/rand"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strings"
 
 	"github.com/tyler-sommer/squircy2/config"
@@ -207,4 +209,20 @@ func (h *mathHelper) Ceil(v float64) int {
 
 func (h *mathHelper) Floor(v float64) int {
 	return int(math.Floor(v))
+}
+
+type fileHelper struct {
+	conf *config.Configuration
+}
+
+func (h *fileHelper) ReadAll(name string) (string, error) {
+	if !h.conf.EnableFileAPI {
+		return "", errors.New("file: file api is disabled")
+	}
+	p := filepath.Clean(filepath.Join(h.conf.FileAPIRoot, name))
+	if !strings.HasPrefix(p, h.conf.FileAPIRoot) {
+		return "", fmt.Errorf("file: path does not exist within configured root: %s", p)
+	}
+	res, err := ioutil.ReadFile(p)
+	return string(res), err
 }

@@ -91,6 +91,21 @@
 	</div>
 </div>
 <div class="row">
+	<div class="col-md-4 form-group">
+		<div class="checkbox">
+			<label for="enable_file_api">
+				<input type="checkbox" name="enable_file_api" id="enable_file_api" value="on" {% if config.EnableFileAPI %}checked {% endif %}> Enable Filesystem API in Scripts
+			</label>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-4 form-group">
+		<label for="file_api_root">File API Root Path</label>
+		<input class="form-control" name="file_api_root" id="file_api_root" placeholder="{{ config.RootPath }}/storage/" value="{{ config.FileAPIRoot }}">
+	</div>
+</div>
+<div class="row">
 	<div class="col-sm-12">
 		<h2>Web Server</h2>
 	</div>

@@ -21,6 +21,7 @@ type ScriptManager struct {
 	scriptHelper scriptHelper
 	mathHelper   mathHelper
 	osHelper     osHelper
+	fileHelper   fileHelper
 	repo         ScriptRepository
 	logger       *log.Logger
 }
@@ -37,6 +38,7 @@ func NewScriptManager(repo ScriptRepository, l *log.Logger, e event.EventManager
 		scriptHelper: scriptHelper{},
 		mathHelper:   mathHelper{},
 		osHelper:     osHelper{},
+		fileHelper:   fileHelper{config},
 		repo:         repo,
 		logger:       l,
 	}

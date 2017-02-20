@@ -11,6 +11,8 @@ type Configuration struct {
 
 	ScriptsAsFiles bool   // Store scripts on the filesystem
 	ScriptsPath    string // Path to script storage
+	EnableFileAPI  bool   // Enable the filesystem API in scripts
+	FileAPIRoot    string // Only allow filesystem ops in this directory
 
 	Network     string // Hostname and port, format: hostname:1234
 	TLS         bool   // Enable TLS/SSL for IRC
@@ -45,6 +47,8 @@ func NewConfiguration(rootPath string) *Configuration {
 		RootPath:       rootPath,
 		ScriptsAsFiles: false,
 		ScriptsPath:    "",
+		EnableFileAPI:  false,
+		FileAPIRoot:    "",
 		Network:        "irc.freenode.net:6667",
 		TLS:            false,
 		AutoConnect:    false,
