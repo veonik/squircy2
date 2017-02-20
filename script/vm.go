@@ -139,7 +139,11 @@ func newJavascriptVm(m *ScriptManager) *jsVm {
 	jsVm.Set("Os", &m.osHelper)
 	v, _ = jsVm.Object("({})")
 	v.Set("ReadAll", func(call otto.FunctionCall) otto.Value {
-		res, _ := m.fileHelper.ReadAll(call.Argument(0).String())
+		res, err := m.fileHelper.ReadAll(call.Argument(0).String())
+		if err != nil {
+			e, _ := otto.ToValue(err.Error())
+			panic(e)
+		}
 		ret, _ := jsVm.ToValue(res)
 		return ret
 	})

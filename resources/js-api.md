@@ -18,6 +18,7 @@ Additionally, the following functions are available to interact with the various
 | Math.Round(val) | Round val to 0 decimal places. |
 | Config.OwnerNick() | Get the configured Owner Nickname |
 | Config.OwnerHost() | Get the configured Owner Host |
+| File.ReadAll(filename) | Return the contents of filename. File API must be enabled. |
 | bind(eventName, fnName) | Add a handler of the given event type and function name |
 | unbind(eventName, fnName) | Removes a handler of the given type and function name |
 | setTimeout(fnName, delay) | Executes fnName after delay milliseconds |
@@ -33,6 +34,10 @@ These are methods available on a repository returned by `use`.
 | repo.Fetch(id) | Attempts to load and return an entity with the given id |
 | repo.FetchAll() | Returns a collection of all the entities in the repository |
 | repo.Save(entity) | Saves the given entity |
+
+## File API
+
+The File API is disabled by default. To enable the File API for your scripts, you need to set a root directory for any files loaded. You should set this to something other than `/`.
 
 ## Stubs
 

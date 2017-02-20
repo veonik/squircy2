@@ -47,6 +47,9 @@ var Irc = {
     Raw: function(raw) {}
 };
 
+/**
+ * Functionality for sending web requests.
+ */
 var Http = {
     /**
      * Fetch the given url using a GET HTTP request.
@@ -70,6 +73,11 @@ var Http = {
     Send: function(options) {}
 };
 
+/**
+ * Math related functions.
+ *
+ * Note that these are aliases to their related built-in method.
+ */
 var Math = {
     /**
      * Generates a random number between 0 and 1.
@@ -96,6 +104,9 @@ var Math = {
     Floor: Math.floor
 };
 
+/**
+ * Application Configuration related.
+ */
 var Config = {
     /**
      * Returns the configured Owner Nickname.
@@ -108,6 +119,21 @@ var Config = {
      * @returns {string}
      */
     OwnerHost: function() {}
+};
+
+/**
+ * File related functions.
+ *
+ * The File API must be enabled for these to function.
+ */
+var File = {
+    /**
+     * Reads the content of filename.
+     *
+     * @param {string} filename The filename, relative to the configured File API root path.
+     * @returns {string} The contents of the file.
+     */
+    ReadAll: function(filename) {}
 };
 
 /**
