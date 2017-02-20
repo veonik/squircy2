@@ -10,6 +10,26 @@ import (
 	"github.com/tyler-sommer/stick"
 )
 
+func blockManageEditHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
+	// line 254, offset 34 in manage/edit.html.twig
+	fmt.Fprint(output, `
+<script type="text/javascript">
+	$(function() {
+	    $('#import-scripts').on('click', function(e) {
+	        e.preventDefault();
+	        e.stopPropagation();
+	        $('#confirm-import').modal('show');
+		});
+
+        $('#export-scripts').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $('#confirm-export').modal('show');
+        });
+	})
+</script>
+`)
+}
 func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 3, offset 19 in manage/edit.html.twig
 	fmt.Fprint(output, `
@@ -224,6 +244,49 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 	</div>
 </div>
 <div class="row">
+	<div class="col-md-4 form-group">
+		<div class="checkbox">
+			<label for="enable_file_api">
+				<input type="checkbox" name="enable_file_api" id="enable_file_api" value="on" `)
+	// line 97, offset 85 in manage/edit.html.twig
+	{
+		val, err := stick.GetAttr(ctx["config"], "EnableFileAPI")
+		if err == nil && stick.CoerceBool(val) {
+			// line 97, offset 111 in manage/edit.html.twig
+			fmt.Fprint(output, `checked `)
+		}
+	}
+	// line 97, offset 130 in manage/edit.html.twig
+	fmt.Fprint(output, `> Enable Filesystem API in Scripts
+			</label>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-4 form-group">
+		<label for="file_api_root">File API Root Path</label>
+		<input class="form-control" name="file_api_root" id="file_api_root" placeholder="`)
+	// line 105, offset 83 in manage/edit.html.twig
+	{
+		val, err := stick.GetAttr(ctx["config"], "RootPath")
+		if err == nil {
+			fmt.Fprint(output, val)
+		}
+	}
+	// line 105, offset 104 in manage/edit.html.twig
+	fmt.Fprint(output, `/storage/" value="`)
+	// line 105, offset 122 in manage/edit.html.twig
+	{
+		val, err := stick.GetAttr(ctx["config"], "FileAPIRoot")
+		if err == nil {
+			fmt.Fprint(output, val)
+		}
+	}
+	// line 105, offset 146 in manage/edit.html.twig
+	fmt.Fprint(output, `">
+	</div>
+</div>
+<div class="row">
 	<div class="col-sm-12">
 		<h2>Web Server</h2>
 	</div>
@@ -233,28 +296,28 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 		<div class="checkbox">
 			<label for="web_interface">
 				<input type="checkbox" name="web_interface" id="web_interface" value="on" `)
-	// line 102, offset 81 in manage/edit.html.twig
+	// line 117, offset 81 in manage/edit.html.twig
 	{
 		val, err := stick.GetAttr(ctx["config"], "WebInterface")
 		if err == nil && stick.CoerceBool(val) {
-			// line 102, offset 106 in manage/edit.html.twig
+			// line 117, offset 106 in manage/edit.html.twig
 			fmt.Fprint(output, `checked `)
 		}
 	}
-	// line 102, offset 125 in manage/edit.html.twig
+	// line 117, offset 125 in manage/edit.html.twig
 	fmt.Fprint(output, `> Enable Web Interface
 			</label>
 		</div>
 		<label for="http_host_port">HTTP Listen Host and Port</label>
 		<input class="form-control" name="http_host_port" id="http_host_port" placeholder=":3000" value="`)
-	// line 106, offset 99 in manage/edit.html.twig
+	// line 121, offset 99 in manage/edit.html.twig
 	{
 		val, err := stick.GetAttr(ctx["config"], "HTTPHostPort")
 		if err == nil {
 			fmt.Fprint(output, val)
 		}
 	}
-	// line 106, offset 124 in manage/edit.html.twig
+	// line 121, offset 124 in manage/edit.html.twig
 	fmt.Fprint(output, `">
 	</div>
 </div>
@@ -268,15 +331,15 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 		<div class="checkbox">
 			<label for="http_auth">
 				<input type="checkbox" name="http_auth" id="http_auth" value="on" `)
-	// line 118, offset 73 in manage/edit.html.twig
+	// line 133, offset 73 in manage/edit.html.twig
 	{
 		val, err := stick.GetAttr(ctx["config"], "HTTPAuth")
 		if err == nil && stick.CoerceBool(val) {
-			// line 118, offset 94 in manage/edit.html.twig
+			// line 133, offset 94 in manage/edit.html.twig
 			fmt.Fprint(output, `checked `)
 		}
 	}
-	// line 118, offset 113 in manage/edit.html.twig
+	// line 133, offset 113 in manage/edit.html.twig
 	fmt.Fprint(output, `> Enable HTTP BasicAuth
 			</label>
 		</div>
@@ -286,27 +349,27 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 	<div class="col-md-4 form-group">
 		<label for="auth_username">Username</label>
 		<input class="form-control" name="auth_username" id="auth_username" placeholder="Username" value="`)
-	// line 126, offset 100 in manage/edit.html.twig
+	// line 141, offset 100 in manage/edit.html.twig
 	{
 		val, err := stick.GetAttr(ctx["config"], "AuthUsername")
 		if err == nil {
 			fmt.Fprint(output, val)
 		}
 	}
-	// line 126, offset 125 in manage/edit.html.twig
+	// line 141, offset 125 in manage/edit.html.twig
 	fmt.Fprint(output, `">
 	</div>
 	<div class="col-md-4 form-group">
 		<label for="auth_password">Password</label>
 		<input class="form-control" name="auth_password" id="auth_password" placeholder="Password" value="`)
-	// line 130, offset 100 in manage/edit.html.twig
+	// line 145, offset 100 in manage/edit.html.twig
 	{
 		val, err := stick.GetAttr(ctx["config"], "AuthPassword")
 		if err == nil {
 			fmt.Fprint(output, val)
 		}
 	}
-	// line 130, offset 125 in manage/edit.html.twig
+	// line 145, offset 125 in manage/edit.html.twig
 	fmt.Fprint(output, `">
 	</div>
 </div>
@@ -320,30 +383,30 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 		<div class="checkbox">
 			<label for="https">
 				<input type="checkbox" name="https" id="https" value="on" `)
-	// line 142, offset 65 in manage/edit.html.twig
+	// line 157, offset 65 in manage/edit.html.twig
 	{
 		val, err := stick.GetAttr(ctx["config"], "HTTPS")
 		if err == nil && stick.CoerceBool(val) {
-			// line 142, offset 83 in manage/edit.html.twig
+			// line 157, offset 83 in manage/edit.html.twig
 			fmt.Fprint(output, `checked `)
 		}
 	}
-	// line 142, offset 102 in manage/edit.html.twig
+	// line 157, offset 102 in manage/edit.html.twig
 	fmt.Fprint(output, `> Enable HTTPS
 			</label>
 		</div>
 		<div class="checkbox">
 			<label for="require_https">
 				<input type="checkbox" name="require_https" id="require_https" value="on" `)
-	// line 147, offset 81 in manage/edit.html.twig
+	// line 162, offset 81 in manage/edit.html.twig
 	{
 		val, err := stick.GetAttr(ctx["config"], "RequireHTTPS")
 		if err == nil && stick.CoerceBool(val) {
-			// line 147, offset 106 in manage/edit.html.twig
+			// line 162, offset 106 in manage/edit.html.twig
 			fmt.Fprint(output, `checked `)
 		}
 	}
-	// line 147, offset 125 in manage/edit.html.twig
+	// line 162, offset 125 in manage/edit.html.twig
 	fmt.Fprint(output, `> Require HTTPS
 			</label>
 		</div>
@@ -353,14 +416,14 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 	<div class="col-md-4 form-group">
 		<label for="nick">SSL Listen Host and Port</label>
 		<input class="form-control" name="ssl_host_port" id="ssl_host_port" placeholder=":3443" value="`)
-	// line 155, offset 97 in manage/edit.html.twig
+	// line 170, offset 97 in manage/edit.html.twig
 	{
 		val, err := stick.GetAttr(ctx["config"], "SSLHostPort")
 		if err == nil {
 			fmt.Fprint(output, val)
 		}
 	}
-	// line 155, offset 121 in manage/edit.html.twig
+	// line 170, offset 121 in manage/edit.html.twig
 	fmt.Fprint(output, `">
 	</div>
 </div>
@@ -368,27 +431,27 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 	<div class="col-md-4 form-group">
 		<label for="nick">SSL Certificate File</label>
 		<input class="form-control" name="ssl_cert_file" id="ssl_cert_file" placeholder="/path/to/cert.pem" value="`)
-	// line 161, offset 109 in manage/edit.html.twig
+	// line 176, offset 109 in manage/edit.html.twig
 	{
 		val, err := stick.GetAttr(ctx["config"], "SSLCertFile")
 		if err == nil {
 			fmt.Fprint(output, val)
 		}
 	}
-	// line 161, offset 133 in manage/edit.html.twig
+	// line 176, offset 133 in manage/edit.html.twig
 	fmt.Fprint(output, `">
 	</div>
 	<div class="col-md-4 form-group">
 		<label for="username">SSL Certificate Key File</label>
 		<input class="form-control" name="ssl_cert_key" id="ssl_cert_key" placeholder="/path/to/key.pem" value="`)
-	// line 165, offset 106 in manage/edit.html.twig
+	// line 180, offset 106 in manage/edit.html.twig
 	{
 		val, err := stick.GetAttr(ctx["config"], "SSLCertKey")
 		if err == nil {
 			fmt.Fprint(output, val)
 		}
 	}
-	// line 165, offset 129 in manage/edit.html.twig
+	// line 180, offset 129 in manage/edit.html.twig
 	fmt.Fprint(output, `">
 	</div>
 </div>
@@ -424,14 +487,14 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 				<div class="form-group">
 					<label for="scripts_import_path">Scripts stored in squIRCy2's database will be imported from:</label>
 					<input class="form-control" name="scripts_import_path" id="scripts_import_path" value="`)
-	// line 199, offset 92 in manage/edit.html.twig
+	// line 214, offset 92 in manage/edit.html.twig
 	{
 		val, err := stick.GetAttr(ctx["config"], "ScriptsPath")
 		if err == nil {
 			fmt.Fprint(output, val)
 		}
 	}
-	// line 199, offset 116 in manage/edit.html.twig
+	// line 214, offset 116 in manage/edit.html.twig
 	fmt.Fprint(output, `">
 				</div>
 
@@ -460,14 +523,14 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 				<div class="form-group">
 					<label for="scripts_export_path">Scripts stored in squIRCy2's database will be exported to:</label>
 					<input class="form-control" name="scripts_export_path" id="scripts_export_path" value="`)
-	// line 226, offset 92 in manage/edit.html.twig
+	// line 241, offset 92 in manage/edit.html.twig
 	{
 		val, err := stick.GetAttr(ctx["config"], "ScriptsPath")
 		if err == nil {
 			fmt.Fprint(output, val)
 		}
 	}
-	// line 226, offset 116 in manage/edit.html.twig
+	// line 241, offset 116 in manage/edit.html.twig
 	fmt.Fprint(output, `">
 				</div>
 			</div>
@@ -479,26 +542,6 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 	</div>
 </div>
 </form>
-`)
-}
-func blockManageEditHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 239, offset 34 in manage/edit.html.twig
-	fmt.Fprint(output, `
-<script type="text/javascript">
-	$(function() {
-	    $('#import-scripts').on('click', function(e) {
-	        e.preventDefault();
-	        e.stopPropagation();
-	        $('#confirm-import').modal('show');
-		});
-
-        $('#export-scripts').on('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            $('#confirm-export').modal('show');
-        });
-	})
-</script>
 `)
 }
 
@@ -634,7 +677,7 @@ $(function() {
 	fmt.Fprint(output, `
 
 `)
-	// line 237, offset 14 in manage/edit.html.twig
+	// line 252, offset 14 in manage/edit.html.twig
 	fmt.Fprint(output, `
 
 `)

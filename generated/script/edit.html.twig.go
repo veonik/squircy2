@@ -10,6 +10,43 @@ import (
 	"github.com/tyler-sommer/stick"
 )
 
+func blockScriptEditHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
+	// line 31, offset 34 in script/edit.html.twig
+	fmt.Fprint(output, `
+`)
+	// line 1, offset 0 in script/_javascripts.html.twig
+	fmt.Fprint(output, `<script src="//cdn.jsdelivr.net/ace/1.1.7/min/ace.js"></script>
+<script src="//cdn.jsdelivr.net/ace/1.1.7/min/ext-searchbox.js"></script>
+<script src="//cdn.jsdelivr.net/ace/1.1.7/min/ext-spellcheck.js"></script>
+<script src="//cdn.jsdelivr.net/ace/1.1.7/min/ext-static_highlight.js"></script>
+<script src="//cdn.jsdelivr.net/ace/1.1.7/min/mode-javascript.js"></script>
+<script src="//cdn.jsdelivr.net/ace/1.1.7/min/theme-textmate.js"></script>
+<script src="//cdn.jsdelivr.net/ace/1.1.7/min/worker-javascript.js"></script>
+<script type="text/javascript">
+$(function() {
+	var modeMap = {
+		"Javascript": "ace/mode/javascript",
+	};	
+	var $bodyField = $('#script_body');
+	var $typeField = $('#script_type');
+	var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/textmate");
+	editor.setValue($bodyField.val());
+	editor.getSession().on('change', function() {
+		$bodyField.val(editor.getValue());
+	});
+	editor.resize();
+	
+	$typeField.on('change', function() {
+		editor.getSession().setMode(modeMap[$typeField.val()]);
+	}).change();
+})
+</script>
+`)
+	// line 32, offset 45 in script/edit.html.twig
+	fmt.Fprint(output, `
+`)
+}
 func blockScriptEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 3, offset 19 in script/edit.html.twig
 	fmt.Fprint(output, `
@@ -77,43 +114,6 @@ func blockScriptEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 	</div>
 </div>
 </form>
-`)
-}
-func blockScriptEditHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 31, offset 34 in script/edit.html.twig
-	fmt.Fprint(output, `
-`)
-	// line 1, offset 0 in script/_javascripts.html.twig
-	fmt.Fprint(output, `<script src="//cdn.jsdelivr.net/ace/1.1.7/min/ace.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/ext-searchbox.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/ext-spellcheck.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/ext-static_highlight.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/mode-javascript.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/theme-textmate.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/worker-javascript.js"></script>
-<script type="text/javascript">
-$(function() {
-	var modeMap = {
-		"Javascript": "ace/mode/javascript",
-	};	
-	var $bodyField = $('#script_body');
-	var $typeField = $('#script_type');
-	var editor = ace.edit("editor");
-    editor.setTheme("ace/theme/textmate");
-	editor.setValue($bodyField.val());
-	editor.getSession().on('change', function() {
-		$bodyField.val(editor.getValue());
-	});
-	editor.resize();
-	
-	$typeField.on('change', function() {
-		editor.getSession().setMode(modeMap[$typeField.val()]);
-	}).change();
-})
-</script>
-`)
-	// line 32, offset 45 in script/edit.html.twig
-	fmt.Fprint(output, `
 `)
 }
 
