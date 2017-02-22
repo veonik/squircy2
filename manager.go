@@ -54,7 +54,7 @@ func NewManager(rootPath string) (manager *Manager) {
 
 	manager.Invoke(configureWeb)
 	manager.invokeAndMap(newEventSource)
-	manager.invokeAndMap(irc.NewIrcConnectionManager)
+	manager.invokeAndMap(irc.NewConnectionManager)
 	manager.invokeAndMap(script.NewScriptManager)
 
 	return

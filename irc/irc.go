@@ -30,7 +30,7 @@ type ConnectionManager struct {
 	lastPong time.Time
 }
 
-func NewIrcConnectionManager(injector inject.Injector) *ConnectionManager {
+func NewConnectionManager(injector inject.Injector) *ConnectionManager {
 	return &ConnectionManager{injector, nil, Disconnected, false, time.Now()}
 }
 
