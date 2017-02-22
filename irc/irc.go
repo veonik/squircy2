@@ -120,7 +120,7 @@ func connect(mgr *ConnectionManager, conf *config.Configuration, l *log.Logger) 
 	}
 
 	mgr.lastPong = time.Now()
-	mgr.conn.PingFreq = 5 * time.Minute
+	mgr.conn.PingFreq = 2 * time.Minute
 	mgr.status = Connecting
 	mgr.injector.Invoke(triggerConnecting)
 	mgr.conn.Connect(conf.Network)
