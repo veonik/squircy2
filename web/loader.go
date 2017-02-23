@@ -1,6 +1,6 @@
 // +build !debug
 
-package squircy2
+package web
 
 import (
 	"bytes"
@@ -8,11 +8,11 @@ import (
 
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/staticbin"
-	"github.com/tyler-sommer/squircy2/generated"
-	"github.com/tyler-sommer/squircy2/generated/manage"
-	"github.com/tyler-sommer/squircy2/generated/repl"
-	"github.com/tyler-sommer/squircy2/generated/script"
-	"github.com/tyler-sommer/squircy2/generated/webhook"
+	"github.com/tyler-sommer/squircy2/web/generated"
+	"github.com/tyler-sommer/squircy2/web/generated/manage"
+	"github.com/tyler-sommer/squircy2/web/generated/repl"
+	"github.com/tyler-sommer/squircy2/web/generated/script"
+	"github.com/tyler-sommer/squircy2/web/generated/webhook"
 	"github.com/tyler-sommer/stick"
 )
 
@@ -48,7 +48,7 @@ func newTemplateLoader() stick.Loader {
 type assetLoader struct{}
 
 func (l *assetLoader) Load(name string) (stick.Template, error) {
-	res, err := Asset("views/" + name)
+	res, err := Asset("web/views/" + name)
 	if err != nil {
 		return nil, err
 	}
@@ -56,5 +56,5 @@ func (l *assetLoader) Load(name string) (stick.Template, error) {
 }
 
 func newStaticHandler() martini.Handler {
-	return staticbin.Static("public", Asset)
+	return staticbin.Static("web/public", Asset)
 }

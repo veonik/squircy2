@@ -1,13 +1,12 @@
 package squircy2
 
 import (
-	"io"
-	"log"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/peterh/liner"
 	"github.com/tyler-sommer/squircy2/config"
 	"github.com/tyler-sommer/squircy2/event"
@@ -20,11 +19,11 @@ const (
 	InputEvent                  = "cli.INPUT"
 )
 
-func (man *Manager) LoopCLI() {
-	man.Invoke(loopCLI)
+func (m *Manager) LoopCLI() {
+	m.Invoke(loopCLI)
 }
 
-func loopCLI(conf *config.Configuration, l *log.Logger, ircmgr *irc.ConnectionManager, evm event.EventManager, scmgr *script.ScriptManager, manager *Manager) {
+func loopCLI(conf *config.Configuration, l log.FieldLogger, ircmgr *irc.ConnectionManager, evm event.EventManager, scmgr *script.ScriptManager, m *Manager) {
 	hist := filepath.Join(conf.RootPath, ".history")
 
 	cli := liner.NewLiner()
@@ -41,7 +40,7 @@ func loopCLI(conf *config.Configuration, l *log.Logger, ircmgr *irc.ConnectionMa
 		f.Close()
 	}
 
-	commands := []string{"exit", "reload", "repl", "debug", "connect", "reconnect", "disconnect"}
+	commands := []string{"exit", "reload", "repl", "debug", "connect", "reconnect", "disconnect", "listen", "stop"}
 	cli.SetCompleter(func(line string) []string {
 		res := []string{}
 		for _, v := range commands {
@@ -53,7 +52,7 @@ func loopCLI(conf *config.Configuration, l *log.Logger, ircmgr *irc.ConnectionMa
 	})
 
 	help := func() {
-		l.Println(`Commands:
+		fmt.Println(`Commands:
 
 exit		Quits IRC, if connected, and exits the program
 listen		Start HTTP (and HTTPS, if configured) server
@@ -62,12 +61,12 @@ reload		Reload the scripting engine
 repl		Start a JavaScript REPL
 debug		Toggles debug on or off`)
 		if ircmgr.Status() != irc.Disconnected {
-			l.Println(`disconnect	Disconnect from IRC
+			fmt.Println(`disconnect	Disconnect from IRC
 reconnect	Force a reconnection to IRC`)
 		} else {
-			l.Println("connect		Connect to IRC")
+			fmt.Println("connect		Connect to IRC")
 		}
-		l.Println()
+		fmt.Println()
 	}
 
 	help()
@@ -84,76 +83,58 @@ reconnect	Force a reconnection to IRC`)
 		cli.AppendHistory(cmd)
 		switch {
 		case cmd == "exit" || cmd == "quit":
-			go ircmgr.Quit()
-			time.Sleep(2 * time.Second)
-			l.Println("Exiting")
+			ircmgr.Quit()
+			fmt.Println("Exiting")
 			return
 
 		case cmd == "listen":
-			manager.ListenAndServe()
+			m.s.ListenAndServe()
 
 		case cmd == "stop":
-			err = manager.StopListenAndServe()
+			err = m.s.StopListenAndServe()
 			if err != nil {
-				l.Println(err.Error())
+				fmt.Println("Unable to stop HTTP server: ", err.Error())
+				l.Errorln(err.Error())
 			}
-			err = manager.StopListenAndServeTLS()
+			err = m.s.StopListenAndServeTLS()
 			if err != nil {
-				l.Println(err.Error())
+				fmt.Println("Unable to stop HTTPS server: ", err.Error())
+				l.Errorln(err.Error())
 			}
 
 		case cmd == "debug":
 			debugging := !ircmgr.Debug()
 			ircmgr.SetDebug(debugging)
 			if debugging {
-				l.Println("Debug ENABLED")
+				l.Infoln("Debug ENABLED")
 			} else {
-				l.Println("Debug DISABLED")
+				l.Infoln("Debug DISABLED")
 			}
 
 		case cmd == "reload":
-			l.Println("Reloading...")
+			l.Infoln("Reloading...")
 			scmgr.ReInit()
-			l.Println("Reloaded.")
+			l.Infoln("Reloaded.")
 
 		case cmd == "repl":
 			scmgr.Repl()
 
 		case cmd == "connect" || cmd == "disconnect":
 			if ircmgr.Status() != irc.Disconnected {
-				l.Println("Disconnecting...")
+				l.Infoln("Disconnecting...")
 				ircmgr.Quit()
 			} else {
-				l.Println("Connecting...")
+				l.Infoln("Connecting...")
 				ircmgr.Connect()
 			}
 
 		case cmd == "reconnect":
-			l.Println("Reconnecting...")
+			l.Infoln("Reconnecting...")
 			ircmgr.Reconnect()
 
 		default:
-			l.Print("Unknown input. ")
+			fmt.Println("Unknown input. ")
 			help()
 		}
 	}
-}
-
-func configureLog(manager *Manager, evm event.EventManager) {
-	hist := &triggerLogger{evm}
-	out := io.MultiWriter(os.Stdout, hist)
-	logger := log.New(out, "", 0)
-	manager.Map(logger)
-}
-
-type triggerLogger struct {
-	evm event.EventManager
-}
-
-func (l *triggerLogger) Write(p []byte) (n int, err error) {
-	l.evm.Trigger(OutputEvent, map[string]interface{}{
-		"Message": string(p),
-	})
-
-	return
 }

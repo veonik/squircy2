@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-
 	"fmt"
 	"runtime"
 
@@ -42,8 +41,8 @@ func main() {
 
 	mgr := squircy2.NewManager(root)
 
-	go mgr.ListenAndServe()
-	mgr.AutoConnect()
+	go mgr.Web().ListenAndServe()
+	mgr.IRC().AutoConnect()
 
 	quit := make(chan struct{})
 	if !*nonInteractiveFlag {

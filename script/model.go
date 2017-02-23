@@ -3,10 +3,11 @@ package script
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"path/filepath"
 	"sort"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/HouzuoGuo/tiedot/db"
 	"github.com/tyler-sommer/squircy2/config"
@@ -33,16 +34,16 @@ type ScriptRepository interface {
 	Delete(id int)
 }
 
-func newDBRepository(database *db.DB, logger *log.Logger) *dbRepository {
+func newDBRepository(database *db.DB, logger log.FieldLogger) *dbRepository {
 	return &dbRepository{database, logger}
 }
 
 type dbRepository struct {
 	database *db.DB
-	logger   *log.Logger
+	logger   log.FieldLogger
 }
 
-func NewScriptRepository(database *db.DB, conf *config.Configuration, logger *log.Logger) ScriptRepository {
+func NewScriptRepository(database *db.DB, conf *config.Configuration, logger log.FieldLogger) ScriptRepository {
 	if conf.ScriptsAsFiles {
 		return newFileRepository(conf, logger)
 	}
@@ -144,10 +145,10 @@ func (repo *dbRepository) Delete(id int) {
 type fileRepository struct {
 	idx    map[int]string
 	conf   *config.Configuration
-	logger *log.Logger
+	logger log.FieldLogger
 }
 
-func newFileRepository(conf *config.Configuration, logger *log.Logger) *fileRepository {
+func newFileRepository(conf *config.Configuration, logger log.FieldLogger) *fileRepository {
 	repo := &fileRepository{make(map[int]string), conf, logger}
 	repo.loadIndex()
 	return repo
@@ -157,13 +158,13 @@ func (repo *fileRepository) loadIndex() {
 	j, err := ioutil.ReadFile(filepath.Join(repo.conf.ScriptsPath, "index.json"))
 	if err != nil {
 		// TODO: Handle error properly
-		repo.logger.Println(err.Error())
+		repo.logger.Debugln(err.Error())
 		return
 	}
 	err = json.Unmarshal(j, &repo.idx)
 	if err != nil {
 		// TODO: Handle error properly
-		repo.logger.Println(err.Error())
+		repo.logger.Debugln(err.Error())
 		return
 	}
 }
@@ -172,13 +173,13 @@ func (repo *fileRepository) saveIndex() {
 	d, err := json.Marshal(repo.idx)
 	if err != nil {
 		// TODO: Handle error properly
-		repo.logger.Println(err.Error())
+		repo.logger.Debugln(err.Error())
 		return
 	}
 	err = ioutil.WriteFile(filepath.Join(repo.conf.ScriptsPath, "index.json"), d, 0644)
 	if err != nil {
 		// TODO: Handle error properly
-		repo.logger.Println(err.Error())
+		repo.logger.Debugln(err.Error())
 		return
 	}
 }
@@ -189,7 +190,7 @@ func (repo *fileRepository) FetchAll() []*Script {
 		contents, err := ioutil.ReadFile(filepath.Join(repo.conf.ScriptsPath, file))
 		if err != nil {
 			// TODO: Handle error properly
-			repo.logger.Println(err.Error())
+			repo.logger.Debugln(err.Error())
 			continue
 		}
 		scripts = append(scripts, &Script{
@@ -209,7 +210,7 @@ func (repo *fileRepository) Fetch(id int) *Script {
 		contents, err := ioutil.ReadFile(filepath.Join(repo.conf.ScriptsPath, file))
 		if err != nil {
 			// TODO: Handle error properly
-			repo.logger.Println(err.Error())
+			repo.logger.Debugln(err.Error())
 			return nil
 		}
 		return &Script{
@@ -232,7 +233,7 @@ func (repo *fileRepository) Save(script *Script) {
 	err := ioutil.WriteFile(filepath.Join(repo.conf.ScriptsPath, script.Title), []byte(script.Body), 0644)
 	if err != nil {
 		// TODO: Handle error properly
-		repo.logger.Println(err.Error())
+		repo.logger.Debugln(err.Error())
 		return
 	}
 	repo.saveIndex()

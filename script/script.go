@@ -1,8 +1,9 @@
 package script
 
 import (
-	"log"
 	"os"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/HouzuoGuo/tiedot/db"
 	"github.com/tyler-sommer/squircy2/config"
@@ -23,10 +24,10 @@ type ScriptManager struct {
 	osHelper     osHelper
 	fileHelper   fileHelper
 	repo         ScriptRepository
-	logger       *log.Logger
+	logger       log.FieldLogger
 }
 
-func NewScriptManager(repo ScriptRepository, l *log.Logger, e event.EventManager, ircmanager *irc.ConnectionManager, config *config.Configuration, database *db.DB) *ScriptManager {
+func NewScriptManager(repo ScriptRepository, l log.FieldLogger, e event.EventManager, ircmanager *irc.ConnectionManager, config *config.Configuration, database *db.DB) *ScriptManager {
 	mgr := ScriptManager{
 		database:     database,
 		events:       e,
@@ -56,7 +57,7 @@ func (m *ScriptManager) RunUnsafe(t ScriptType, code string) (result interface{}
 			err = e.(error)
 		}
 		if err != nil {
-			m.logger.Println("An error occurred: ", err)
+			m.logger.Infoln("An error occurred: ", err)
 		}
 	}()
 
@@ -120,7 +121,7 @@ func (m *ScriptManager) init() {
 		if !script.Enabled {
 			continue
 		}
-		m.logger.Println("Running", script.Type, "script", script.Title)
+		m.logger.Debugln("Running", script.Type, "script", script.Title)
 		m.RunUnsafe(script.Type, script.Body)
 	}
 }

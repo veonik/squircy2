@@ -10,26 +10,6 @@ import (
 	"github.com/tyler-sommer/stick"
 )
 
-func blockManageEditHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 254, offset 34 in manage/edit.html.twig
-	fmt.Fprint(output, `
-<script type="text/javascript">
-	$(function() {
-	    $('#import-scripts').on('click', function(e) {
-	        e.preventDefault();
-	        e.stopPropagation();
-	        $('#confirm-import').modal('show');
-		});
-
-        $('#export-scripts').on('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            $('#confirm-export').modal('show');
-        });
-	})
-</script>
-`)
-}
 func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 3, offset 19 in manage/edit.html.twig
 	fmt.Fprint(output, `
@@ -542,6 +522,26 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 	</div>
 </div>
 </form>
+`)
+}
+func blockManageEditHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
+	// line 254, offset 34 in manage/edit.html.twig
+	fmt.Fprint(output, `
+<script type="text/javascript">
+	$(function() {
+	    $('#import-scripts').on('click', function(e) {
+	        e.preventDefault();
+	        e.stopPropagation();
+	        $('#confirm-import').modal('show');
+		});
+
+        $('#export-scripts').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $('#confirm-export').modal('show');
+        });
+	})
+</script>
 `)
 }
 

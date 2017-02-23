@@ -1,6 +1,6 @@
 // +build debug
 
-package squircy2
+package web
 
 import (
 	"os"
@@ -22,11 +22,11 @@ func init() {
 }
 
 func newTemplateLoader() stick.Loader {
-	return stick.NewFilesystemLoader(rootDir + "/views")
+	return stick.NewFilesystemLoader(rootDir + "/web/views")
 }
 
 func newStaticHandler() martini.Handler {
-	return martini.Static(rootDir+"/public", martini.StaticOptions{
+	return martini.Static(rootDir+"/web/public", martini.StaticOptions{
 		SkipLogging: true,
 	})
 }

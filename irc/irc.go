@@ -4,9 +4,10 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"log"
+	stdlog "log"
 	"time"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/inject"
 	ircevent "github.com/thoj/go-ircevent"
 	"github.com/tyler-sommer/squircy2/config"
@@ -24,14 +25,21 @@ const (
 
 type ConnectionManager struct {
 	injector inject.Injector
+	conf     *config.Configuration
 	conn     *ircevent.Connection
 	status   ConnectionStatus
 	debug    bool
 	lastPong time.Time
 }
 
-func NewConnectionManager(injector inject.Injector) *ConnectionManager {
-	return &ConnectionManager{injector, nil, Disconnected, false, time.Now()}
+func NewConnectionManager(injector inject.Injector, conf *config.Configuration) *ConnectionManager {
+	return &ConnectionManager{injector, conf, nil, Disconnected, false, time.Now()}
+}
+
+func (mgr *ConnectionManager) AutoConnect() {
+	if mgr.conf.AutoConnect {
+		mgr.Connect()
+	}
 }
 
 func (mgr *ConnectionManager) Connect() {
@@ -97,15 +105,15 @@ func (mgr *ConnectionManager) Connection() *ircevent.Connection {
 	return mgr.conn
 }
 
-func connect(mgr *ConnectionManager, conf *config.Configuration, l *log.Logger) {
+func connect(mgr *ConnectionManager, l *log.Logger) {
 	if mgr.conn == nil {
-		mgr.conn = ircevent.IRC(conf.Nick, conf.Username)
-		if conf.SASL {
+		mgr.conn = ircevent.IRC(mgr.conf.Nick, mgr.conf.Username)
+		if mgr.conf.SASL {
 			mgr.conn.UseSASL = true
-			mgr.conn.SASLLogin = conf.SASLUsername
-			mgr.conn.SASLPassword = conf.SASLPassword
+			mgr.conn.SASLLogin = mgr.conf.SASLUsername
+			mgr.conn.SASLPassword = mgr.conf.SASLPassword
 		}
-		mgr.conn.Log = l
+		mgr.conn.Log = stdlog.New(l.Writer(), "", 0)
 		mgr.injector.Map(mgr.conn)
 		mgr.injector.Invoke(bindEvents)
 	}
@@ -113,7 +121,7 @@ func connect(mgr *ConnectionManager, conf *config.Configuration, l *log.Logger) 
 	mgr.conn.Debug = mgr.debug
 	mgr.conn.VerboseCallbackHandler = mgr.debug
 
-	if conf.TLS {
+	if mgr.conf.TLS {
 		mgr.conn.UseTLS = true
 		// TODO: Don't skip cert verification
 		mgr.conn.TLSConfig = &tls.Config{InsecureSkipVerify: true}
@@ -123,7 +131,7 @@ func connect(mgr *ConnectionManager, conf *config.Configuration, l *log.Logger) 
 	mgr.conn.PingFreq = 2 * time.Minute
 	mgr.status = Connecting
 	mgr.injector.Invoke(triggerConnecting)
-	mgr.conn.Connect(conf.Network)
+	mgr.conn.Connect(mgr.conf.Network)
 
 	go func() {
 		wait := 1 * time.Minute
@@ -134,11 +142,9 @@ func connect(mgr *ConnectionManager, conf *config.Configuration, l *log.Logger) 
 				if mgr.conn == nil || mgr.status == Disconnected {
 					return
 				} else if time.Now().Sub(mgr.lastPong) > 5*time.Minute {
-					l.Println("Ping Timeout, disconnecting.")
+					l.Debugln("Ping Timeout, disconnecting.")
 					mgr.Quit()
-					if conf.AutoConnect {
-						mgr.Connect()
-					}
+					mgr.AutoConnect()
 					return
 				}
 				t.Reset(wait)

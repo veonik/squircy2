@@ -1,24 +1,21 @@
-package squircy2
+package web
 
 import (
 	"fmt"
 	"html"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/HouzuoGuo/tiedot/db"
+	log "github.com/Sirupsen/logrus"
 	"github.com/go-martini/martini"
-	"github.com/martini-contrib/auth"
 	"github.com/martini-contrib/render"
-	"github.com/martini-contrib/secure"
 	"github.com/nu7hatch/gouuid"
 	"github.com/tyler-sommer/squircy2/config"
 	"github.com/tyler-sommer/squircy2/event"
-	"github.com/tyler-sommer/squircy2/eventsource"
 	"github.com/tyler-sommer/squircy2/irc"
 	"github.com/tyler-sommer/squircy2/script"
 	"github.com/tyler-sommer/squircy2/webhook"
@@ -67,73 +64,9 @@ func newStickHandler() martini.Handler {
 	}
 }
 
-func configureWeb(manager *Manager, conf *config.Configuration) {
-	manager.Handlers(
-		newStaticHandler(),
-		newStickHandler(),
-		render.Renderer(),
-		secure.Secure(secure.Options{
-			BrowserXssFilter: true,
-			FrameDeny:        true,
-			SSLRedirect:      conf.RequireHTTPS,
-			SSLHost:          conf.SSLHostPort,
-			DisableProdCheck: true,
-		}),
-	)
-	manager.NotFound(func(req *http.Request, r render.Render, l *log.Logger) {
-		r.Error(404)
-	})
-
-	manager.Post("/webhooks/:webhook_id", webhookReceiveAction)
-
-	// Admin web interface
-	handlers := []martini.Handler{}
-	if conf.HTTPAuth && len(conf.AuthUsername) > 0 && len(conf.AuthPassword) > 0 {
-		handlers = append(handlers, auth.Basic(conf.AuthUsername, conf.AuthPassword))
-	}
-	manager.Group("", func(rm martini.Router) {
-		rm.Get("/event", func(es *eventsource.Broker, w http.ResponseWriter, r *http.Request) {
-			es.ServeHTTP(w, r)
-		})
-		rm.Get("/", indexAction)
-		rm.Get("/status", statusAction)
-		rm.Group("/manage", func(r martini.Router) {
-			r.Get("", manageAction)
-			r.Post("/update", manageUpdateAction)
-			r.Post("/export-scripts", manageExportScriptsAction)
-			r.Post("/import-scripts", manageImportScriptsAction)
-		})
-		rm.Post("/connect", connectAction)
-		rm.Post("/disconnect", disconnectAction)
-		rm.Group("/script", func(r martini.Router) {
-			r.Get("", scriptAction)
-			r.Post("/reinit", scriptReinitAction)
-			r.Get("/new", newScriptAction)
-			r.Post("/create", createScriptAction)
-			r.Get("/:id/edit", editScriptAction)
-			r.Post("/:id/update", updateScriptAction)
-			r.Post("/:id/remove", removeScriptAction)
-			r.Post("/:id/toggle", toggleScriptAction)
-		})
-		rm.Group("/repl", func(r martini.Router) {
-			r.Get("", replAction)
-			r.Post("/execute", replExecuteAction)
-		})
-		rm.Group("/webhook", func(r martini.Router) {
-			r.Get("", webhookAction)
-			r.Get("/new", newWebhookAction)
-			r.Post("/create", createWebhookAction)
-			r.Get("/:id/edit", editWebhookAction)
-			r.Post("/:id/update", updateWebhookAction)
-			r.Post("/:id/remove", removeWebhookAction)
-			r.Post("/:id/toggle", toggleWebhookAction)
-		})
-	}, handlers...)
-}
-
-func indexAction(s *stickHandler, t *eventTracer) {
+func indexAction(s *stickHandler, t *event.Tracer) {
 	s.HTML(200, "index.html.twig", map[string]stick.Value{
-		"terminal": t.History(OutputEvent),
+		"terminal": t.History(event.EventType("cli.OUTPUT")),
 		"irc":      t.History(irc.IrcEvent),
 	})
 }
@@ -346,7 +279,7 @@ func createWebhookAction(r render.Render, repo webhook.WebhookRepository, reques
 
 	hook := &webhook.Webhook{0, title, key.String(), signature, true}
 	repo.Save(hook)
-	log.Printf("Created webhook %d", hook.ID)
+	log.Debugln("Created webhook %d", hook.ID)
 	r.Redirect("/webhook", 302)
 }
 
@@ -418,7 +351,7 @@ func webhookReceiveAction(render render.Render, evm event.EventManager, repo web
 	// Parse body
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
-		log.Printf("error reading the request body. %+v\n", err)
+		log.Debugln("error reading the request body. %+v\n", err)
 		render.JSON(400, "Invalid data")
 		return
 	}

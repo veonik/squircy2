@@ -237,7 +237,7 @@ func newJavascriptVm(m *ScriptManager) *jsVm {
 			v, err := jsVm.ToValue(vals)
 
 			if err != nil {
-				m.logger.Println("An error occurred: ", err)
+				m.logger.Debugln("An error occurred: ", err)
 			}
 
 			return v
@@ -258,7 +258,7 @@ func newJavascriptVm(m *ScriptManager) *jsVm {
 			v, err := jsVm.ToValue(vals)
 
 			if err != nil {
-				m.logger.Println("An error occurred: ", err)
+				m.logger.Debugln("An error occurred: ", err)
 			}
 
 			return v

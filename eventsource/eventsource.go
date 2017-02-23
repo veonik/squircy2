@@ -9,11 +9,12 @@ package eventsource
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 // the amount of time to wait when pushing a message to
@@ -45,7 +46,7 @@ func (m *Message) String() string {
 }
 
 type Broker struct {
-	*log.Logger
+	log.FieldLogger
 
 	messages chan *Message
 
@@ -56,7 +57,7 @@ type Broker struct {
 
 func New() *Broker {
 	broker := &Broker{
-		Logger:         nil,
+		FieldLogger:    nil,
 		messages:       make(chan *Message, 10),
 		newClients:     make(chan chan *Message),
 		closingClients: make(chan chan *Message),
@@ -107,14 +108,14 @@ func (broker *Broker) listen() {
 		select {
 		case s := <-broker.newClients:
 			broker.clients[s] = true
-			if broker.Logger != nil {
-				broker.Printf("Client added. %d registered clients.\n", len(broker.clients))
+			if broker.FieldLogger != nil {
+				broker.Debugf("Client added. %d registered clients.\n", len(broker.clients))
 			}
 
 		case s := <-broker.closingClients:
 			delete(broker.clients, s)
-			if broker.Logger != nil {
-				broker.Printf("Removed client. %d registered clients.\n", len(broker.clients))
+			if broker.FieldLogger != nil {
+				broker.Debugf("Removed client. %d registered clients.\n", len(broker.clients))
 			}
 
 		case event := <-broker.messages:
@@ -125,8 +126,8 @@ func (broker *Broker) listen() {
 					select {
 					case client <- event:
 					case <-time.After(patience):
-						if broker.Logger != nil {
-							broker.Println("Skipping client.")
+						if broker.FieldLogger != nil {
+							broker.Debugf("Skipping client.")
 						}
 					}
 					wg.Done()

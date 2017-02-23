@@ -2,8 +2,9 @@ package script
 
 import (
 	"errors"
-	"log"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
 
 	"github.com/robertkrimen/otto"
 	"github.com/tyler-sommer/squircy2/event"
@@ -21,19 +22,19 @@ type scriptDriver interface {
 
 type javascriptDriver struct {
 	vm *jsVm
-	*log.Logger
+	log.FieldLogger
 }
 
 func (d javascriptDriver) Handle(e event.Event, fnName string) {
 	d.vm.Interrupt = make(chan func(), 1)
 	data, err := d.vm.ToValue(e.Data)
 	if err != nil {
-		d.Println("An error occurred while creating event data", err)
+		d.Debugln("An error occurred while creating event data", err)
 		return
 	}
 	_, err = d.vm.Call(fnName, otto.NullValue(), data)
 	if err != nil {
-		d.Println("An error occurred while executing the Javascript handler", err)
+		d.Debugln("An error occurred while executing the Javascript handler", err)
 	}
 }
 
@@ -44,7 +45,7 @@ func (d javascriptDriver) RunUnsafe(unsafe string) (val interface{}, err error) 
 		if e := recover(); e != nil {
 			if e == Halt {
 				duration := time.Since(start)
-				d.Println("Some Javascript code took too long! Stopping after: ", duration)
+				d.Infoln("Some Javascript code took too long! Stopping after: ", duration)
 			}
 			err = e.(error)
 		}

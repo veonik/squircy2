@@ -6,9 +6,9 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/tyler-sommer/squircy2/event"
 )
 
@@ -23,7 +23,7 @@ type WebhookEvent struct {
 func (e *WebhookEvent) Process(evt event.EventManager) error {
 	err := e.CheckPayloadSignature()
 	if err != nil {
-		log.Printf("Check payload failed, %s", err)
+		log.Debugln("Check payload failed, %s", err)
 		return err
 	}
 	d := map[string]interface{}{
