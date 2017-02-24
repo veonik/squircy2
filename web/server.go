@@ -16,6 +16,7 @@ import (
 	"github.com/martini-contrib/auth"
 	"github.com/martini-contrib/render"
 	"github.com/martini-contrib/secure"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/tyler-sommer/squircy2/config"
 	"github.com/tyler-sommer/squircy2/eventsource"
 )
@@ -178,6 +179,7 @@ func newCustomMartini(injector inject.Injector, l *log.Logger) *martini.ClassicM
 
 func configure(s *Server) {
 	s.Handlers(
+		counterHandler,
 		newStaticHandler(),
 		newStickHandler(),
 		render.Renderer(),
@@ -201,6 +203,7 @@ func configure(s *Server) {
 		handlers = append(handlers, auth.Basic(s.conf.AuthUsername, s.conf.AuthPassword))
 	}
 	s.Group("", func(rm martini.Router) {
+		rm.Get("/metrics", promhttp.Handler())
 		rm.Get("/event", func(es *eventsource.Broker, w http.ResponseWriter, r *http.Request) {
 			es.ServeHTTP(w, r)
 		})

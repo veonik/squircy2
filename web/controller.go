@@ -14,6 +14,7 @@ import (
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
 	"github.com/nu7hatch/gouuid"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/tyler-sommer/squircy2/config"
 	"github.com/tyler-sommer/squircy2/event"
 	"github.com/tyler-sommer/squircy2/irc"
@@ -21,6 +22,15 @@ import (
 	"github.com/tyler-sommer/squircy2/webhook"
 	"github.com/tyler-sommer/stick"
 )
+
+var requestCounter = prometheus.NewCounterVec(prometheus.CounterOpts{
+	Name: "http_requests_total",
+	Help: "Total web request count.",
+}, []string{"proto", "method", "url"})
+
+func init() {
+	prometheus.MustRegister(requestCounter)
+}
 
 type generatedTemplate func(env *stick.Env, output io.Writer, ctx map[string]stick.Value)
 
@@ -62,6 +72,14 @@ func newStickHandler() martini.Handler {
 	return func(res http.ResponseWriter, req *http.Request, c martini.Context) {
 		c.Map(&stickHandler{genv, res})
 	}
+}
+
+func counterHandler(req *http.Request) {
+	proto := "http"
+	if req.TLS != nil {
+		proto = "https"
+	}
+	requestCounter.With(prometheus.Labels{"proto": proto, "method": req.Method, "url": req.URL.Path}).Add(1)
 }
 
 func indexAction(s *stickHandler, t *event.Tracer) {
