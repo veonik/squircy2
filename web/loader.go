@@ -56,5 +56,5 @@ func (l *assetLoader) Load(name string) (stick.Template, error) {
 }
 
 func newStaticHandler() martini.Handler {
-	return staticbin.Static("web/public", Asset)
+	return staticbin.Static("public", Asset)
 }
