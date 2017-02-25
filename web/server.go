@@ -24,6 +24,7 @@ import (
 type Server struct {
 	*martini.ClassicMartini
 
+	l    *log.Logger
 	conf *config.Configuration
 
 	httpListener  io.Closer
@@ -33,6 +34,7 @@ type Server struct {
 func NewServer(injector inject.Injector, conf *config.Configuration, l *log.Logger) *Server {
 	s := &Server{
 		ClassicMartini: newCustomMartini(injector, l),
+		l:              l,
 		conf:           conf,
 	}
 	configure(s)
@@ -40,7 +42,33 @@ func NewServer(injector inject.Injector, conf *config.Configuration, l *log.Logg
 }
 
 func (s *Server) ListenAndServe() {
-	s.Invoke(s.listenAndServe)
+	wg := &sync.WaitGroup{}
+	wg.Add(2)
+	go func() {
+		defer func() {
+			if err, ok := recover().(error); ok {
+				s.l.Errorln("Could not start HTTP: ", err)
+			}
+			wg.Done()
+		}()
+		err := listenAndServe(s)
+		if err != nil {
+			panic(err)
+		}
+	}()
+	go func() {
+		defer func() {
+			if err, ok := recover().(error); ok {
+				s.l.Errorln("Could not start HTTPS: ", err)
+			}
+			wg.Done()
+		}()
+		err := listenAndServeTLS(s)
+		if err != nil {
+			panic(err)
+		}
+	}()
+	wg.Wait()
 }
 
 func (s *Server) StopListenAndServe() error {
@@ -63,41 +91,11 @@ func (s *Server) StopListenAndServeTLS() error {
 	return s.httpsListener.Close()
 }
 
-func (s *Server) listenAndServe(l log.FieldLogger) {
-	wg := &sync.WaitGroup{}
-	wg.Add(2)
-	go func() {
-		defer func() {
-			if err, ok := recover().(error); ok {
-				l.Errorln("Could not start HTTP: ", err)
-			}
-			wg.Done()
-		}()
-		err := listenAndServe(s, l)
-		if err != nil {
-			panic(err)
-		}
-	}()
-	go func() {
-		defer func() {
-			if err, ok := recover().(error); ok {
-				l.Errorln("Could not start HTTPS: ", err)
-			}
-			wg.Done()
-		}()
-		err := listenAndServeTLS(s, l)
-		if err != nil {
-			panic(err)
-		}
-	}()
-	wg.Wait()
-}
-
-func listenAndServe(s *Server, l log.FieldLogger) error {
+func listenAndServe(s *Server) error {
 	if !s.conf.WebInterface {
 		return errors.New("web: web interface is disabled.")
 	}
-	l.Infoln("Starting HTTP, listening at", s.conf.HTTPHostPort)
+	s.l.Infoln("Starting HTTP, listening at", s.conf.HTTPHostPort)
 	srv := &http.Server{Addr: s.conf.HTTPHostPort, Handler: s}
 	listener, err := net.Listen("tcp", s.conf.HTTPHostPort)
 	if err != nil {
@@ -106,21 +104,21 @@ func listenAndServe(s *Server, l log.FieldLogger) error {
 	go func() {
 		err := srv.Serve(tcpKeepAliveListener{listener.(*net.TCPListener)})
 		if err != nil {
-			l.Errorln(err.Error())
+			s.l.Errorln(err.Error())
 		}
 	}()
 	s.httpListener = listener.(io.Closer)
 	return nil
 }
 
-func listenAndServeTLS(s *Server, l log.FieldLogger) error {
+func listenAndServeTLS(s *Server) error {
 	if !s.conf.WebInterface {
 		return errors.New("web: web interface is disabled.")
 	}
 	if !s.conf.HTTPS {
 		return errors.New("HTTPS is disabled.")
 	}
-	l.Infoln("Starting HTTPS, listening at", s.conf.SSLHostPort)
+	s.l.Infoln("Starting HTTPS, listening at", s.conf.SSLHostPort)
 	srv := &http.Server{Addr: s.conf.SSLHostPort, Handler: s}
 	var err error
 	srv.TLSConfig = &tls.Config{}
@@ -137,7 +135,7 @@ func listenAndServeTLS(s *Server, l log.FieldLogger) error {
 	go func() {
 		err := srv.Serve(tls.NewListener(tcpKeepAliveListener{listener.(*net.TCPListener)}, srv.TLSConfig))
 		if err != nil {
-			l.Errorln(err.Error())
+			s.l.Errorln(err.Error())
 		}
 	}()
 	s.httpsListener = listener.(io.Closer)

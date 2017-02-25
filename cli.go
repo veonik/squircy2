@@ -8,23 +8,11 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/peterh/liner"
-	"github.com/tyler-sommer/squircy2/config"
-	"github.com/tyler-sommer/squircy2/event"
 	"github.com/tyler-sommer/squircy2/irc"
-	"github.com/tyler-sommer/squircy2/script"
-)
-
-const (
-	OutputEvent event.EventType = "cli.OUTPUT"
-	InputEvent                  = "cli.INPUT"
 )
 
 func (m *Manager) LoopCLI() {
-	m.Invoke(loopCLI)
-}
-
-func loopCLI(conf *config.Configuration, l log.FieldLogger, ircmgr *irc.ConnectionManager, evm event.EventManager, scmgr *script.ScriptManager, m *Manager) {
-	hist := filepath.Join(conf.RootPath, ".history")
+	hist := filepath.Join(m.conf.RootPath, ".history")
 
 	cli := liner.NewLiner()
 	defer func() {
@@ -60,7 +48,7 @@ stop		Stop HTTP and HTTPS server, if they are running
 reload		Reload the scripting engine
 repl		Start a JavaScript REPL
 debug		Toggles debug on or off`)
-		if ircmgr.Status() != irc.Disconnected {
+		if m.irc.Status() != irc.Disconnected {
 			fmt.Println(`disconnect	Disconnect from IRC
 reconnect	Force a reconnection to IRC`)
 		} else {
@@ -71,66 +59,68 @@ reconnect	Force a reconnection to IRC`)
 
 	help()
 
+	oldLevel := m.logger.Level
+
 	for {
 		cmd, err := cli.Prompt("cmd> ")
 		if err != nil {
 			// TODO: do something useful
 			continue
 		}
-		evm.Trigger(InputEvent, map[string]interface{}{
-			"Message": cmd,
-		})
 		cli.AppendHistory(cmd)
 		switch {
 		case cmd == "exit" || cmd == "quit":
-			ircmgr.Quit()
+			m.irc.Quit()
 			fmt.Println("Exiting")
 			return
 
 		case cmd == "listen":
-			m.s.ListenAndServe()
+			m.web.ListenAndServe()
 
 		case cmd == "stop":
-			err = m.s.StopListenAndServe()
+			err = m.web.StopListenAndServe()
 			if err != nil {
 				fmt.Println("Unable to stop HTTP server: ", err.Error())
-				l.Errorln(err.Error())
+				m.logger.Errorln(err.Error())
 			}
-			err = m.s.StopListenAndServeTLS()
+			err = m.web.StopListenAndServeTLS()
 			if err != nil {
 				fmt.Println("Unable to stop HTTPS server: ", err.Error())
-				l.Errorln(err.Error())
+				m.logger.Errorln(err.Error())
 			}
 
 		case cmd == "debug":
-			debugging := !ircmgr.Debug()
-			ircmgr.SetDebug(debugging)
+			debugging := !m.irc.Debug()
+			m.irc.SetDebug(debugging)
 			if debugging {
-				l.Infoln("Debug ENABLED")
+				oldLevel = m.logger.Level
+				m.logger.Level = log.DebugLevel
+				m.logger.Infoln("Debug ENABLED")
 			} else {
-				l.Infoln("Debug DISABLED")
+				m.logger.Level = oldLevel
+				m.logger.Infoln("Debug DISABLED")
 			}
 
 		case cmd == "reload":
-			l.Infoln("Reloading...")
-			scmgr.ReInit()
-			l.Infoln("Reloaded.")
+			m.logger.Infoln("Reloading...")
+			m.scripts.ReInit()
+			m.logger.Infoln("Reloaded.")
 
 		case cmd == "repl":
-			scmgr.Repl()
+			m.scripts.Repl()
 
 		case cmd == "connect" || cmd == "disconnect":
-			if ircmgr.Status() != irc.Disconnected {
-				l.Infoln("Disconnecting...")
-				ircmgr.Quit()
+			if m.irc.Status() != irc.Disconnected {
+				m.logger.Infoln("Disconnecting...")
+				m.irc.Quit()
 			} else {
-				l.Infoln("Connecting...")
-				ircmgr.Connect()
+				m.logger.Infoln("Connecting...")
+				m.irc.Connect()
 			}
 
 		case cmd == "reconnect":
-			l.Infoln("Reconnecting...")
-			ircmgr.Reconnect()
+			m.logger.Infoln("Reconnecting...")
+			m.irc.Reconnect()
 
 		default:
 			fmt.Println("Unknown input. ")

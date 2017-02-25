@@ -1,8 +1,6 @@
 package irc
 
 import (
-	"fmt"
-
 	"time"
 
 	ircevent "github.com/thoj/go-ircevent"
@@ -25,7 +23,6 @@ func bindEvents(mgr *ConnectionManager, e event.EventManager) {
 	})
 
 	mgr.conn.AddCallback("001", func(ev *ircevent.Event) {
-		fmt.Println("Connected")
 		mgr.status = Connected
 		e.Trigger(ConnectEvent, newEventData(ev))
 	})
@@ -34,6 +31,7 @@ func bindEvents(mgr *ConnectionManager, e event.EventManager) {
 		if mgr.status != Disconnected {
 			mgr.Quit()
 		}
+		// TODO: Triggers disconnect twice, but once with the error details.
 		e.Trigger(DisconnectEvent, newEventData(ev))
 	})
 	mgr.conn.AddCallback("PONG", func(ev *ircevent.Event) {

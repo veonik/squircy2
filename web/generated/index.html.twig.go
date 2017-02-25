@@ -10,85 +10,8 @@ import (
 	"github.com/tyler-sommer/stick"
 )
 
-func blockIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 3, offset 19 in index.html.twig
-	fmt.Fprint(output, `
-<div class="row">
-	<div class="col-md-8">
-		<h4>Dashboard</h4>
-	</div>
-</div>
-<div class="row">
-    <div class="col-md-12">
-        <h5>Terminal</h5>
-        <pre id="terminal-log" class="history">`)
-	// line 12, offset 50 in index.html.twig
-	stick.Iterate(ctx["terminal"], func(_, line stick.Value, loop stick.Loop) (brk bool, err error) {
-		// line 12, offset 73 in index.html.twig
-		{
-			val, err := stick.GetAttr(line, "Message")
-			if err == nil {
-				fmt.Fprint(output, val)
-			}
-		}
-		return false, nil
-	})
-	// line 12, offset 103 in index.html.twig
-	fmt.Fprint(output, `</pre>
-        <h5>Events</h5>
-        <pre id="event-log" class="history">`)
-	// line 14, offset 47 in index.html.twig
-	stick.Iterate(ctx["irc"], func(_, line stick.Value, loop stick.Loop) (brk bool, err error) {
-		// line 14, offset 65 in index.html.twig
-		fmt.Fprint(output, `[`)
-		// line 14, offset 66 in index.html.twig
-		{
-			val, err := stick.GetAttr(line, "Code")
-			if err == nil {
-				fmt.Fprint(output, val)
-			}
-		}
-		// line 14, offset 81 in index.html.twig
-		fmt.Fprint(output, `] `)
-		// line 14, offset 83 in index.html.twig
-		{
-			val, err := stick.GetAttr(line, "Nick")
-			if err == nil {
-				fmt.Fprint(output, val)
-			}
-		}
-		// line 14, offset 98 in index.html.twig
-		fmt.Fprint(output, `->`)
-		// line 14, offset 100 in index.html.twig
-		{
-			val, err := stick.GetAttr(line, "Target")
-			if err == nil {
-				fmt.Fprint(output, val)
-			}
-		}
-		// line 14, offset 117 in index.html.twig
-		fmt.Fprint(output, `: `)
-		// line 14, offset 119 in index.html.twig
-		{
-			val, err := stick.GetAttr(line, "Message")
-			if err == nil {
-				fmt.Fprint(output, val)
-			}
-		}
-		// line 14, offset 137 in index.html.twig
-		fmt.Fprint(output, `
-`)
-		return false, nil
-	})
-	// line 15, offset 12 in index.html.twig
-	fmt.Fprint(output, `</pre>
-    </div>
-</div>
-</div>
-`)
-}
 func blockIndexHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 21, offset 34 in index.html.twig
+	// line 22, offset 34 in index.html.twig
 	fmt.Fprint(output, `
 <script type="text/javascript">
 $(function() {
@@ -100,9 +23,9 @@ $(function() {
         $eventLog.append("[" + data.Code + "] " + data.Nick + "->" + data.Target + ": " + data.Message + "\n");
         $eventLog[0].scrollTop = $eventLog[0].scrollHeight;
     });
-    es.addEventListener("cli.OUTPUT", function(e) {
+    es.addEventListener("log.OUTPUT", function(e) {
         var data = JSON.parse(e.data);
-        $terminalLog.append(data.Message);
+        $terminalLog.append("[" + data.Level + "] " + data.Message + "\n");
         $terminalLog[0].scrollTop = $terminalLog[0].scrollHeight;
     });
 
@@ -110,6 +33,97 @@ $(function() {
     $terminalLog[0].scrollTop = $terminalLog[0].scrollHeight;
 });
 </script>
+`)
+}
+func blockIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
+	// line 3, offset 19 in index.html.twig
+	fmt.Fprint(output, `
+<div class="row">
+	<div class="col-md-8">
+		<h4>Dashboard</h4>
+	</div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <h5>Log</h5>
+        <pre id="terminal-log" class="history">`)
+	// line 12, offset 50 in index.html.twig
+	stick.Iterate(ctx["log"], func(_, line stick.Value, loop stick.Loop) (brk bool, err error) {
+		// line 12, offset 68 in index.html.twig
+		fmt.Fprint(output, `[`)
+		// line 12, offset 69 in index.html.twig
+		{
+			val, err := stick.GetAttr(line, "Level")
+			if err == nil {
+				fmt.Fprint(output, val)
+			}
+		}
+		// line 12, offset 85 in index.html.twig
+		fmt.Fprint(output, `] `)
+		// line 12, offset 87 in index.html.twig
+		{
+			val, err := stick.GetAttr(line, "Message")
+			if err == nil {
+				fmt.Fprint(output, val)
+			}
+		}
+		// line 12, offset 105 in index.html.twig
+		fmt.Fprint(output, `
+`)
+		return false, nil
+	})
+	// line 13, offset 12 in index.html.twig
+	fmt.Fprint(output, `</pre>
+        <h5>Events</h5>
+        <pre id="event-log" class="history">`)
+	// line 15, offset 47 in index.html.twig
+	stick.Iterate(ctx["irc"], func(_, line stick.Value, loop stick.Loop) (brk bool, err error) {
+		// line 15, offset 65 in index.html.twig
+		fmt.Fprint(output, `[`)
+		// line 15, offset 66 in index.html.twig
+		{
+			val, err := stick.GetAttr(line, "Code")
+			if err == nil {
+				fmt.Fprint(output, val)
+			}
+		}
+		// line 15, offset 81 in index.html.twig
+		fmt.Fprint(output, `] `)
+		// line 15, offset 83 in index.html.twig
+		{
+			val, err := stick.GetAttr(line, "Nick")
+			if err == nil {
+				fmt.Fprint(output, val)
+			}
+		}
+		// line 15, offset 98 in index.html.twig
+		fmt.Fprint(output, `->`)
+		// line 15, offset 100 in index.html.twig
+		{
+			val, err := stick.GetAttr(line, "Target")
+			if err == nil {
+				fmt.Fprint(output, val)
+			}
+		}
+		// line 15, offset 117 in index.html.twig
+		fmt.Fprint(output, `: `)
+		// line 15, offset 119 in index.html.twig
+		{
+			val, err := stick.GetAttr(line, "Message")
+			if err == nil {
+				fmt.Fprint(output, val)
+			}
+		}
+		// line 15, offset 137 in index.html.twig
+		fmt.Fprint(output, `
+`)
+		return false, nil
+	})
+	// line 16, offset 12 in index.html.twig
+	fmt.Fprint(output, `</pre>
+    </div>
+</div>
+</div>
 `)
 }
 
@@ -245,11 +259,11 @@ $(function() {
 	fmt.Fprint(output, `
 
 `)
-	// line 19, offset 14 in index.html.twig
+	// line 20, offset 14 in index.html.twig
 	fmt.Fprint(output, `
 
 `)
-	// line 42, offset 14 in index.html.twig
+	// line 43, offset 14 in index.html.twig
 	fmt.Fprint(output, `
 `)
 }

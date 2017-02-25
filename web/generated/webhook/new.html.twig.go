@@ -10,11 +10,6 @@ import (
 	"github.com/tyler-sommer/stick"
 )
 
-func blockWebhookNewHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 46, offset 38 in webhook/new.html.twig
-	fmt.Fprint(output, `
-    `)
-}
 func blockWebhookNewHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 3, offset 19 in webhook/new.html.twig
 	fmt.Fprint(output, `
@@ -37,6 +32,11 @@ func blockWebhookNewHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 </div>
 </form>
 `)
+}
+func blockWebhookNewHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
+	// line 46, offset 38 in webhook/new.html.twig
+	fmt.Fprint(output, `
+    `)
 }
 
 func TemplateWebhookNewHtmlTwig(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {

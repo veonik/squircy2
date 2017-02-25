@@ -23,38 +23,46 @@ import (
 
 type Manager struct {
 	inject.Injector
-	s   *web.Server
-	irc *irc.ConnectionManager
 
-	conf *config.Configuration
+	conf   *config.Configuration
+	logger *log.Logger
+
+	scripts *script.ScriptManager
+	web     *web.Server
+	irc     *irc.ConnectionManager
+	events  event.EventManager
 }
 
 func NewManager(rootPath string) *Manager {
 	m := &Manager{Injector: inject.New()}
+
+	m.conf = config.NewConfiguration(rootPath)
+	database := data.NewDatabaseConnection(m.conf.RootPath)
+	config.LoadConfig(database, m.conf)
+	evm := event.NewEventManager(m.Injector)
+	l := newLogger(evm)
+	scriptRepo := script.NewScriptRepository(database, m.conf, l)
+
+	m.web = web.NewServer(m.Injector, m.conf, l)
+	m.irc = irc.NewConnectionManager(m.Injector, m.conf)
+	m.scripts = script.NewScriptManager(scriptRepo, l, evm, m.irc, m.conf, database)
+	m.logger = l
+	m.events = evm
+
 	m.Map(m)
 	m.Map(m.Injector)
-
-	conf := config.NewConfiguration(rootPath)
-	database := data.NewDatabaseConnection(conf.RootPath)
-	config.LoadConfig(database, conf)
-	m.Map(conf)
-	m.conf = conf
-
-	evm := event.NewEventManager(m.Injector)
-	m.Map(evm)
-	m.invokeAndMap(event.NewTracer)
-	l := newLogger(evm)
-	m.Map(l)
+	m.Map(m.conf)
+	m.Map(m.irc)
+	m.Map(m.web)
+	m.Map(m.scripts)
+	m.Map(m.logger)
+	m.Map(m.events)
 
 	m.Map(database)
-	m.invokeAndMap(script.NewScriptRepository)
+	m.Map(event.NewTracer(evm))
+	m.Map(newEventSource(evm, l))
+	m.Map(scriptRepo)
 	m.Map(webhook.NewWebhookRepository(database))
-
-	m.s = web.NewServer(m.Injector, conf, l)
-	m.invokeAndMap(newEventSource)
-	m.irc = irc.NewConnectionManager(m.Injector, conf)
-	m.Map(m.irc)
-	m.invokeAndMap(script.NewScriptManager)
 
 	return m
 }
@@ -64,23 +72,15 @@ func (m *Manager) Conf() *config.Configuration {
 }
 
 func (m *Manager) Web() *web.Server {
-	return m.s
+	return m.web
 }
 
 func (m *Manager) IRC() *irc.ConnectionManager {
 	return m.irc
 }
 
-func (m *Manager) invokeAndMap(fn interface{}) interface{} {
-	res, err := m.Invoke(fn)
-	if err != nil {
-		panic(err)
-	}
-
-	val := res[0].Interface()
-	m.Map(val)
-
-	return val
+func (m *Manager) Script() *script.ScriptManager {
+	return m.scripts
 }
 
 func newEventSource(evm event.EventManager, l log.FieldLogger) *eventsource.Broker {

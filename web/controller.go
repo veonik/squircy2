@@ -84,8 +84,8 @@ func counterHandler(req *http.Request) {
 
 func indexAction(s *stickHandler, t *event.Tracer) {
 	s.HTML(200, "index.html.twig", map[string]stick.Value{
-		"terminal": t.History(event.EventType("cli.OUTPUT")),
-		"irc":      t.History(irc.IrcEvent),
+		"log": t.History(event.EventType("log.OUTPUT")),
+		"irc": t.History(irc.IrcEvent),
 	})
 }
 
