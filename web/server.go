@@ -13,12 +13,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/inject"
 	"github.com/go-martini/martini"
-	"github.com/martini-contrib/auth"
-	"github.com/martini-contrib/render"
-	"github.com/martini-contrib/secure"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/tyler-sommer/squircy2/config"
-	"github.com/tyler-sommer/squircy2/eventsource"
 )
 
 type Server struct {
@@ -37,7 +32,6 @@ func NewServer(injector inject.Injector, conf *config.Configuration, l *log.Logg
 		l:              l,
 		conf:           conf,
 	}
-	configure(s)
 	return s
 }
 
@@ -173,70 +167,4 @@ func newCustomMartini(injector inject.Injector, l *log.Logger) *martini.ClassicM
 	m.MapTo(r, (*martini.Routes)(nil))
 	m.Action(r.Handle)
 	return &martini.ClassicMartini{m, r}
-}
-
-func configure(s *Server) {
-	s.Handlers(
-		counterHandler,
-		newStaticHandler(),
-		newStickHandler(),
-		render.Renderer(),
-		secure.Secure(secure.Options{
-			BrowserXssFilter: true,
-			FrameDeny:        true,
-			SSLRedirect:      s.conf.RequireHTTPS,
-			SSLHost:          s.conf.SSLHostPort,
-			DisableProdCheck: true,
-		}),
-	)
-	s.NotFound(func(req *http.Request, r render.Render, l log.FieldLogger) {
-		r.Error(404)
-	})
-
-	s.Post("/webhooks/:webhook_id", webhookReceiveAction)
-
-	// Admin web interface
-	handlers := []martini.Handler{}
-	if s.conf.HTTPAuth && len(s.conf.AuthUsername) > 0 && len(s.conf.AuthPassword) > 0 {
-		handlers = append(handlers, auth.Basic(s.conf.AuthUsername, s.conf.AuthPassword))
-	}
-	s.Group("", func(rm martini.Router) {
-		rm.Get("/metrics", promhttp.Handler())
-		rm.Get("/event", func(es *eventsource.Broker, w http.ResponseWriter, r *http.Request) {
-			es.ServeHTTP(w, r)
-		})
-		rm.Get("/", indexAction)
-		rm.Get("/status", statusAction)
-		rm.Group("/manage", func(r martini.Router) {
-			r.Get("", manageAction)
-			r.Post("/update", manageUpdateAction)
-			r.Post("/export-scripts", manageExportScriptsAction)
-			r.Post("/import-scripts", manageImportScriptsAction)
-		})
-		rm.Post("/connect", connectAction)
-		rm.Post("/disconnect", disconnectAction)
-		rm.Group("/script", func(r martini.Router) {
-			r.Get("", scriptAction)
-			r.Post("/reinit", scriptReinitAction)
-			r.Get("/new", newScriptAction)
-			r.Post("/create", createScriptAction)
-			r.Get("/:id/edit", editScriptAction)
-			r.Post("/:id/update", updateScriptAction)
-			r.Post("/:id/remove", removeScriptAction)
-			r.Post("/:id/toggle", toggleScriptAction)
-		})
-		rm.Group("/repl", func(r martini.Router) {
-			r.Get("", replAction)
-			r.Post("/execute", replExecuteAction)
-		})
-		rm.Group("/webhook", func(r martini.Router) {
-			r.Get("", webhookAction)
-			r.Get("/new", newWebhookAction)
-			r.Post("/create", createWebhookAction)
-			r.Get("/:id/edit", editWebhookAction)
-			r.Post("/:id/update", updateWebhookAction)
-			r.Post("/:id/remove", removeWebhookAction)
-			r.Post("/:id/toggle", toggleWebhookAction)
-		})
-	}, handlers...)
 }

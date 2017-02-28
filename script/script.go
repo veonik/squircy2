@@ -28,7 +28,7 @@ type ScriptManager struct {
 }
 
 func NewScriptManager(repo ScriptRepository, l log.FieldLogger, e event.EventManager, ircmanager *irc.ConnectionManager, config *config.Configuration, database *db.DB) *ScriptManager {
-	mgr := ScriptManager{
+	mgr := &ScriptManager{
 		database:     database,
 		events:       e,
 		conf:         config,
@@ -45,7 +45,7 @@ func NewScriptManager(repo ScriptRepository, l log.FieldLogger, e event.EventMan
 	}
 	mgr.init()
 
-	return &mgr
+	return mgr
 }
 
 func (m *ScriptManager) RunUnsafe(t ScriptType, code string) (result interface{}, err error) {

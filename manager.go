@@ -64,6 +64,8 @@ func NewManager(rootPath string) *Manager {
 	m.Map(scriptRepo)
 	m.Map(webhook.NewWebhookRepository(database))
 
+	m.web.Configure()
+
 	return m
 }
 
@@ -81,6 +83,10 @@ func (m *Manager) IRC() *irc.ConnectionManager {
 
 func (m *Manager) Script() *script.ScriptManager {
 	return m.scripts
+}
+
+func (m *Manager) Logger() *log.Logger {
+	return m.logger
 }
 
 func newEventSource(evm event.EventManager, l log.FieldLogger) *eventsource.Broker {

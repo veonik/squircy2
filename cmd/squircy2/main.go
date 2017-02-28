@@ -6,6 +6,7 @@ import (
 	"runtime"
 
 	"github.com/tyler-sommer/squircy2"
+	_ "github.com/tyler-sommer/squircy2/web/module"
 	"gopkg.in/mattes/go-expand-tilde.v1"
 )
 
