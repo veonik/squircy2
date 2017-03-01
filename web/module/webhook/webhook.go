@@ -146,23 +146,23 @@ func (m *module) toggleWebhookAction(r render.Render, params martini.Params) {
 }
 
 // Manage webhook events
-func (m *module) webhookReceiveAction(render render.Render, request *http.Request, params martini.Params) {
+func (m *module) webhookReceiveAction(r render.Render, request *http.Request, params martini.Params) {
 	// Find webhook by it's url
 	webhookId, err := strconv.Atoi(params["webhook_id"])
 	if err != nil {
-		render.JSON(400, "Invalid ID")
+		r.JSON(400, "Invalid ID")
 		return
 	}
 	hook := m.repo.Fetch(webhookId)
 	if hook == nil {
-		render.JSON(404, "Webhook not found")
+		r.JSON(404, "Webhook not found")
 		return
 	}
 	// Get signature
 	signature := request.Header.Get(hook.SignatureHeader)
 	if signature == "" {
 		err := "Signature header not found " + hook.SignatureHeader
-		render.JSON(400, err)
+		r.JSON(400, err)
 		return
 	}
 
@@ -170,7 +170,7 @@ func (m *module) webhookReceiveAction(render render.Render, request *http.Reques
 	body, err := ioutil.ReadAll(request.Body)
 	if err != nil {
 		log.Debugln("error reading the request body. %+v\n", err)
-		render.JSON(400, "Invalid data")
+		r.JSON(400, "Invalid data")
 		return
 	}
 	// Process json
@@ -180,7 +180,7 @@ func (m *module) webhookReceiveAction(render render.Render, request *http.Reques
 	evt := webhook.WebhookEvent{Body: body, Webhook: hook, ContentType: contentType, Signature: signature}
 	err = evt.Process(m.events)
 	if err != nil {
-		render.JSON(500, "An error occurred while processing the webhook.")
+		r.JSON(500, "An error occurred while processing the webhook.")
 	}
-	render.JSON(200, "OK")
+	r.JSON(200, "OK")
 }

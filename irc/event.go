@@ -16,15 +16,15 @@ const (
 	IrcEvent                        = "irc.WILDCARD"
 )
 
-func bindEvents(mgr *ConnectionManager, e event.EventManager) {
+func (mgr *ConnectionManager) bindEvents() {
 	mgr.conn.AddCallback("*", func(ev *ircevent.Event) {
-		e.Trigger(IrcEvent, newEventData(ev))
-		e.Trigger(event.EventType("irc."+ev.Code), newEventData(ev))
+		mgr.events.Trigger(IrcEvent, newEventData(ev))
+		mgr.events.Trigger(event.EventType("irc."+ev.Code), newEventData(ev))
 	})
 
 	mgr.conn.AddCallback("001", func(ev *ircevent.Event) {
 		mgr.status = Connected
-		e.Trigger(ConnectEvent, newEventData(ev))
+		mgr.events.Trigger(ConnectEvent, newEventData(ev))
 	})
 
 	mgr.conn.AddCallback("ERROR", func(ev *ircevent.Event) {
@@ -32,7 +32,7 @@ func bindEvents(mgr *ConnectionManager, e event.EventManager) {
 			mgr.Quit()
 		}
 		// TODO: Triggers disconnect twice, but once with the error details.
-		e.Trigger(DisconnectEvent, newEventData(ev))
+		mgr.events.Trigger(DisconnectEvent, newEventData(ev))
 	})
 	mgr.conn.AddCallback("PONG", func(ev *ircevent.Event) {
 		mgr.lastPong = time.Now()

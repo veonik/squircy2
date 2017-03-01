@@ -18,6 +18,7 @@ import (
 	"github.com/tyler-sommer/squircy2/irc"
 	"github.com/tyler-sommer/squircy2/script"
 	"github.com/tyler-sommer/squircy2/web"
+	_ "github.com/tyler-sommer/squircy2/web/module"
 	"github.com/tyler-sommer/squircy2/webhook"
 )
 
@@ -39,18 +40,17 @@ func NewManager(rootPath string) *Manager {
 	m.conf = config.NewConfiguration(rootPath)
 	database := data.NewDatabaseConnection(m.conf.RootPath)
 	config.LoadConfig(database, m.conf)
-	evm := event.NewEventManager(m.Injector)
-	l := newLogger(evm)
-	scriptRepo := script.NewScriptRepository(database, m.conf, l)
+	events := event.NewEventManager(m.Injector)
+	logger := newLogger(events)
+	scriptRepo := script.NewScriptRepository(database, m.conf, logger)
 
-	m.web = web.NewServer(m.Injector, m.conf, l)
-	m.irc = irc.NewConnectionManager(m.Injector, m.conf)
-	m.scripts = script.NewScriptManager(scriptRepo, l, evm, m.irc, m.conf, database)
-	m.logger = l
-	m.events = evm
+	m.web = web.NewServer(m.Injector, m.conf, logger)
+	m.irc = irc.NewConnectionManager(logger, events, m.conf)
+	m.scripts = script.NewScriptManager(scriptRepo, logger, events, m.irc, m.conf, database)
+	m.logger = logger
+	m.events = events
 
 	m.Map(m)
-	m.Map(m.Injector)
 	m.Map(m.conf)
 	m.Map(m.irc)
 	m.Map(m.web)
@@ -59,8 +59,8 @@ func NewManager(rootPath string) *Manager {
 	m.Map(m.events)
 
 	m.Map(database)
-	m.Map(event.NewTracer(evm))
-	m.Map(newEventSource(evm, l))
+	m.Map(event.NewTracer(events))
+	m.Map(newEventSource(events, logger))
 	m.Map(scriptRepo)
 	m.Map(webhook.NewWebhookRepository(database))
 

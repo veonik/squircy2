@@ -33,7 +33,7 @@ func NewWithInjector(injector inject.Injector) (web.Module, error) {
 	if m, ok := res[0].Interface().(web.Module); ok {
 		return m, nil
 	}
-	return nil, errors.New("dashboard: unable to create web module")
+	return nil, errors.New("manage: unable to create web module")
 }
 
 func New(conf *config.Configuration, manager *script.ScriptManager, database *db.DB) *module {
@@ -51,9 +51,9 @@ func (m *module) Configure(s *web.Server) error {
 	return nil
 }
 
-func (m *module) manageAction(s *web.StickHandler, config *config.Configuration) {
+func (m *module) manageAction(s *web.StickHandler) {
 	s.HTML(200, "manage/edit.html.twig", map[string]stick.Value{
-		"config": config,
+		"config": m.conf,
 	})
 }
 

@@ -44,6 +44,9 @@ func main() {
 		panic(err)
 	}
 	
+	// Uncomment if you've enabled BasicAuth
+	//req.SetBasicAuth("username", "password")
+	
 	// Set the signature header to the generated signature
 	req.Header.Add(header, fmt.Sprintf("sha1=%s", signature))
 
