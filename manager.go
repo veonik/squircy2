@@ -1,6 +1,6 @@
 package squircy2
 
-//go:generate go-bindata -prefix "./web" -pkg web -tags "!debug" -o "./web/bindata.go" ./web/public/...
+//go:generate go-bindata -prefix "./web" -pkg generated -tags "!debug" -o "./web/generated/bindata.go" ./web/public/...
 //go:generate stickgen -path "./web/views" -out web/generated index.html.twig
 //go:generate stickgen -path "./web/views" -out web/generated **/[a-z]*.twig
 

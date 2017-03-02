@@ -5,7 +5,7 @@
 
 // +build !debug
 
-package web
+package generated
 
 import (
 	"bytes"

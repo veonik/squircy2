@@ -48,7 +48,7 @@ func newTemplateLoader() stick.Loader {
 type assetLoader struct{}
 
 func (l *assetLoader) Load(name string) (stick.Template, error) {
-	res, err := Asset("web/views/" + name)
+	res, err := generated.Asset("web/views/" + name)
 	if err != nil {
 		return nil, err
 	}
@@ -56,5 +56,5 @@ func (l *assetLoader) Load(name string) (stick.Template, error) {
 }
 
 func newStaticHandler() martini.Handler {
-	return staticbin.Static("public", Asset)
+	return staticbin.Static("public", generated.Asset)
 }
