@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var vmStatSplitter = regexp.MustCompile(`:\s+`)
@@ -47,16 +48,18 @@ func New() (s SystemInfo) {
 	top := c.getOutput("top", "-l1", "-n0")
 	matches = topMatcher.FindStringSubmatch(top)
 
-	user, _ := strconv.ParseFloat(matches[1], 64)
-	sys, _ := strconv.ParseFloat(matches[2], 64)
-	idle, _ := strconv.ParseFloat(matches[3], 64)
+	if len(matches) == 4 {
+		user, _ := strconv.ParseFloat(matches[1], 64)
+		sys, _ := strconv.ParseFloat(matches[2], 64)
+		idle, _ := strconv.ParseFloat(matches[3], 64)
 
-	s.User = float32(user)
-	s.Sys = float32(sys)
-	s.Idle = float32(idle)
+		s.User = float32(user)
+		s.Sys = float32(sys)
+		s.Idle = float32(idle)
+	}
 
-	uptime, _ := strconv.ParseInt(swapMatcher.FindString(c.getOutput("sysctl", "-n", "kern.boottime")), 10, 32)
-	s.Uptime = uint(uptime)
+	uptime, _ := strconv.ParseInt(swapMatcher.FindString(c.getOutput("sysctl", "-n", "kern.boottime")), 10, 64)
+	s.Uptime = uint(time.Now().Sub(time.Unix(uptime, 0)).Seconds())
 
 	return
 }
