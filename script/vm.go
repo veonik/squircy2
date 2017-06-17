@@ -84,6 +84,31 @@ func newJavascriptVm(m *ScriptManager) *jsVm {
 	})
 	jsVm.Set("clearTimeout", clearTimer)
 	jsVm.Set("clearInterval", clearTimer)
+	jsVm.Set("async", func(call otto.FunctionCall) otto.Value {
+		if len(call.ArgumentList) != 2 {
+			panic(jsVm.MakeCustomError("ArgumentError", "expected 2 arguments"))
+		}
+		async := call.Argument(0)
+		if !async.IsFunction() {
+			panic(jsVm.MakeCustomError("ArgumentError", "expected argument 1 to be a function"))
+		}
+		await := call.Argument(1)
+		if !await.IsFunction() {
+			panic(jsVm.MakeCustomError("ArgumentError", "expected argument 2 to be a function"))
+		}
+		go func(cvm *otto.Otto) {
+			c := fmt.Sprintf("(%s)()", async.String())
+			// Execute the async function on a copy of the vm
+			result, err := cvm.Eval(c)
+			if err != nil {
+				await.Call(await, nil, jsVm.MakeCustomError("AsyncError", err.Error()))
+				return
+			}
+			// Call the await function with the result on the original vm
+			await.Call(await, result)
+		}(jsVm.Copy())
+		return otto.TrueValue()
+	})
 	jsVm.Set("Http", &m.httpHelper)
 	v, _ := jsVm.Object("Http")
 	v.Set("Send", func(call otto.FunctionCall) otto.Value {
