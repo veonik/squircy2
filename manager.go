@@ -8,9 +8,9 @@ import (
 	"encoding/json"
 	"strconv"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/inject"
 	_ "github.com/jteeuwen/go-bindata"
+	log "github.com/sirupsen/logrus"
 	"github.com/tyler-sommer/squircy2/config"
 	"github.com/tyler-sommer/squircy2/data"
 	"github.com/tyler-sommer/squircy2/event"

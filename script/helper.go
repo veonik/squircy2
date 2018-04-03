@@ -106,6 +106,14 @@ func (h *ircHelper) Privmsg(target, message string) {
 	conn.Privmsg(target, message)
 }
 
+func (h *ircHelper) Action(target, message string) {
+	conn := h.manager.Connection()
+	if conn == nil {
+		return
+	}
+	conn.Action(target, message)
+}
+
 func (h *ircHelper) Join(target string) {
 	conn := h.manager.Connection()
 	if conn == nil {

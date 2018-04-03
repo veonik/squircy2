@@ -6,7 +6,7 @@ import (
 	stdlog "log"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	ircevent "github.com/thoj/go-ircevent"
 	"github.com/tyler-sommer/squircy2/config"
 	"github.com/tyler-sommer/squircy2/event"

@@ -10,9 +10,9 @@ import (
 	"sync"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/inject"
 	"github.com/go-martini/martini"
+	log "github.com/sirupsen/logrus"
 	"github.com/tyler-sommer/squircy2/config"
 )
 

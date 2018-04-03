@@ -9,6 +9,7 @@ Additionally, the following functions are available to interact with the various
 | Irc.Join(channel) | Joins the given channel |
 | Irc.Part(channel) | Parts the given channel |
 | Irc.Privmsg(target, message) | Messages target with message. Target can be a user or a channel |
+| Irc.Action(target, message) | Perform an action, equivalent to `/me`. Target can be a user or a channel |
 | Irc.CurrentNick() | Get the bot's current nickname |
 | Irc.Nick(newNick) | Change the bot's nickname |
 | Http.Get(url, ...headers) | Fetch the given url using a GET HTTP request |

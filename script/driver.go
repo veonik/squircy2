@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/robertkrimen/otto"
 	"github.com/tyler-sommer/squircy2/event"

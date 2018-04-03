@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/peterh/liner"
+	log "github.com/sirupsen/logrus"
 	"github.com/tyler-sommer/squircy2/irc"
 )
 

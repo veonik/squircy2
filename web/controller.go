@@ -6,12 +6,12 @@ import (
 	"io"
 	"net/http"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/auth"
 	"github.com/martini-contrib/render"
 	"github.com/martini-contrib/secure"
 	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
 	"github.com/tyler-sommer/stick"
 )
 

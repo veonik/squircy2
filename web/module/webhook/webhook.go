@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/inject"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
 	"github.com/nu7hatch/gouuid"
+	log "github.com/sirupsen/logrus"
 	"github.com/tyler-sommer/squircy2/event"
 	"github.com/tyler-sommer/squircy2/web"
 	"github.com/tyler-sommer/squircy2/webhook"

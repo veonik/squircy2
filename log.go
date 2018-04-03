@@ -3,7 +3,7 @@ package squircy2
 import (
 	"os"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/tyler-sommer/squircy2/event"
 )
 
