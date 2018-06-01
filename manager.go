@@ -58,6 +58,7 @@ func NewManager(rootPath string) *Manager {
 	m.Map(m.scripts)
 	m.Map(m.logger)
 	m.Map(m.events)
+	m.Map(slack.New(slack.Config{APIToken: "<insert APIToken>"}, m.events, m.logger))
 
 	m.Map(database)
 	m.Map(event.NewTracer(events))
