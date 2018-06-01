@@ -8,7 +8,7 @@ import (
 
 	"github.com/peterh/liner"
 	log "github.com/sirupsen/logrus"
-	"github.com/tyler-sommer/squircy2/irc"
+	"github.com/veonik/squircy2/irc"
 )
 
 func (m *Manager) LoopCLI() {

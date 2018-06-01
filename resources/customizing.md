@@ -12,19 +12,19 @@ The master branch contains active development. It should be considered unstable.
 squIRCy2 is made up of a few different parts:
 
 * The **CLI interface** lets a user interact with squIRCy from the command line.
-  > See [`cli.go`](https://github.com/tyler-sommer/squircy2/blob/master/cli.go) for the CLI related code.
+  > See [`cli.go`](https://github.com/veonik/squircy2/blob/master/cli.go) for the CLI related code.
   
 * The **Web interface** allows a user to work with squIRCy from the web.
-  > See [`controller.go`](https://github.com/tyler-sommer/squircy2/blob/master/controller.go) for code related to all controller actions.
+  > See [`controller.go`](https://github.com/veonik/squircy2/blob/master/controller.go) for code related to all controller actions.
   
 * **Static assets** (like CSS) and **views** are embedded in the squIRCy2 binary using the [go-bindata utility](https://github.com/jteeuwen/go-bindata).
-  > Running `go generate` prior to building squIRCy2 will regenerate the binary forms of the assets into [`bindata.go`](https://github.com/tyler-sommer/squircy2/blob/master/bindata.go). See ["Building the project." for more details](#3-building-the-project).
+  > Running `go generate` prior to building squIRCy2 will regenerate the binary forms of the assets into [`bindata.go`](https://github.com/veonik/squircy2/blob/master/bindata.go). See ["Building the project." for more details](#3-building-the-project).
 
-* A **persistence layer** is available using [tiedot](https://github.com/HouzuoGuo/tiedot). A basic repository is implemented in `data` with more specific implementations in [`config/model.go`](https://github.com/tyler-sommer/squircy2/blob/master/config/model.go) and  [`script/model.go`](https://github.com/tyler-sommer/squircy2/blob/master/script/model.go).
+* A **persistence layer** is available using [tiedot](https://github.com/HouzuoGuo/tiedot). A basic repository is implemented in `data` with more specific implementations in [`config/model.go`](https://github.com/veonik/squircy2/blob/master/config/model.go) and  [`script/model.go`](https://github.com/veonik/squircy2/blob/master/script/model.go).
 
-* The **Javascript VM** is a lightly wrapped [otto runtime](https://github.com/robertkrimen/otto). Code related to customizing the VM and executing predefined scripts is in [`script/`](https://github.com/tyler-sommer/squircy2/blob/master/script/).
+* The **Javascript VM** is a lightly wrapped [otto runtime](https://github.com/robertkrimen/otto). Code related to customizing the VM and executing predefined scripts is in [`script/`](https://github.com/veonik/squircy2/blob/master/script/).
 
-* Other parts include an event dispatcher in [`event/`](https://github.com/tyler-sommer/squircy2/blob/master/event/), a wrapper for [go-ircevent](https://github.com/thoj/go-ircevent) in [`irc/`](https://github.com/tyler-sommer/squircy2/blob/master/irc/), and an overall "manager" that embeds an [inject.Injector](https://github.com/codegangsta/inject) in [`manager.go`](https://github.com/tyler-sommer/squircy2/blob/master/manager.go).
+* Other parts include an event dispatcher in [`event/`](https://github.com/veonik/squircy2/blob/master/event/), a wrapper for [go-ircevent](https://github.com/thoj/go-ircevent) in [`irc/`](https://github.com/veonik/squircy2/blob/master/irc/), and an overall "manager" that embeds an [inject.Injector](https://github.com/codegangsta/inject) in [`manager.go`](https://github.com/veonik/squircy2/blob/master/manager.go).
 
 
 Modifying squIRCy2

@@ -10,6 +10,42 @@ import (
 	"github.com/tyler-sommer/stick"
 )
 
+func blockScriptIndexHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
+	// line 31, offset 34 in script/index.html.twig
+	fmt.Fprint(output, `
+<script type="text/javascript">
+$(function() {
+	$('.remove').on('click', function(e) {
+		e.preventDefault();
+		
+		if (confirm('Are you sure you want to delete this script?')) {
+			var url = $(this).attr('href');
+			$.ajax({
+				url: url,
+				type: 'post',
+				success: function() {
+					window.location.reload();
+				}
+			});
+		}
+	});
+
+	$('.toggle').on('click', function(e) {
+		e.preventDefault();
+
+		var url = $(this).attr('href');
+		$.ajax({
+			url: url,
+			type: 'post',
+			success: function() {
+				window.location.reload();
+			}
+		});
+	});
+});
+</script>
+`)
+}
 func blockScriptIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 3, offset 19 in script/index.html.twig
 	fmt.Fprint(output, `
@@ -115,42 +151,6 @@ func blockScriptIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[s
 </table>
 `)
 }
-func blockScriptIndexHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 31, offset 34 in script/index.html.twig
-	fmt.Fprint(output, `
-<script type="text/javascript">
-$(function() {
-	$('.remove').on('click', function(e) {
-		e.preventDefault();
-		
-		if (confirm('Are you sure you want to delete this script?')) {
-			var url = $(this).attr('href');
-			$.ajax({
-				url: url,
-				type: 'post',
-				success: function() {
-					window.location.reload();
-				}
-			});
-		}
-	});
-
-	$('.toggle').on('click', function(e) {
-		e.preventDefault();
-
-		var url = $(this).attr('href');
-		$.ajax({
-			url: url,
-			type: 'post',
-			success: function() {
-				window.location.reload();
-			}
-		});
-	});
-});
-</script>
-`)
-}
 
 func TemplateScriptIndexHtmlTwig(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 1, offset 0 in layout.html.twig
@@ -182,7 +182,7 @@ func TemplateScriptIndexHtmlTwig(env *stick.Env, output io.Writer, ctx map[strin
 	<nav id="main-nav" class="navbar navbar-default navbar-fixed-top" role="navigation">
 	  	<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand" href="https://github.com/tyler-sommer/squircy2">squIRCy2</a>
+				<a class="navbar-brand" href="https://github.com/veonik/squircy2">squIRCy2</a>
         	</div>
 			<ul class="nav navbar-nav">
 				<li><a href="/">Dashboard</a></li>

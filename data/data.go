@@ -1,4 +1,4 @@
-package data
+package data // import "github.com/veonik/squircy2/data"
 
 import (
 	"github.com/HouzuoGuo/tiedot/db"

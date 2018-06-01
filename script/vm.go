@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/robertkrimen/otto"
-	"github.com/tyler-sommer/squircy2/data"
-	"github.com/tyler-sommer/squircy2/event"
+	"github.com/veonik/squircy2/data"
+	"github.com/veonik/squircy2/event"
 )
 
 // timer represents a function call to be performed after a delay.

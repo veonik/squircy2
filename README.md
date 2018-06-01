@@ -16,7 +16,7 @@ Installation
 Install squIRCy2 with `go get`.
 
 ```bash
-go get -u github.com/tyler-sommer/squircy2/cmd/squircy2
+go get -u github.com/veonik/squircy2/...
 ```
 
 After squIRCy2 is installed, you can run it immediately with `squircy2`. On first run, a default configuration will be initialized in `~/.squircy2`.

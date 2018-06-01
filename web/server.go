@@ -1,4 +1,4 @@
-package web
+package web // import "github.com/veonik/squircy2/web"
 
 import (
 	"crypto/tls"
@@ -13,7 +13,7 @@ import (
 	"github.com/codegangsta/inject"
 	"github.com/go-martini/martini"
 	log "github.com/sirupsen/logrus"
-	"github.com/tyler-sommer/squircy2/config"
+	"github.com/veonik/squircy2/config"
 )
 
 type Server struct {
@@ -67,7 +67,7 @@ func (s *Server) ListenAndServe() {
 
 func (s *Server) StopListenAndServe() error {
 	if s.httpListener == nil {
-		return errors.New("web: not listening on http")
+		return errors.New("not listening on http")
 	}
 	defer func() {
 		s.httpListener = nil
@@ -77,7 +77,7 @@ func (s *Server) StopListenAndServe() error {
 
 func (s *Server) StopListenAndServeTLS() error {
 	if s.httpsListener == nil {
-		return errors.New("web: not listening on https")
+		return errors.New("not listening on https")
 	}
 	defer func() {
 		s.httpsListener = nil
@@ -87,7 +87,7 @@ func (s *Server) StopListenAndServeTLS() error {
 
 func listenAndServe(s *Server) error {
 	if !s.conf.WebInterface {
-		return errors.New("web: web interface is disabled.")
+		return errors.New("web interface is disabled")
 	}
 	s.l.Infoln("Starting HTTP, listening at", s.conf.HTTPHostPort)
 	srv := &http.Server{Addr: s.conf.HTTPHostPort, Handler: s}
@@ -107,10 +107,10 @@ func listenAndServe(s *Server) error {
 
 func listenAndServeTLS(s *Server) error {
 	if !s.conf.WebInterface {
-		return errors.New("web: web interface is disabled.")
+		return errors.New("web interface is disabled")
 	}
 	if !s.conf.HTTPS {
-		return errors.New("HTTPS is disabled.")
+		return errors.New("https is disabled")
 	}
 	s.l.Infoln("Starting HTTPS, listening at", s.conf.SSLHostPort)
 	srv := &http.Server{Addr: s.conf.SSLHostPort, Handler: s}

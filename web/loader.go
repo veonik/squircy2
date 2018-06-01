@@ -8,12 +8,12 @@ import (
 
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/staticbin"
-	"github.com/tyler-sommer/squircy2/web/generated"
-	"github.com/tyler-sommer/squircy2/web/generated/manage"
-	"github.com/tyler-sommer/squircy2/web/generated/repl"
-	"github.com/tyler-sommer/squircy2/web/generated/script"
-	"github.com/tyler-sommer/squircy2/web/generated/webhook"
 	"github.com/tyler-sommer/stick"
+	"github.com/veonik/squircy2/web/generated"
+	"github.com/veonik/squircy2/web/generated/manage"
+	"github.com/veonik/squircy2/web/generated/repl"
+	"github.com/veonik/squircy2/web/generated/script"
+	"github.com/veonik/squircy2/web/generated/webhook"
 )
 
 var templateMapping = map[string]generatedTemplate{

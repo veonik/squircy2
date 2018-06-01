@@ -12,10 +12,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/tyler-sommer/squircy2/config"
-	"github.com/tyler-sommer/squircy2/event"
-	"github.com/tyler-sommer/squircy2/irc"
-	"github.com/tyler-sommer/squircy2/sysinfo"
+	"github.com/veonik/squircy2/config"
+	"github.com/veonik/squircy2/event"
+	"github.com/veonik/squircy2/irc"
+	"github.com/veonik/squircy2/sysinfo"
 )
 
 type httpHelper struct{}

@@ -108,7 +108,7 @@ func TemplateScriptNewHtmlTwig(env *stick.Env, output io.Writer, ctx map[string]
 	<nav id="main-nav" class="navbar navbar-default navbar-fixed-top" role="navigation">
 	  	<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand" href="https://github.com/tyler-sommer/squircy2">squIRCy2</a>
+				<a class="navbar-brand" href="https://github.com/veonik/squircy2">squIRCy2</a>
         	</div>
 			<ul class="nav navbar-nav">
 				<li><a href="/">Dashboard</a></li>

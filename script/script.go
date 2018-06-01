@@ -1,4 +1,4 @@
-package script
+package script // import "github.com/veonik/squircy2/script"
 
 import (
 	"os"
@@ -6,9 +6,9 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/HouzuoGuo/tiedot/db"
-	"github.com/tyler-sommer/squircy2/config"
-	"github.com/tyler-sommer/squircy2/event"
-	"github.com/tyler-sommer/squircy2/irc"
+	"github.com/veonik/squircy2/config"
+	"github.com/veonik/squircy2/event"
+	"github.com/veonik/squircy2/irc"
 )
 
 type ScriptManager struct {

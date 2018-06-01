@@ -12,10 +12,10 @@ import (
 	"github.com/martini-contrib/render"
 	"github.com/nu7hatch/gouuid"
 	log "github.com/sirupsen/logrus"
-	"github.com/tyler-sommer/squircy2/event"
-	"github.com/tyler-sommer/squircy2/web"
-	"github.com/tyler-sommer/squircy2/webhook"
 	"github.com/tyler-sommer/stick"
+	"github.com/veonik/squircy2/event"
+	"github.com/veonik/squircy2/web"
+	"github.com/veonik/squircy2/webhook"
 )
 
 func init() {

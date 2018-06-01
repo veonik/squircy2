@@ -10,6 +10,42 @@ import (
 	"github.com/tyler-sommer/stick"
 )
 
+func blockWebhookIndexHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
+	// line 35, offset 34 in webhook/index.html.twig
+	fmt.Fprint(output, `
+<script type="text/javascript">
+$(function() {
+	$('.remove').on('click', function(e) {
+		e.preventDefault();
+		
+		if (confirm('Are you sure you want to delete this webhook?')) {
+			var url = $(this).attr('href');
+			$.ajax({
+				url: url,
+				type: 'post',
+				success: function() {
+					window.location.reload();
+				}
+			});
+		}
+	});
+
+	$('.toggle').on('click', function(e) {
+		e.preventDefault();
+
+		var url = $(this).attr('href');
+		$.ajax({
+			url: url,
+			type: 'post',
+			success: function() {
+				window.location.reload();
+			}
+		});
+	});
+});
+</script>
+`)
+}
 func blockWebhookIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 3, offset 19 in webhook/index.html.twig
 	fmt.Fprint(output, `
@@ -137,42 +173,6 @@ func blockWebhookIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[
 </table>
 `)
 }
-func blockWebhookIndexHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 35, offset 34 in webhook/index.html.twig
-	fmt.Fprint(output, `
-<script type="text/javascript">
-$(function() {
-	$('.remove').on('click', function(e) {
-		e.preventDefault();
-		
-		if (confirm('Are you sure you want to delete this webhook?')) {
-			var url = $(this).attr('href');
-			$.ajax({
-				url: url,
-				type: 'post',
-				success: function() {
-					window.location.reload();
-				}
-			});
-		}
-	});
-
-	$('.toggle').on('click', function(e) {
-		e.preventDefault();
-
-		var url = $(this).attr('href');
-		$.ajax({
-			url: url,
-			type: 'post',
-			success: function() {
-				window.location.reload();
-			}
-		});
-	});
-});
-</script>
-`)
-}
 
 func TemplateWebhookIndexHtmlTwig(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 1, offset 0 in layout.html.twig
@@ -204,7 +204,7 @@ func TemplateWebhookIndexHtmlTwig(env *stick.Env, output io.Writer, ctx map[stri
 	<nav id="main-nav" class="navbar navbar-default navbar-fixed-top" role="navigation">
 	  	<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand" href="https://github.com/tyler-sommer/squircy2">squIRCy2</a>
+				<a class="navbar-brand" href="https://github.com/veonik/squircy2">squIRCy2</a>
         	</div>
 			<ul class="nav navbar-nav">
 				<li><a href="/">Dashboard</a></li>

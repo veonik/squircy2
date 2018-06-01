@@ -8,11 +8,11 @@ import (
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/tyler-sommer/squircy2/event"
-	"github.com/tyler-sommer/squircy2/eventsource"
-	"github.com/tyler-sommer/squircy2/irc"
-	"github.com/tyler-sommer/squircy2/web"
 	"github.com/tyler-sommer/stick"
+	"github.com/veonik/squircy2/event"
+	"github.com/veonik/squircy2/eventsource"
+	"github.com/veonik/squircy2/irc"
+	"github.com/veonik/squircy2/web"
 )
 
 func init() {

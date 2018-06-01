@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/robertkrimen/otto"
-	"github.com/tyler-sommer/squircy2/event"
+	"github.com/veonik/squircy2/event"
 )
 
 const maxExecutionTime = 5 // in seconds

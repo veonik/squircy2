@@ -1,4 +1,4 @@
-package event
+package event // import "github.com/veonik/squircy2/event"
 
 import (
 	"errors"

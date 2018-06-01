@@ -10,11 +10,6 @@ import (
 	"github.com/tyler-sommer/stick"
 )
 
-func blockWebhookEditHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 46, offset 38 in webhook/edit.html.twig
-	fmt.Fprint(output, `
-    `)
-}
 func blockWebhookEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 3, offset 19 in webhook/edit.html.twig
 	fmt.Fprint(output, `
@@ -65,6 +60,11 @@ func blockWebhookEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[s
 </form>
 `)
 }
+func blockWebhookEditHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
+	// line 46, offset 38 in webhook/edit.html.twig
+	fmt.Fprint(output, `
+    `)
+}
 
 func TemplateWebhookEditHtmlTwig(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 1, offset 0 in layout.html.twig
@@ -96,7 +96,7 @@ func TemplateWebhookEditHtmlTwig(env *stick.Env, output io.Writer, ctx map[strin
 	<nav id="main-nav" class="navbar navbar-default navbar-fixed-top" role="navigation">
 	  	<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand" href="https://github.com/tyler-sommer/squircy2">squIRCy2</a>
+				<a class="navbar-brand" href="https://github.com/veonik/squircy2">squIRCy2</a>
         	</div>
 			<ul class="nav navbar-nav">
 				<li><a href="/">Dashboard</a></li>

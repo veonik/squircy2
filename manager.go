@@ -1,4 +1,4 @@
-package squircy2
+package squircy2 // import "github.com/veonik/squircy2"
 
 //go:generate go-bindata -prefix "./web" -pkg generated -tags "!debug" -o "./web/generated/bindata.go" ./web/public/...
 //go:generate stickgen -path "./web/views" -out web/generated index.html.twig
@@ -11,15 +11,16 @@ import (
 	"github.com/codegangsta/inject"
 	_ "github.com/jteeuwen/go-bindata"
 	log "github.com/sirupsen/logrus"
-	"github.com/tyler-sommer/squircy2/config"
-	"github.com/tyler-sommer/squircy2/data"
-	"github.com/tyler-sommer/squircy2/event"
-	"github.com/tyler-sommer/squircy2/eventsource"
-	"github.com/tyler-sommer/squircy2/irc"
-	"github.com/tyler-sommer/squircy2/script"
-	"github.com/tyler-sommer/squircy2/web"
-	_ "github.com/tyler-sommer/squircy2/web/module"
-	"github.com/tyler-sommer/squircy2/webhook"
+	"github.com/veonik/squircy2/config"
+	"github.com/veonik/squircy2/data"
+	"github.com/veonik/squircy2/event"
+	"github.com/veonik/squircy2/eventsource"
+	"github.com/veonik/squircy2/irc"
+	"github.com/veonik/squircy2/script"
+	"github.com/veonik/squircy2/slack"
+	"github.com/veonik/squircy2/web"
+	_ "github.com/veonik/squircy2/web/module"
+	"github.com/veonik/squircy2/webhook"
 )
 
 type Manager struct {

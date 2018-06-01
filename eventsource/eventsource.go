@@ -4,7 +4,7 @@
 // https://gist.github.com/schmohlio/d7bdb255ba61d3f5e51a512a7c0d6a85
 // https://gist.github.com/ismasan/3fb75381cd2deb6bfa9c
 // https://github.com/antage/eventsource
-package eventsource
+package eventsource // import "github.com/veonik/squircy2/eventsource"
 
 import (
 	"bytes"

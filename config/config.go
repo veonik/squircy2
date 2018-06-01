@@ -1,4 +1,4 @@
-package config
+package config // import "github.com/veonik/squircy2/config"
 
 import (
 	"github.com/HouzuoGuo/tiedot/db"

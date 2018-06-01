@@ -1,4 +1,4 @@
-package irc
+package irc // import "github.com/veonik/squircy2/irc"
 
 import (
 	"crypto/tls"
@@ -8,8 +8,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	ircevent "github.com/thoj/go-ircevent"
-	"github.com/tyler-sommer/squircy2/config"
-	"github.com/tyler-sommer/squircy2/event"
+	"github.com/veonik/squircy2/config"
+	"github.com/veonik/squircy2/event"
 )
 
 var halt = errors.New("Halt")

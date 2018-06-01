@@ -4,7 +4,7 @@ import (
 	"time"
 
 	ircevent "github.com/thoj/go-ircevent"
-	"github.com/tyler-sommer/squircy2/event"
+	"github.com/veonik/squircy2/event"
 )
 
 const (

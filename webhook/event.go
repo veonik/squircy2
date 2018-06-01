@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/tyler-sommer/squircy2/event"
+	"github.com/veonik/squircy2/event"
 )
 
 type WebhookEvent struct {

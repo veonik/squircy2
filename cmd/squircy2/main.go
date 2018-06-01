@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/tyler-sommer/squircy2"
+	"github.com/veonik/squircy2"
 	"gopkg.in/mattes/go-expand-tilde.v1"
 )
 

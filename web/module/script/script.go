@@ -8,9 +8,9 @@ import (
 	"github.com/codegangsta/inject"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
-	"github.com/tyler-sommer/squircy2/script"
-	"github.com/tyler-sommer/squircy2/web"
 	"github.com/tyler-sommer/stick"
+	"github.com/veonik/squircy2/script"
+	"github.com/veonik/squircy2/web"
 )
 
 func init() {

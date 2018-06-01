@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/HouzuoGuo/tiedot/db"
-	"github.com/tyler-sommer/squircy2/config"
+	"github.com/veonik/squircy2/config"
 )
 
 type ScriptType string
