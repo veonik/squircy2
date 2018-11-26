@@ -17,7 +17,6 @@ import (
 	"github.com/veonik/squircy2/eventsource"
 	"github.com/veonik/squircy2/irc"
 	"github.com/veonik/squircy2/script"
-	"github.com/veonik/squircy2/slack"
 	"github.com/veonik/squircy2/web"
 	_ "github.com/veonik/squircy2/web/module"
 	"github.com/veonik/squircy2/webhook"
