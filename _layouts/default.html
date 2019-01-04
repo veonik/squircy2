@@ -15,7 +15,6 @@
 <div class="wrapper">
     <header>
         <h1><a href="/">{{ site.title | default: site.github.repository_name }}</a></h1>
-        <p>{{ site.description | default: site.github.project_tagline }}</p>
 
         {% if site.github.is_project_page %}
         <p class="view"><a href="{{ site.github.repository_url }}">GitHub Repo</a></p>
@@ -43,7 +42,7 @@
     </header>
     <section>
 
-        {{ content | replace_first: "squIRCy2", "&nbsp;" | replace_first: "</h5>", "</h2>" | replace_first: "<h5", "<h2" }}
+        {{ content | replace_first: "squIRCy2", "&nbsp;" | replace_first: "</h5>", "</h2>" | replace_first: "<h5", "<h2" | replace_first: "the scriptable", "squircy2, the scriptable" }}
 
     </section>
     <footer>
