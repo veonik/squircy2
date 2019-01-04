@@ -43,7 +43,7 @@
     </header>
     <section>
 
-        {{ content }}
+        {{ content | replace_first: "squIRCy2", "&nbsp;" | replace_first: "</h5>", "</h2>" | replace_first: "<h5>", "<h2>" }}
 
     </section>
     <footer>
