@@ -16,8 +16,15 @@ a code {
 }
 
 footer a.author {
-	display: block;
-	font-size: 1.2em;
+    font-size: 1.2em;
+}
+
+header {
+    width: 190px;
+}
+
+section {
+    width: 640px;
 }
 
 header ul.menu {
@@ -57,5 +64,11 @@ header ul.menu {
 @media print, screen and (max-width: 720px) {
     header {
         height: 340px;
+    }
+    .wrapper {
+        width: 700px;
+    }
+    section {
+        width: 500px;
     }
 }
