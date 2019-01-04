@@ -4,14 +4,15 @@ Javascript API
 squIRCy2 embeds [otto](https://github.com/robertkrimen/otto) and supports ECMAScript 5, minus a regular expression incompatibility.
 Additionally, the following functions are available to interact with the various squIRCy2 modules:
 
-| Method | Description |
-| ------ | ----------- |
+| Name | Description |
+| ---- | ----------- |
 | Irc.Join(channel) | Joins the given channel |
 | Irc.Part(channel) | Parts the given channel |
 | Irc.Privmsg(target, message) | Messages target with message. Target can be a user or a channel |
 | Irc.Action(target, message) | Perform an action, equivalent to `/me`. Target can be a user or a channel |
 | Irc.CurrentNick() | Get the bot's current nickname |
 | Irc.Nick(newNick) | Change the bot's nickname |
+| Irc.Raw(raw) | Send a raw IRC command |
 | Http.Get(url, ...headers) | Fetch the given url using a GET HTTP request |
 | Http.Post(url, body, ...headers) | Fetch the given url using a POST HTTP request |
 | Http.Send(options) | Send an HTTP request with the configured options. |
@@ -19,7 +20,7 @@ Additionally, the following functions are available to interact with the various
 | Math.Round(val) | Round val to 0 decimal places. |
 | Config.OwnerNick() | Get the configured Owner Nickname |
 | Config.OwnerHost() | Get the configured Owner Host |
-| File.ReadAll(filename) | Return the contents of filename. File API must be enabled. |
+| File.ReadAll(filename) | Return the contents of filename. [File API](#file-api) must be enabled. |
 | bind(eventName, fnName) | Add a handler of the given event type and function name |
 | unbind(eventName, fnName) | Removes a handler of the given type and function name |
 | setTimeout(fnName, delay) | Executes fnName after delay milliseconds |
