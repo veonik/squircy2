@@ -43,6 +43,10 @@ bind("irc.WILDCARD", function(e) {
 
 An example script that keeps track of who is participating in channels the bot is on is defined in [examples/channel-names.js](examples/channel-names.js).
 
+## Manipulate core configuration
+
+Check [examples/manipulate-config.js](examples/manipulate-config.js) for an example that directly manipulates the bot's full configuration via script.
+
 ## In-chat REPL
 
 This example shows how to check a user's nickname and hostname to provide a little bit of security around a feature exposed to IRC.
