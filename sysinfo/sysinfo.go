@@ -1,4 +1,4 @@
-package sysinfo
+package sysinfo // import "github.com/veonik/squircy2/sysinfo"
 
 import (
 	"os/exec"

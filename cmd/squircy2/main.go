@@ -23,7 +23,9 @@ func printVersion() {
 func main() {
 	flag.Usage = func() {
 		printVersion()
-		fmt.Println("\nUsage: squircy2 [-no-interactive] [-root-path <config root>] [-version]\n")
+		fmt.Println()
+		fmt.Println("Usage: squircy2 [-no-interactive] [-root-path <config root>] [-version]")
+		fmt.Println()
 		flag.PrintDefaults()
 	}
 	flag.Parse()

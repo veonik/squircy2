@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"sync"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/codegangsta/inject"
 )
 
@@ -32,6 +33,7 @@ type EventManager interface {
 type eventManager struct {
 	sync.Mutex
 	injector inject.Injector
+	logger   log.FieldLogger
 	events   map[EventType][]reflect.Value
 }
 
@@ -102,7 +104,9 @@ func (e *eventManager) Trigger(eventName EventType, data map[string]interface{})
 
 	if ok {
 		for _, handler := range handlers {
-			c.Invoke(handler.Interface())
+			if _, err := c.Invoke(handler.Interface()); err != nil {
+
+			}
 		}
 	}
 

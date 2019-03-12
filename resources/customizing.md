@@ -15,7 +15,7 @@ squIRCy2 is made up of a few different parts:
   > See [`cli.go`](https://github.com/veonik/squircy2/blob/master/cli.go) for the CLI related code.
   
 * The **Web interface** allows a user to work with squIRCy from the web.
-  > See [`controller.go`](https://github.com/veonik/squircy2/blob/master/controller.go) for code related to all controller actions.
+  > See [`web/controller.go`](https://github.com/veonik/squircy2/blob/master/web/controller.go) for code related to all controller actions.
   
 * **Static assets** (like CSS) and **views** are embedded in the squIRCy2 binary using the [go-bindata utility](https://github.com/jteeuwen/go-bindata).
   > Running `go generate` prior to building squIRCy2 will regenerate the binary forms of the assets into [`bindata.go`](https://github.com/veonik/squircy2/blob/master/bindata.go). See ["Building the project." for more details](#3-building-the-project).

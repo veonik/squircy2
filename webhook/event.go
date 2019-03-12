@@ -1,4 +1,4 @@
-package webhook
+package webhook // import "github.com/veonik/squircy2/webhook"
 
 import (
 	"crypto/hmac"
@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/veonik/squircy2/event"
 )
 
@@ -21,9 +20,7 @@ type WebhookEvent struct {
 
 // Process a webhook event
 func (e *WebhookEvent) Process(evt event.EventManager) error {
-	err := e.CheckPayloadSignature()
-	if err != nil {
-		log.Debugln("Check payload failed, %s", err)
+	if err := e.CheckPayloadSignature(); err != nil {
 		return err
 	}
 	d := map[string]interface{}{
@@ -50,9 +47,9 @@ func (e *WebhookEvent) CheckPayloadSignature() error {
 		expectedMAC := hex.EncodeToString(mac.Sum(nil))
 
 		if !hmac.Equal([]byte(signature), []byte(expectedMAC)) {
-			return errors.New("Signature does not match")
+			return errors.New("webhook: signature does not match")
 		}
 		return nil
 	}
-	return errors.New("Only sha1 signature handled")
+	return errors.New("webhook: only sha1 signature handled")
 }
