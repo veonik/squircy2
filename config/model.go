@@ -2,12 +2,13 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 
-	"github.com/HouzuoGuo/tiedot/db"
+	"github.com/veonik/squircy2/data"
 )
 
 type configRepository struct {
-	database *db.DB
+	database *data.DB
 }
 
 func flattenConfig(config *Configuration) map[string]interface{} {
@@ -36,6 +37,8 @@ func flattenConfig(config *Configuration) map[string]interface{} {
 		"ScriptsPath":    config.ScriptsPath,
 		"EnableFileAPI":  config.EnableFileAPI,
 		"FileAPIRoot":    config.FileAPIRoot,
+		"PluginsEnabled": config.PluginsEnabled,
+		"PluginsPath":    config.PluginsPath,
 	}
 }
 
@@ -44,7 +47,7 @@ func (repo *configRepository) fetchInto(config *Configuration) {
 	col.ForEachDoc(func(id int, doc []byte) (moveOn bool) {
 		moveOn = false
 
-		json.Unmarshal(doc, config)
+		fmt.Println("loaded config", json.Unmarshal(doc, config))
 		config.ID = id
 
 		return
@@ -55,7 +58,7 @@ func (repo *configRepository) save(config *Configuration) {
 	col := repo.database.Use("Settings")
 	data := map[string]interface{}{}
 	col.ForEachDoc(func(id int, doc []byte) bool {
-		json.Unmarshal(doc, &data)
+		fmt.Println(json.Unmarshal(doc, &data))
 		return false
 	})
 	for k, v := range flattenConfig(config) {

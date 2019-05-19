@@ -7,9 +7,10 @@ import (
 	"path/filepath"
 	"sort"
 
+	"github.com/veonik/squircy2/data"
+
 	log "github.com/sirupsen/logrus"
 
-	"github.com/HouzuoGuo/tiedot/db"
 	"github.com/veonik/squircy2/config"
 )
 
@@ -34,16 +35,16 @@ type ScriptRepository interface {
 	Delete(id int)
 }
 
-func newDBRepository(database *db.DB, logger log.FieldLogger) *dbRepository {
+func newDBRepository(database *data.DB, logger log.FieldLogger) *dbRepository {
 	return &dbRepository{database, logger}
 }
 
 type dbRepository struct {
-	database *db.DB
+	database *data.DB
 	logger   log.FieldLogger
 }
 
-func NewScriptRepository(database *db.DB, conf *config.Configuration, logger log.FieldLogger) ScriptRepository {
+func NewScriptRepository(database *data.DB, conf *config.Configuration, logger log.FieldLogger) ScriptRepository {
 	if conf.ScriptsAsFiles {
 		return newFileRepository(conf, logger)
 	}

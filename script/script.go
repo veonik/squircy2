@@ -3,16 +3,19 @@ package script // import "github.com/veonik/squircy2/script"
 import (
 	"os"
 
+	"github.com/veonik/squircy2/data"
+
 	log "github.com/sirupsen/logrus"
 
-	"github.com/HouzuoGuo/tiedot/db"
 	"github.com/veonik/squircy2/config"
 	"github.com/veonik/squircy2/event"
 	"github.com/veonik/squircy2/irc"
 )
 
+type InitVMFunc = func(m *ScriptManager)
+
 type ScriptManager struct {
-	database     *db.DB
+	database     *data.DB
 	events       event.EventManager
 	conf         *config.Configuration
 	driver       javascriptDriver
@@ -25,9 +28,11 @@ type ScriptManager struct {
 	fileHelper   fileHelper
 	repo         ScriptRepository
 	logger       log.FieldLogger
+
+	initFns []InitVMFunc
 }
 
-func NewScriptManager(repo ScriptRepository, l log.FieldLogger, e event.EventManager, ircmanager *irc.ConnectionManager, config *config.Configuration, database *db.DB) *ScriptManager {
+func NewScriptManager(repo ScriptRepository, l log.FieldLogger, e event.EventManager, ircmanager *irc.ConnectionManager, config *config.Configuration, database *data.DB) *ScriptManager {
 	mgr := &ScriptManager{
 		database:     database,
 		events:       e,
@@ -46,6 +51,10 @@ func NewScriptManager(repo ScriptRepository, l log.FieldLogger, e event.EventMan
 	mgr.init()
 
 	return mgr
+}
+
+func (m *ScriptManager) AddOnInit(fn InitVMFunc) {
+	m.initFns = append(m.initFns, fn)
 }
 
 func (m *ScriptManager) RunUnsafe(t ScriptType, code string) (result interface{}, err error) {
@@ -105,14 +114,24 @@ func (m *ScriptManager) Import() error {
 }
 
 func (m *ScriptManager) ReInit() {
-	close(m.driver.vm.quit)
+	close(m.driver.VM.quit)
 	m.init()
+}
+
+func (m *ScriptManager) GetVM(t ScriptType) (*jsVm, error) {
+	if t != Javascript {
+		return nil, UnknownScriptType
+	}
+	return m.driver.VM, nil
 }
 
 func (m *ScriptManager) init() {
 	m.events.ClearAll()
 
-	m.driver.vm = newJavascriptVm(m)
+	m.driver.VM = newJavascriptVm(m)
+	for _, fn := range m.initFns {
+		fn(m)
+	}
 
 	m.scriptHelper = scriptHelper{m.events, m.driver, make(map[string]event.EventHandler, 0)}
 
@@ -122,6 +141,8 @@ func (m *ScriptManager) init() {
 			continue
 		}
 		m.logger.Debugln("Running", script.Type, "script", script.Title)
-		m.RunUnsafe(script.Type, script.Body)
+		if _, err := m.RunUnsafe(script.Type, script.Body); err != nil {
+			m.logger.Warnln("Error running script", script.Title, err)
+		}
 	}
 }

@@ -166,18 +166,34 @@
 </div>
 <div class="row">
 	<div class="col-md-4 form-group">
-		<label for="nick">SSL Listen Host and Port</label>
+		<label for="ssl_host_port">SSL Listen Host and Port</label>
 		<input class="form-control" name="ssl_host_port" id="ssl_host_port" placeholder=":3443" value="{{ config.SSLHostPort }}">
 	</div>
 </div>
 <div class="row">
 	<div class="col-md-4 form-group">
-		<label for="nick">SSL Certificate File</label>
+		<label for="ssl_cert_file">SSL Certificate File</label>
 		<input class="form-control" name="ssl_cert_file" id="ssl_cert_file" placeholder="/path/to/cert.pem" value="{{ config.SSLCertFile }}">
 	</div>
 	<div class="col-md-4 form-group">
-		<label for="username">SSL Certificate Key File</label>
+		<label for="ssl_cert_key">SSL Certificate Key File</label>
 		<input class="form-control" name="ssl_cert_key" id="ssl_cert_key" placeholder="/path/to/key.pem" value="{{ config.SSLCertKey }}">
+	</div>
+</div>
+<div class="row">
+	<div class="col-sm-12">
+		<h3>Plugins</h3>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-4 form-group">
+		<label for="plugins_enabled">Enabled Plugins</label>
+		<input class="form-control" name="plugins_enabled" id="plugins_enabled" placeholder="plugin1,plugin2" value="{{ format_plugin_names(config.PluginsEnabled) }}">
+		<p>Comma separated list without the .so extension</p>
+	</div>
+	<div class="col-md-4 form-group">
+		<label for="plugins_path">Plugin Root Path</label>
+		<input class="form-control" name="plugins_path" id="plugins_path" placeholder="/path/to/squircy/plugins" value="{{ config.PluginsPath }}">
 	</div>
 </div>
 <div class="row">
@@ -213,7 +229,6 @@
 					<label for="scripts_import_path">Scripts stored in squIRCy2's database will be imported from:</label>
 					<input class="form-control" name="scripts_import_path" id="scripts_import_path" value="{{ config.ScriptsPath }}">
 				</div>
-
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

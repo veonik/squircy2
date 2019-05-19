@@ -3,18 +3,16 @@ package data
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/HouzuoGuo/tiedot/db"
 )
 
 type GenericRepository struct {
-	database *db.DB
+	database *DB
 	coll     string
 }
 
 type GenericModel map[string]interface{}
 
-func NewGenericRepository(database *db.DB, coll string) *GenericRepository {
+func NewGenericRepository(database *DB, coll string) *GenericRepository {
 	col := database.Use(coll)
 	if col == nil {
 		err := database.Create(coll)
@@ -91,7 +89,7 @@ func (repo *GenericRepository) Save(generic GenericModel) {
 func (repo *GenericRepository) Query(query interface{}) []GenericModel {
 	col := repo.database.Use(repo.coll)
 	result := make(map[int]struct{})
-	if err := db.EvalQuery(query, col, &result); err != nil {
+	if err := EvalQuery(query, col, &result); err != nil {
 		panic(err)
 	}
 

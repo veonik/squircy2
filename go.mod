@@ -1,8 +1,6 @@
 module github.com/veonik/squircy2
 
 require (
-	bou.ke/monkey v1.0.1 // indirect
-	github.com/HouzuoGuo/tiedot v0.0.0-20190123063644-be8ab1f1598e
 	github.com/codegangsta/inject v0.0.0-20150114235600-33e0aa1cb7c0
 	github.com/go-martini/martini v0.0.0-20170121215854-22fa46961aab
 	github.com/jteeuwen/go-bindata v3.0.7+incompatible
@@ -13,7 +11,7 @@ require (
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 	github.com/oxtoacart/bpool v0.0.0-20190227141107-8c4636f812cc // indirect
 	github.com/peterh/liner v1.1.0
-	github.com/pkg/errors v0.8.1 // indirect
+	github.com/pkg/errors v0.8.1
 	github.com/prometheus/client_golang v0.9.2
 	github.com/robertkrimen/otto v0.0.0-20180617131154-15f95af6e78d
 	github.com/sirupsen/logrus v1.4.0

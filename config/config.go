@@ -1,7 +1,9 @@
 package config // import "github.com/veonik/squircy2/config"
 
 import (
-	"github.com/HouzuoGuo/tiedot/db"
+	"path/filepath"
+
+	"github.com/veonik/squircy2/data"
 )
 
 type Configuration struct {
@@ -39,6 +41,9 @@ type Configuration struct {
 	HTTPAuth     bool
 	AuthUsername string
 	AuthPassword string
+
+	PluginsEnabled []string // List of plugins to load
+	PluginsPath    string   // Path to search for plugins in.
 }
 
 func NewConfiguration(rootPath string) *Configuration {
@@ -69,16 +74,18 @@ func NewConfiguration(rootPath string) *Configuration {
 		HTTPAuth:       false,
 		AuthUsername:   "",
 		AuthPassword:   "",
+		PluginsEnabled: []string{},
+		PluginsPath:    filepath.Join(rootPath, "plugins"),
 	}
 }
 
-func LoadConfig(database *db.DB, conf *Configuration) {
+func LoadConfig(database *data.DB, conf *Configuration) {
 	repo := configRepository{database}
 	repo.fetchInto(conf)
 	SaveConfig(database, conf)
 }
 
-func SaveConfig(database *db.DB, conf *Configuration) {
+func SaveConfig(database *data.DB, conf *Configuration) {
 	repo := configRepository{database}
 	repo.save(conf)
 }

@@ -4,13 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
-	"github.com/HouzuoGuo/tiedot/db"
 	"github.com/codegangsta/inject"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
 	"github.com/tyler-sommer/stick"
 	"github.com/veonik/squircy2/config"
+	"github.com/veonik/squircy2/data"
 	"github.com/veonik/squircy2/script"
 	"github.com/veonik/squircy2/web"
 )
@@ -22,7 +23,7 @@ func init() {
 type module struct {
 	conf     *config.Configuration
 	manager  *script.ScriptManager
-	database *db.DB
+	database *data.DB
 }
 
 func NewWithInjector(injector inject.Injector) (web.Module, error) {
@@ -36,7 +37,7 @@ func NewWithInjector(injector inject.Injector) (web.Module, error) {
 	return nil, errors.New("manage: unable to create web module")
 }
 
-func New(conf *config.Configuration, manager *script.ScriptManager, database *db.DB) *module {
+func New(conf *config.Configuration, manager *script.ScriptManager, database *data.DB) *module {
 	return &module{conf, manager, database}
 }
 
@@ -54,6 +55,9 @@ func (m *module) Configure(s *web.Server) error {
 func (m *module) manageAction(s *web.StickHandler) {
 	s.HTML(200, "manage/edit.html.twig", map[string]stick.Value{
 		"config": m.conf,
+		"format_plugin_names": func(s []string) string {
+			return strings.Join(s, ",")
+		},
 	})
 }
 
@@ -88,6 +92,9 @@ func (m *module) manageUpdateAction(r render.Render, request *http.Request) {
 	m.conf.HTTPAuth = request.FormValue("http_auth") == "on"
 	m.conf.AuthUsername = request.FormValue("auth_username")
 	m.conf.AuthPassword = request.FormValue("auth_password")
+
+	m.conf.PluginsPath = request.FormValue("plugins_path")
+	m.conf.PluginsEnabled = strings.Split(request.FormValue("plugins_enabled"), ",")
 
 	config.SaveConfig(m.database, m.conf)
 

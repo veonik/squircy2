@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"strconv"
 
+	"github.com/veonik/squircy2/plugin"
+
 	"github.com/codegangsta/inject"
 	_ "github.com/jteeuwen/go-bindata"
 	log "github.com/sirupsen/logrus"
@@ -28,6 +30,7 @@ type Manager struct {
 	conf   *config.Configuration
 	logger *log.Logger
 
+	plugins *plugin.Manager
 	scripts *script.ScriptManager
 	web     *web.Server
 	irc     *irc.ConnectionManager
@@ -38,10 +41,12 @@ func NewManager(rootPath string) *Manager {
 	m := &Manager{Injector: inject.New()}
 
 	m.conf = config.NewConfiguration(rootPath)
-	database := data.NewDatabaseConnection(m.conf.RootPath)
-	config.LoadConfig(database, m.conf)
+
 	events := event.NewEventManager(m.Injector)
 	logger := newLogger(events)
+	database := data.NewDatabaseConnection(m.conf.RootPath, logger)
+
+	config.LoadConfig(database, m.conf)
 	scriptRepo := script.NewScriptRepository(database, m.conf, logger)
 
 	m.web = web.NewServer(m.Injector, m.conf, logger)
@@ -49,6 +54,7 @@ func NewManager(rootPath string) *Manager {
 	m.scripts = script.NewScriptManager(scriptRepo, logger, events, m.irc, m.conf, database)
 	m.logger = logger
 	m.events = events
+	m.plugins = plugin.NewManager(m.conf.PluginsPath, m.conf.PluginsEnabled...)
 
 	m.Map(m)
 	m.Map(m.conf)
@@ -64,6 +70,9 @@ func NewManager(rootPath string) *Manager {
 	m.Map(scriptRepo)
 	m.Map(webhook.NewWebhookRepository(database))
 
+	if err := m.plugins.Configure(m.Injector); err != nil {
+		panic(err)
+	}
 	m.web.Configure()
 
 	return m

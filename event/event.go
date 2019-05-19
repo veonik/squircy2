@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"sync"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/codegangsta/inject"
+	log "github.com/sirupsen/logrus"
 )
 
 var InvalidHandler = errors.New("Invalid handler")

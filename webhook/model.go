@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"sort"
 
-	"github.com/HouzuoGuo/tiedot/db"
+	"github.com/veonik/squircy2/data"
 )
 
 type Webhook struct {
@@ -16,10 +16,10 @@ type Webhook struct {
 }
 
 type WebhookRepository struct {
-	database *db.DB
+	database *data.DB
 }
 
-func NewWebhookRepository(database *db.DB) WebhookRepository {
+func NewWebhookRepository(database *data.DB) WebhookRepository {
 	return WebhookRepository{database}
 }
 
