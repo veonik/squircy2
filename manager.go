@@ -1,6 +1,6 @@
 package squircy2 // import "github.com/veonik/squircy2"
 
-//go:generate go-bindata -prefix "./web" -pkg generated -tags "!debug" -o "./web/generated/bindata.go" ./web/public/...
+//go:generate go-bindata -prefix "./web" -pkg generated -tags "!debug" -modtime 0 -o "./web/generated/bindata.go" ./web/public/...
 //go:generate stickgen -path "./web/views" -out web/generated index.html.twig
 //go:generate stickgen -path "./web/views" -out web/generated **/[a-z]*.twig
 
@@ -74,6 +74,8 @@ func NewManager(rootPath string) *Manager {
 		panic(err)
 	}
 	m.web.Configure()
+
+	m.scripts.ReInit()
 
 	return m
 }

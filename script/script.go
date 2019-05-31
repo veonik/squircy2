@@ -48,8 +48,6 @@ func NewScriptManager(repo ScriptRepository, l log.FieldLogger, e event.EventMan
 		repo:         repo,
 		logger:       l,
 	}
-	mgr.init()
-
 	return mgr
 }
 
@@ -114,7 +112,14 @@ func (m *ScriptManager) Import() error {
 }
 
 func (m *ScriptManager) ReInit() {
-	close(m.driver.VM.quit)
+	if m.driver.VM != nil {
+		select {
+		case <-m.driver.VM.quit:
+			break
+		default:
+			close(m.driver.VM.quit)
+		}
+	}
 	m.init()
 }
 
