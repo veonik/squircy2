@@ -4,9 +4,10 @@
 package script
 
 import (
-	"github.com/tyler-sommer/stick"
-	"io"
 	"fmt"
+	"io"
+
+	"github.com/tyler-sommer/stick"
 )
 
 func blockScriptIndexHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
@@ -56,6 +57,140 @@ func blockScriptIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[s
 		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/resources/js-api.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
 	</div>
 </div>
+`)
+	// line 12, offset 3 in script/index.html.twig
+	{
+
+		var fnval stick.Value = ""
+		if fn, ok := env.Filters["length"]; ok {
+			fnval = fn(nil, ctx["scripts"])
+		}
+		if stick.CoerceBool(stick.Equal(fnval, 0)) {
+			// line 12, offset 30 in script/index.html.twig
+			fmt.Fprint(output, `
+<div class="panel panel-primary">
+	<div class="panel-heading"><i class="fa fa-info-circle"></i> No scripts created, yet.</div>
+	<div class="panel-body">
+		<p class="lead">Scripts are the building blocks used to personalize and enhance your bot.</p>
+		<p>Written in JavaScript, scripts use the bot's special API to make interesting things happen.</p>
+		<p>Refer to the <a href="https://squircy.com/resources/js-api.html">JavaScript API Reference</a> on the squIRCy2 website for the comprehensive list of available APIs.</p>
+		<p>
+			Looking for ideas? Check out the <a href="https://squircy.com/resources/examples.html" target="_blank">Example Scripts section</a> on the squIRCy2 website!
+		</p>
+	</div>
+	<div class="panel-footer">
+		<a href="/script/new" class="btn btn-primary"><i class="fa fa-plus"></i> Create New Script</a>
+	</div>
+</div>
+`)
+		} else {
+			// line 27, offset 10 in script/index.html.twig
+			fmt.Fprint(output, `
+<table class="table table-bordered table-striped">
+	<tr>
+		<th style="width: 175px">Title</th>
+		<th>Body</th>
+		<th style="width: 250px"><a href="/script/new" class="btn btn-primary"><i class="fa fa-plus"></i> New Script</a></th>
+	</tr>
+	`)
+			// line 34, offset 4 in script/index.html.twig
+			stick.Iterate(ctx["scripts"], func(_, el stick.Value, loop stick.Loop) (brk bool, err error) {
+				// line 34, offset 24 in script/index.html.twig
+				fmt.Fprint(output, `
+		<tr>
+			<td>`)
+				// line 36, offset 7 in script/index.html.twig
+				{
+					val, err := stick.GetAttr(el, "Title")
+					if err == nil {
+						fmt.Fprint(output, val)
+					}
+				}
+				// line 36, offset 21 in script/index.html.twig
+				fmt.Fprint(output, `</td>
+			<td class="code-preview">`)
+				// line 37, offset 28 in script/index.html.twig
+				{
+					val, err := stick.GetAttr(el, "Body")
+					if err == nil {
+						fmt.Fprint(output, val)
+					}
+				}
+				// line 37, offset 41 in script/index.html.twig
+				fmt.Fprint(output, `</td>
+			<td>
+				<a href="/script/`)
+				// line 39, offset 21 in script/index.html.twig
+				{
+					val, err := stick.GetAttr(el, "ID")
+					if err == nil {
+						fmt.Fprint(output, val)
+					}
+				}
+				// line 39, offset 32 in script/index.html.twig
+				fmt.Fprint(output, `/edit" class="btn btn-default"><i class="fa fa-edit"></i> Edit</a>
+				<div class="btn-group pull-right">
+					`)
+				// line 41, offset 8 in script/index.html.twig
+				{
+					val, err := stick.GetAttr(el, "Enabled")
+					if err == nil && stick.CoerceBool(val) {
+						// line 41, offset 24 in script/index.html.twig
+						fmt.Fprint(output, `
+						<a href="/script/`)
+						// line 42, offset 23 in script/index.html.twig
+						{
+							val, err := stick.GetAttr(el, "ID")
+							if err == nil {
+								fmt.Fprint(output, val)
+							}
+						}
+						// line 42, offset 34 in script/index.html.twig
+						fmt.Fprint(output, `/toggle" class="toggle btn btn-warning">Disable</a>
+					`)
+					} else {
+						// line 43, offset 15 in script/index.html.twig
+						fmt.Fprint(output, `
+						<a href="/script/`)
+						// line 44, offset 23 in script/index.html.twig
+						{
+							val, err := stick.GetAttr(el, "ID")
+							if err == nil {
+								fmt.Fprint(output, val)
+							}
+						}
+						// line 44, offset 34 in script/index.html.twig
+						fmt.Fprint(output, `/toggle" class="toggle btn btn-success">Enable</a>
+					`)
+					}
+				}
+				// line 45, offset 16 in script/index.html.twig
+				fmt.Fprint(output, `
+					<a href="/script/`)
+				// line 46, offset 22 in script/index.html.twig
+				{
+					val, err := stick.GetAttr(el, "ID")
+					if err == nil {
+						fmt.Fprint(output, val)
+					}
+				}
+				// line 46, offset 33 in script/index.html.twig
+				fmt.Fprint(output, `/remove" class="remove btn btn-danger">Remove</a>
+				</div>
+
+			</td>
+		</tr>
+	`)
+				return false, nil
+			})
+			// line 51, offset 13 in script/index.html.twig
+			fmt.Fprint(output, `
+</table>
+`)
+		}
+	}
+	// line 53, offset 11 in script/index.html.twig
+	fmt.Fprint(output, `
 `)
 }
 

@@ -5,35 +5,11 @@ package generated
 
 import (
 	"fmt"
-	"github.com/tyler-sommer/stick"
 	"io"
+
+	"github.com/tyler-sommer/stick"
 )
 
-func blockIndexHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 25, offset 34 in index.html.twig
-	fmt.Fprint(output, `
-<script type="text/javascript">
-$(function() {
-    var $eventLog = $('#event-log');
-    var $terminalLog = $('#terminal-log');
-    var es = window.squIRCyEvents;
-    es.addEventListener("irc.WILDCARD", function(e) {
-        var data = JSON.parse(e.data);
-        $eventLog.append("[" + data.Code + "] " + data.Nick + "->" + data.Target + ": " + data.Message + "\n");
-        $eventLog[0].scrollTop = $eventLog[0].scrollHeight;
-    });
-    es.addEventListener("log.OUTPUT", function(e) {
-        var data = JSON.parse(e.data);
-        $terminalLog.append("[" + data.Level + "] " + data.Message + "\n");
-        $terminalLog[0].scrollTop = $terminalLog[0].scrollHeight;
-    });
-
-    $eventLog[0].scrollTop = $eventLog[0].scrollHeight;
-    $terminalLog[0].scrollTop = $terminalLog[0].scrollHeight;
-});
-</script>
-`)
-}
 func blockIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 3, offset 19 in index.html.twig
 	fmt.Fprint(output, `
@@ -126,6 +102,31 @@ func blockIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]
     </div>
 </div>
 </div>
+`)
+}
+func blockIndexHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
+	// line 25, offset 34 in index.html.twig
+	fmt.Fprint(output, `
+<script type="text/javascript">
+$(function() {
+    var $eventLog = $('#event-log');
+    var $terminalLog = $('#terminal-log');
+    var es = window.squIRCyEvents;
+    es.addEventListener("irc.WILDCARD", function(e) {
+        var data = JSON.parse(e.data);
+        $eventLog.append("[" + data.Code + "] " + data.Nick + "->" + data.Target + ": " + data.Message + "\n");
+        $eventLog[0].scrollTop = $eventLog[0].scrollHeight;
+    });
+    es.addEventListener("log.OUTPUT", function(e) {
+        var data = JSON.parse(e.data);
+        $terminalLog.append("[" + data.Level + "] " + data.Message + "\n");
+        $terminalLog[0].scrollTop = $terminalLog[0].scrollHeight;
+    });
+
+    $eventLog[0].scrollTop = $eventLog[0].scrollHeight;
+    $terminalLog[0].scrollTop = $terminalLog[0].scrollHeight;
+});
+</script>
 `)
 }
 

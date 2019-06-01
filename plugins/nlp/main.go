@@ -58,7 +58,7 @@ func (b *initBinding) AddFunctionsToScriptManager(m *script.ScriptManager) {
 	}
 }
 
-type webModule struct {}
+type webModule struct{}
 
 func NewWithInjector(injector inject.Injector) (web.Module, error) {
 	res, err := injector.Invoke(New)

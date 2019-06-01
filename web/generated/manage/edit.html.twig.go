@@ -5,8 +5,9 @@ package manage
 
 import (
 	"fmt"
-	"github.com/tyler-sommer/stick"
 	"io"
+
+	"github.com/tyler-sommer/stick"
 )
 
 func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
@@ -281,7 +282,15 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 				<label for="plugins_enabled">Enabled Plugins</label>
 				<input class="form-control" name="plugins_enabled" id="plugins_enabled" placeholder="plugin1,plugin2" value="`)
 	// line 111, offset 113 in manage/edit.html.twig
-	fmt.Fprint(output, )
+	{
+		val, _ := stick.GetAttr(ctx["config"], "PluginsEnabled")
+
+		var fnval stick.Value = ""
+		if fn, ok := env.Filters["join"]; ok {
+			fnval = fn(nil, val, ",")
+		}
+		fmt.Fprint(output, fnval)
+	}
 	// line 111, offset 150 in manage/edit.html.twig
 	fmt.Fprint(output, `">
 				<p>Comma separated list without the .so extension</p>

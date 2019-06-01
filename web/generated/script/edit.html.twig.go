@@ -4,8 +4,9 @@
 package script
 
 import (
-	"io"
 	"fmt"
+	"io"
+
 	"github.com/tyler-sommer/stick"
 )
 
@@ -48,7 +49,7 @@ func blockScriptEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 			<option`)
 	// line 19, offset 13 in script/edit.html.twig
 	{
-		val, _  := stick.GetAttr(ctx["script"], "Type")
+		val, _ := stick.GetAttr(ctx["script"], "Type")
 		if stick.CoerceBool(stick.Equal(val, "Javascript")) {
 			// line 19, offset 46 in script/edit.html.twig
 			fmt.Fprint(output, ` selected`)

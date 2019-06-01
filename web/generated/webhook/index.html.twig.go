@@ -4,9 +4,10 @@
 package webhook
 
 import (
-	"github.com/tyler-sommer/stick"
-	"io"
 	"fmt"
+	"io"
+
+	"github.com/tyler-sommer/stick"
 )
 
 func blockWebhookIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
@@ -20,6 +21,175 @@ func blockWebhookIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[
 		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/resources/webhooks.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
 	</div>
 </div>
+`)
+	// line 12, offset 3 in webhook/index.html.twig
+	{
+
+		var fnval stick.Value = ""
+		if fn, ok := env.Filters["length"]; ok {
+			fnval = fn(nil, ctx["webhooks"])
+		}
+		if stick.CoerceBool(stick.CoerceNumber(fnval) > stick.CoerceNumber(0)) {
+			// line 12, offset 30 in webhook/index.html.twig
+			fmt.Fprint(output, `
+<table class="table table-bordered table-striped">
+	<tr>
+	    <th>Title</th>
+		<th>URL</th>
+		<th>Key</th>
+		<th>Header</th>
+		<th><a href="/webhook/new" class="btn btn-primary"><i class="fa fa-plus"></i> New Webhook</a></th>
+	</tr>
+	`)
+			// line 21, offset 4 in webhook/index.html.twig
+			stick.Iterate(ctx["webhooks"], func(_, el stick.Value, loop stick.Loop) (brk bool, err error) {
+				// line 21, offset 25 in webhook/index.html.twig
+				fmt.Fprint(output, `
+	<tr>
+	    <td>`)
+				// line 23, offset 9 in webhook/index.html.twig
+				{
+					val, err := stick.GetAttr(el, "Title")
+					if err == nil {
+						fmt.Fprint(output, val)
+					}
+				}
+				// line 23, offset 23 in webhook/index.html.twig
+				fmt.Fprint(output, `</td>
+		<td><a href="/webhooks/`)
+				// line 24, offset 25 in webhook/index.html.twig
+				{
+					val, err := stick.GetAttr(el, "ID")
+					if err == nil {
+						fmt.Fprint(output, val)
+					}
+				}
+				// line 24, offset 36 in webhook/index.html.twig
+				fmt.Fprint(output, `">/webhooks/`)
+				// line 24, offset 48 in webhook/index.html.twig
+				{
+					val, err := stick.GetAttr(el, "ID")
+					if err == nil {
+						fmt.Fprint(output, val)
+					}
+				}
+				// line 24, offset 59 in webhook/index.html.twig
+				fmt.Fprint(output, `</a></td>
+		<td>`)
+				// line 25, offset 6 in webhook/index.html.twig
+				{
+					val, err := stick.GetAttr(el, "Key")
+					if err == nil {
+						fmt.Fprint(output, val)
+					}
+				}
+				// line 25, offset 18 in webhook/index.html.twig
+				fmt.Fprint(output, `</td>
+		<td>`)
+				// line 26, offset 6 in webhook/index.html.twig
+				{
+					val, err := stick.GetAttr(el, "SignatureHeader")
+					if err == nil {
+						fmt.Fprint(output, val)
+					}
+				}
+				// line 26, offset 30 in webhook/index.html.twig
+				fmt.Fprint(output, `</td>
+		<td>
+			<a href="/webhook/`)
+				// line 28, offset 21 in webhook/index.html.twig
+				{
+					val, err := stick.GetAttr(el, "ID")
+					if err == nil {
+						fmt.Fprint(output, val)
+					}
+				}
+				// line 28, offset 32 in webhook/index.html.twig
+				fmt.Fprint(output, `/edit" class="btn btn-default"><i class="fa fa-edit"></i> Edit</a>
+			<div class="btn-group pull-right">
+				`)
+				// line 30, offset 7 in webhook/index.html.twig
+				{
+					val, err := stick.GetAttr(el, "Enabled")
+					if err == nil && stick.CoerceBool(val) {
+						// line 30, offset 23 in webhook/index.html.twig
+						fmt.Fprint(output, `
+					<a href="/webhook/`)
+						// line 31, offset 23 in webhook/index.html.twig
+						{
+							val, err := stick.GetAttr(el, "ID")
+							if err == nil {
+								fmt.Fprint(output, val)
+							}
+						}
+						// line 31, offset 34 in webhook/index.html.twig
+						fmt.Fprint(output, `/toggle" class="toggle btn btn-warning">Disable</a>
+				`)
+					} else {
+						// line 32, offset 14 in webhook/index.html.twig
+						fmt.Fprint(output, `
+					<a href="/webhook/`)
+						// line 33, offset 23 in webhook/index.html.twig
+						{
+							val, err := stick.GetAttr(el, "ID")
+							if err == nil {
+								fmt.Fprint(output, val)
+							}
+						}
+						// line 33, offset 34 in webhook/index.html.twig
+						fmt.Fprint(output, `/toggle" class="toggle btn btn-success">Enable</a>
+				`)
+					}
+				}
+				// line 34, offset 15 in webhook/index.html.twig
+				fmt.Fprint(output, `
+				<a href="/webhook/`)
+				// line 35, offset 22 in webhook/index.html.twig
+				{
+					val, err := stick.GetAttr(el, "ID")
+					if err == nil {
+						fmt.Fprint(output, val)
+					}
+				}
+				// line 35, offset 33 in webhook/index.html.twig
+				fmt.Fprint(output, `/remove" class="remove btn btn-danger">Remove</a>
+			</div>
+		</td>
+	</tr>
+	`)
+				return false, nil
+			})
+			// line 39, offset 13 in webhook/index.html.twig
+			fmt.Fprint(output, `
+</table>
+`)
+		} else {
+			// line 41, offset 10 in webhook/index.html.twig
+			fmt.Fprint(output, `
+<div class="panel panel-primary">
+	<div class="panel-heading"><i class="fa fa-info-circle"></i> No webhooks created, yet.</div>
+	<div class="panel-body">
+		<p class="lead">Use webhooks to integrate squIRCy with GitHub, Slack, or anything really!</p>
+		<p>
+			Webhooks are unique links that trigger an event within the bot when they are loaded. Scripts may bind to these
+			webhook events and when a given webhook is invoked, any bound event listeners for that webhook will also be invoked.
+		</p>
+		<p>
+			Anything capable of sending an HTTP request when something interesting happens can be made to support this type of integration.
+		</p>
+		<p>
+			Check out the <a href="https://squircy.com/resources/webhooks.html" target="_blank">Webhooks documentation page</a> on the squIRCy2 website for a full overview.
+		</p>
+	</div>
+	<div class="panel-footer">
+		<a href="/webhook/new" class="btn btn-primary btn"><i class="fa fa-plus"></i> Create New Webhook</a>
+	</div>
+</div>
+`)
+		}
+	}
+	// line 61, offset 11 in webhook/index.html.twig
+	fmt.Fprint(output, `
 `)
 }
 func blockWebhookIndexHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {

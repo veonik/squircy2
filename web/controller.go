@@ -60,13 +60,6 @@ func newStickHandler() martini.Handler {
 		}
 		return html.EscapeString(stick.CoerceString(args[0]))
 	}
-	env.Filters["default"] = func(ctx stick.Context, val stick.Value, args ...stick.Value) stick.Value {
-		res := stick.CoerceString(val)
-		if len(res) == 0 && len(args) > 0 {
-			res = stick.CoerceString(args[0])
-		}
-		return res
-	}
 	env.Filters["join"] = func(ctx stick.Context, val stick.Value, args ...stick.Value) stick.Value {
 		if len(args) == 0 {
 			return nil

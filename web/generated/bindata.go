@@ -83,7 +83,7 @@ func publicCssStyleCss() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "public/css/style.css", size: 1000, mode: os.FileMode(420), modTime: time.Unix(1559359738, 0)}
+	info := bindataFileInfo{name: "public/css/style.css", size: 1000, mode: os.FileMode(420), modTime: time.Unix(1559363773, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

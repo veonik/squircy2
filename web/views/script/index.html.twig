@@ -9,33 +9,7 @@
 		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/resources/js-api.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
 	</div>
 </div>
-{% if (scripts|length) > 0 %}
-<table class="table table-bordered table-striped">
-	<tr>
-		<th style="width: 175px">Title</th>
-		<th>Body</th>
-		<th style="width: 250px"><a href="/script/new" class="btn btn-primary"><i class="fa fa-plus"></i> New Script</a></th>
-	</tr>
-	{% for el in scripts %}
-	<tr>
-		<td>{{ el.Title }}</td>
-		<td class="code-preview">{{ el.Body }}</td>
-		<td>
-			<a href="/script/{{ el.ID }}/edit" class="btn btn-default"><i class="fa fa-edit"></i> Edit</a>
-			<div class="btn-group pull-right">
-				{% if el.Enabled %}
-					<a href="/script/{{ el.ID }}/toggle" class="toggle btn btn-warning">Disable</a>
-				{% else %}
-					<a href="/script/{{ el.ID }}/toggle" class="toggle btn btn-success">Enable</a>
-				{% endif %}
-				<a href="/script/{{ el.ID }}/remove" class="remove btn btn-danger">Remove</a>
-			</div>
-
-		</td>
-	</tr>
-	{% endfor %}
-</table>
-{% else %}
+{% if (scripts|length) == 0 %}
 <div class="panel panel-primary">
 	<div class="panel-heading"><i class="fa fa-info-circle"></i> No scripts created, yet.</div>
 	<div class="panel-body">
@@ -50,6 +24,32 @@
 		<a href="/script/new" class="btn btn-primary"><i class="fa fa-plus"></i> Create New Script</a>
 	</div>
 </div>
+{% else %}
+<table class="table table-bordered table-striped">
+	<tr>
+		<th style="width: 175px">Title</th>
+		<th>Body</th>
+		<th style="width: 250px"><a href="/script/new" class="btn btn-primary"><i class="fa fa-plus"></i> New Script</a></th>
+	</tr>
+	{% for el in scripts %}
+		<tr>
+			<td>{{ el.Title }}</td>
+			<td class="code-preview">{{ el.Body }}</td>
+			<td>
+				<a href="/script/{{ el.ID }}/edit" class="btn btn-default"><i class="fa fa-edit"></i> Edit</a>
+				<div class="btn-group pull-right">
+					{% if el.Enabled %}
+						<a href="/script/{{ el.ID }}/toggle" class="toggle btn btn-warning">Disable</a>
+					{% else %}
+						<a href="/script/{{ el.ID }}/toggle" class="toggle btn btn-success">Enable</a>
+					{% endif %}
+					<a href="/script/{{ el.ID }}/remove" class="remove btn btn-danger">Remove</a>
+				</div>
+
+			</td>
+		</tr>
+	{% endfor %}
+</table>
 {% endif %}
 {% endblock %}
 

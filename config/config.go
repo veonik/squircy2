@@ -1,8 +1,9 @@
 package config // import "github.com/veonik/squircy2/config"
 
 import (
-	"github.com/sirupsen/logrus"
 	"path/filepath"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/veonik/squircy2/data"
 )

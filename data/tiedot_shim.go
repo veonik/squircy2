@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"math/rand"
 	"os"
 	"path/filepath"
 	"sync"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type DB struct {
