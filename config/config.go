@@ -1,6 +1,7 @@
 package config // import "github.com/veonik/squircy2/config"
 
 import (
+	"github.com/sirupsen/logrus"
 	"path/filepath"
 
 	"github.com/veonik/squircy2/data"
@@ -79,13 +80,13 @@ func NewConfiguration(rootPath string) *Configuration {
 	}
 }
 
-func LoadConfig(database *data.DB, conf *Configuration) {
-	repo := configRepository{database}
+func LoadConfig(database *data.DB, logger *logrus.Logger, conf *Configuration) {
+	repo := configRepository{database, logger}
 	repo.fetchInto(conf)
-	SaveConfig(database, conf)
+	SaveConfig(database, logger, conf)
 }
 
-func SaveConfig(database *data.DB, conf *Configuration) {
-	repo := configRepository{database}
+func SaveConfig(database *data.DB, logger *logrus.Logger, conf *Configuration) {
+	repo := configRepository{database, logger}
 	repo.save(conf)
 }

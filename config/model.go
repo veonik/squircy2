@@ -2,13 +2,15 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/veonik/squircy2/data"
 )
 
 type configRepository struct {
 	database *data.DB
+
+	logger *log.Logger
 }
 
 func flattenConfig(config *Configuration) map[string]interface{} {
@@ -47,7 +49,9 @@ func (repo *configRepository) fetchInto(config *Configuration) {
 	col.ForEachDoc(func(id int, doc []byte) (moveOn bool) {
 		moveOn = false
 
-		fmt.Println("loaded config", json.Unmarshal(doc, config))
+		if err := json.Unmarshal(doc, config); err != nil {
+			repo.logger.Warnln("error unmarshaling json config:", err)
+		}
 		config.ID = id
 
 		return
@@ -56,19 +60,26 @@ func (repo *configRepository) fetchInto(config *Configuration) {
 
 func (repo *configRepository) save(config *Configuration) {
 	col := repo.database.Use("Settings")
-	data := map[string]interface{}{}
+	d := map[string]interface{}{}
 	col.ForEachDoc(func(id int, doc []byte) bool {
-		fmt.Println(json.Unmarshal(doc, &data))
+		if err := json.Unmarshal(doc, &d); err != nil {
+			repo.logger.Warnln("error unmarshaling json config:", err)
+		}
 		return false
 	})
 	for k, v := range flattenConfig(config) {
-		data[k] = v
+		d[k] = v
 	}
 	if config.ID <= 0 {
-		id, _ := col.Insert(data)
+		id, err := col.Insert(d)
+		if err != nil {
+			repo.logger.Warnln("error inserting json config:", err)
+		}
 		config.ID = id
 
 	} else {
-		col.Update(config.ID, data)
+		if err := col.Update(config.ID, d); err != nil {
+			repo.logger.Warnln("error updating json config:", err)
+		}
 	}
 }

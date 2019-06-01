@@ -2,7 +2,6 @@ package data
 
 import (
 	"encoding/json"
-	"fmt"
 )
 
 type GenericRepository struct {
@@ -42,7 +41,9 @@ func (repo *GenericRepository) FetchAll() []GenericModel {
 
 		val := make(map[string]interface{}, 0)
 
-		json.Unmarshal(doc, &val)
+		if err := json.Unmarshal(doc, &val); err != nil {
+			repo.database.logger.Warnln("failed to unmarshal json data:", err)
+		}
 		generic := hydrateGeneric(val)
 		generic["ID"] = id
 
@@ -75,13 +76,13 @@ func (repo *GenericRepository) Save(generic GenericModel) {
 		id, err := col.Insert(data)
 		generic["ID"] = id
 		if err != nil {
-			fmt.Println("An error occurred while inserting the model: ", err)
+			repo.database.logger.Warnln("failed to insert model data:", err)
 		}
 
 	} else {
 		err := col.Update(generic["ID"].(int), data)
 		if err != nil {
-			fmt.Println("An error occurred while updating the model: ", err)
+			repo.database.logger.Warnln("failed to update model data: ", err)
 		}
 	}
 }
