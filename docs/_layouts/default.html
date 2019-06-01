@@ -43,7 +43,7 @@
     </header>
     <section>
 
-        {{ content | replace_first: "squIRCy2", "&nbsp;" | replace_first: "</h5>", "</h2>" | replace_first: "<h5", "<h2" | replace_first: "the scriptable", "squircy2, the scriptable" }}
+        {{ content }}
 
     </section>
     <footer>
@@ -51,7 +51,7 @@
         <p>This project is maintained<br>
             by <a class="author" href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></p>
         {% endif %}
-        <p><small>Hosted on GitHub Pages <br> Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+        <p><small>Hosted on GitHub Pages <br> Based on minimal by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
     </footer>
 </div>
 <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>

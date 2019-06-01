@@ -1,7 +1,5 @@
-squIRCy2
-========
-
-##### the scriptable IRC bot
+Scriptable IRC bot
+==================
 
 squIRCy2 is an IRC bot written in Go and is scriptable using an embedded JavaScript runtime.
 
