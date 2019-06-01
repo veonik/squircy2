@@ -46,7 +46,7 @@ func NewManager(rootPath string) *Manager {
 	logger := newLogger(events)
 	database := data.NewDatabaseConnection(m.conf.RootPath, logger)
 
-	config.LoadConfig(database, m.conf)
+	config.LoadConfig(database, logger, m.conf)
 	scriptRepo := script.NewScriptRepository(database, m.conf, logger)
 
 	m.web = web.NewServer(m.Injector, m.conf, logger)
@@ -70,8 +70,10 @@ func NewManager(rootPath string) *Manager {
 	m.Map(scriptRepo)
 	m.Map(webhook.NewWebhookRepository(database))
 
-	if err := m.plugins.Configure(m.Injector); err != nil {
-		panic(err)
+	if errs := m.plugins.Configure(m.Injector); len(errs) > 0 {
+		for _, err := range errs {
+			logger.Warnln(err)
+		}
 	}
 	m.web.Configure()
 

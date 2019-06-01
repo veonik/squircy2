@@ -2,7 +2,7 @@ package main // import "github.com/veonik/squircy2/plugins/nlp"
 
 import (
 	"errors"
-	
+
 	"github.com/codegangsta/inject"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
