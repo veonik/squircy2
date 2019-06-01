@@ -1,6 +1,13 @@
 Example Scripts
 ===============
 
+* [Join channels on connect](#join-channels-on-connect)
+* [Identify with Nickserv](#identify-with-nickserv)
+* [Iterate over an event's properties](#iterate-over-an-events-properties)
+* [Keep track of channel participants](#keep-track-of-channel-participants)
+* [Manipulate core configuration](#manipulate-core-configuration)
+* [In-chat Read-Evaluate-Print Loop (REPL)](#in-chat-repl)
+
 ## Join channels on connect
 
 ```js
@@ -18,7 +25,7 @@ requesting you identify, it will reply with your password.
 
 ```js
 function handleNickserv(e) {
-    if (e.Nick == "NickServ" && e.Message.indexOf("identify") >= 0) {
+    if (e.Nick === "NickServ" && e.Message.indexOf("identify") >= 0) {
         Irc.Privmsg("NickServ", "IDENTIFY superlongandsecurepassword");
         console.log("Identified with Nickserv");
     }

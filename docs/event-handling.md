@@ -48,16 +48,16 @@ Events
 
 | Event Name | Description |
 | ---------- | ----------- |
-| cli.INPUT | Input received from terminal |
-| cli.OUTPUT | Output sent to terminal |
-| irc.CONNECTING | Fired when first connecting to the IRC server |
-| irc.CONNECT | Successfully connected to the IRC server |
-| irc.DISCONNECT | Disconnected from the IRC server |
-| irc.PRIVMSG | A message received, in a channel or a private message |
-| irc.NOTICE | A notice received |
-| irc.WILDCARD | Any IRC event |
-| irc.[code] | A specific IRC event, given its RFC Code. For example, 001 `irc.001` or NICK is `irc.NICK`. |
-| hook.WILDCARD | Fired whenever a valid webhook is received. |
-| hook.[ID] | Fired when the webhook with [ID] is received. |
+| `cli.INPUT` | Input received from terminal |
+| `cli.OUTPUT` | Output sent to terminal |
+| `irc.CONNECTING` | Fired when first connecting to the IRC server |
+| `irc.CONNECT` | Successfully connected to the IRC server |
+| `irc.DISCONNECT` | Disconnected from the IRC server |
+| `irc.PRIVMSG` | A message received, in a channel or a private message |
+| `irc.NOTICE` | A notice received |
+| `irc.WILDCARD` | Any IRC event |
+| `irc.[code]` | A specific IRC event, given its RFC Code. For example, 001 `irc.001` or NICK is `irc.NICK`. |
+| `hook.WILDCARD` | Fired whenever a valid webhook is received. |
+| `hook.[ID]` | Fired when the webhook with [ID] is received. |
 
 

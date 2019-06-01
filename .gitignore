@@ -3,6 +3,10 @@
 *.a
 *.so
 
+# Jekyll related (GitHub Pages)
+docs/_site
+docs/Gemfile.lock
+
 # Folders
 _obj
 _test

@@ -7,7 +7,7 @@ squIRCy2 is an IRC bot written in Go and is scriptable using an embedded JavaScr
 
 It features a robust CLI with REPL and auto-completion, a web management interface, an embedded document store, and event based in-program communication. 
 
-Customize the bot's functionality with JavaScript scripts. Bind event handlers to handle events that occur in the application. Events come from IRC, the CLI, or even the web.
+Customize the bot's functionality with JavaScript. Bind event handlers to handle events that occur in the application. Events come from IRC, the CLI, or even the web.
 
 
 Installation
@@ -16,16 +16,16 @@ Installation
 Install squIRCy2 with `go get`.
 
 ```bash
-go get -u github.com/veonik/squircy2/...
+go get -u "github.com/veonik/squircy2/..."
 ```
 
 After squIRCy2 is installed, you can run it immediately with `squircy2`. On first run, a default configuration will be initialized in `~/.squircy2`.
 
-```bash
+```
 squircy2
 ```
 
-> For information on modifying and customizing squIRcy2, see [Contributing](resources/customizing.md).
+> For information on modifying and customizing squIRcy2, see [Contributing](customizing.md).
 
 
 Usage
