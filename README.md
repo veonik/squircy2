@@ -66,7 +66,7 @@ From the Settings page, you can configure:
 * **IRC**
   * Configure the Network, Nickname and Username information for the bot. You can also enable TLS-- be sure to specify a TLS-capable port for the Network.
   * Enable SASL authentication and enter your NickServ username and password. **Note these are stored plaintext in a blob format.**
-  * Owner Nick and Host can be used from within scripts to verify a user's ownership of the bot. See [the JavaScript reference](resources/js-api.md) for more information.
+  * Owner Nick and Host can be used from within scripts to verify a user's ownership of the bot. See [the JavaScript reference](docs/js-api.md) for more information.
 * **Script Management**
   * If you prefer to work with an external editor, you can have squIRCy2 load scripts on the filesystem. Specify a path, enable the option, and restart squIRCy2.
   * Import and Export scripts from the embedded data store.
@@ -83,15 +83,15 @@ squIRCy2 embeds a JavaScript interpreter, allowing you to write scripts to imple
 
 ### JavaScript API
 
-A full introduction to the squIRCy2 JavaScript API can be found in [the JavaScript API reference](resources/js-api.md).
+A full introduction to the squIRCy2 JavaScript API can be found in [the JavaScript API reference](docs/js-api.md).
 
 #### Example scripts
 
-Check the [Example Scripts section](resources/examples.md) for ideas for squIRCy2 scripts.
+Check the [Example Scripts section](docs/examples.md) for ideas for squIRCy2 scripts.
 
 ### Webhooks
 
-See the [dedicated section on Webhooks](resources/webhooks.md).
+See the [dedicated section on Webhooks](docs/webhooks.md).
 
 
 Additional Info
