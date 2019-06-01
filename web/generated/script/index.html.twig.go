@@ -4,14 +4,13 @@
 package script
 
 import (
-	"fmt"
-	"io"
-
 	"github.com/tyler-sommer/stick"
+	"io"
+	"fmt"
 )
 
 func blockScriptIndexHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 31, offset 34 in script/index.html.twig
+	// line 56, offset 34 in script/index.html.twig
 	fmt.Fprint(output, `
 <script type="text/javascript">
 $(function() {
@@ -49,106 +48,14 @@ $(function() {
 func blockScriptIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 3, offset 19 in script/index.html.twig
 	fmt.Fprint(output, `
-<h4>Scripts</h4>
-<table class="table table-bordered table-striped">
-	<tr>
-		<th>Title</th>
-		<th>Body</th>
-		<th><a href="/script/new" class="btn btn-primary btn-sm">New Script</a></th>
-	</tr>
-	`)
-	// line 11, offset 4 in script/index.html.twig
-	stick.Iterate(ctx["scripts"], func(_, el stick.Value, loop stick.Loop) (brk bool, err error) {
-		// line 11, offset 24 in script/index.html.twig
-		fmt.Fprint(output, `
-	<tr>
-		<td>`)
-		// line 13, offset 6 in script/index.html.twig
-		{
-			val, err := stick.GetAttr(el, "Title")
-			if err == nil {
-				fmt.Fprint(output, val)
-			}
-		}
-		// line 13, offset 20 in script/index.html.twig
-		fmt.Fprint(output, `</td>
-		<td class="code-preview">`)
-		// line 14, offset 27 in script/index.html.twig
-		{
-			val, err := stick.GetAttr(el, "Body")
-			if err == nil {
-				fmt.Fprint(output, val)
-			}
-		}
-		// line 14, offset 40 in script/index.html.twig
-		fmt.Fprint(output, `</td>
-		<td>
-			<div class="btn-group">
-				<a href="/script/`)
-		// line 17, offset 21 in script/index.html.twig
-		{
-			val, err := stick.GetAttr(el, "ID")
-			if err == nil {
-				fmt.Fprint(output, val)
-			}
-		}
-		// line 17, offset 32 in script/index.html.twig
-		fmt.Fprint(output, `/edit" class="btn btn-sm btn-default">Edit</a>
-				<a href="/script/`)
-		// line 18, offset 21 in script/index.html.twig
-		{
-			val, err := stick.GetAttr(el, "ID")
-			if err == nil {
-				fmt.Fprint(output, val)
-			}
-		}
-		// line 18, offset 32 in script/index.html.twig
-		fmt.Fprint(output, `/remove" class="remove btn btn-sm btn-warning">Remove</a>
-			</div>
-			`)
-		// line 20, offset 6 in script/index.html.twig
-		{
-			val, err := stick.GetAttr(el, "Enabled")
-			if err == nil && stick.CoerceBool(val) {
-				// line 20, offset 22 in script/index.html.twig
-				fmt.Fprint(output, `
-				<a href="/script/`)
-				// line 21, offset 21 in script/index.html.twig
-				{
-					val, err := stick.GetAttr(el, "ID")
-					if err == nil {
-						fmt.Fprint(output, val)
-					}
-				}
-				// line 21, offset 32 in script/index.html.twig
-				fmt.Fprint(output, `/toggle" class="toggle btn btn-sm btn-default">Disable</a>
-			`)
-			} else {
-				// line 22, offset 13 in script/index.html.twig
-				fmt.Fprint(output, `
-				<a href="/script/`)
-				// line 23, offset 21 in script/index.html.twig
-				{
-					val, err := stick.GetAttr(el, "ID")
-					if err == nil {
-						fmt.Fprint(output, val)
-					}
-				}
-				// line 23, offset 32 in script/index.html.twig
-				fmt.Fprint(output, `/toggle" class="toggle btn btn-sm btn-success">Enable</a>
-			`)
-			}
-		}
-		// line 24, offset 14 in script/index.html.twig
-		fmt.Fprint(output, `
-		</td>
-	</tr>
-	`)
-		return false, nil
-	})
-	// line 27, offset 13 in script/index.html.twig
-	fmt.Fprint(output, `
-</table>
+<div class="row">
+	<div class="col-sm-6">
+		<h4>Script Management</h4>
+	</div>
+	<div class="col-sm-6">
+		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/resources/js-api.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
+	</div>
+</div>
 `)
 }
 
@@ -158,11 +65,11 @@ func TemplateScriptIndexHtmlTwig(env *stick.Env, output io.Writer, ctx map[strin
 <html>
 <head>
   <title>squIRCy</title>
-  <script src="//cdn.jsdelivr.net/jquery/2.1.1/jquery.min.js"></script>
-  <script src="//cdn.jsdelivr.net/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-  <script src="//cdn.jsdelivr.net/momentjs/2.8.1/moment.min.js"></script>
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap/3.2.0/css/bootstrap.min.css">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/fontawesome/4.2.0/css/font-awesome.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/cyborg/bootstrap.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 
@@ -179,10 +86,10 @@ func TemplateScriptIndexHtmlTwig(env *stick.Env, output io.Writer, ctx map[strin
 		</div>
 	</div>
 
-	<nav id="main-nav" class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 	  	<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand" href="https://github.com/veonik/squircy2">squIRCy2</a>
+				<a class="navbar-brand" href="https://squircy.com" target="_blank">squIRCy</a>
         	</div>
 			<ul class="nav navbar-nav">
 				<li><a href="/">Dashboard</a></li>
@@ -284,11 +191,11 @@ $(function() {
 	fmt.Fprint(output, `
 
 `)
-	// line 29, offset 14 in script/index.html.twig
+	// line 54, offset 14 in script/index.html.twig
 	fmt.Fprint(output, `
 
 `)
-	// line 63, offset 14 in script/index.html.twig
+	// line 88, offset 14 in script/index.html.twig
 	fmt.Fprint(output, `
 `)
 }

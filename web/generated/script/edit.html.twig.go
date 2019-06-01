@@ -4,60 +4,69 @@
 package script
 
 import (
-	"fmt"
 	"io"
-
+	"fmt"
 	"github.com/tyler-sommer/stick"
 )
 
 func blockScriptEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 3, offset 19 in script/edit.html.twig
 	fmt.Fprint(output, `
+<div class="row">
+	<div class="col-sm-6">
+		<h4>Modify Script</h4>
+	</div>
+	<div class="col-sm-6">
+		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/resources/js-api.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
+	</div>
+</div>
 <form method="post" class="form form-horizontal" action="/script/`)
-	// line 4, offset 65 in script/edit.html.twig
+	// line 12, offset 65 in script/edit.html.twig
 	{
 		val, err := stick.GetAttr(ctx["script"], "ID")
 		if err == nil {
 			fmt.Fprint(output, val)
 		}
 	}
-	// line 4, offset 80 in script/edit.html.twig
+	// line 12, offset 80 in script/edit.html.twig
 	fmt.Fprint(output, `/update">
 <div class="row">
 	<div class="col-md-4">
   		<input class="form-control" name="title" placeholder="Title" value="`)
-	// line 7, offset 72 in script/edit.html.twig
+	// line 15, offset 72 in script/edit.html.twig
 	{
 		val, err := stick.GetAttr(ctx["script"], "Title")
 		if err == nil {
 			fmt.Fprint(output, val)
 		}
 	}
-	// line 7, offset 90 in script/edit.html.twig
+	// line 15, offset 90 in script/edit.html.twig
 	fmt.Fprint(output, `">
 	</div>
 	<div class="col-md-4">
-  		<select class="form-control" id="script_type" name="type">
+  		<select style="visibility: hidden" class="form-control" id="script_type" name="type">
 			<option`)
-	// line 11, offset 13 in script/edit.html.twig
+	// line 19, offset 13 in script/edit.html.twig
 	{
-		val, _ := stick.GetAttr(ctx["script"], "Type")
+		val, _  := stick.GetAttr(ctx["script"], "Type")
 		if stick.CoerceBool(stick.Equal(val, "Javascript")) {
-			// line 11, offset 46 in script/edit.html.twig
+			// line 19, offset 46 in script/edit.html.twig
 			fmt.Fprint(output, ` selected`)
 		}
 	}
-	// line 11, offset 66 in script/edit.html.twig
+	// line 19, offset 66 in script/edit.html.twig
 	fmt.Fprint(output, `>Javascript</option>
 		</select>
 	</div>
+	<div class="col-md-4">
+		<button class="form-control btn btn-primary">Save Changes</button>
+	</div>
 </div>
-<br>
 <div class="row">
-	<div class="col-md-12" style="height: 400px">
+	<div class="col-md-12" style="height: 700px">
   		<div id="editor" style="width: 100%; height: 100%"></div>
 		<input type="hidden" name="body" id="script_body" value="`)
-	// line 19, offset 59 in script/edit.html.twig
+	// line 29, offset 59 in script/edit.html.twig
 	{
 		val, _ := stick.GetAttr(ctx["script"], "Body")
 		var fnval stick.Value = ""
@@ -66,53 +75,59 @@ func blockScriptEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 		}
 		fmt.Fprint(output, fnval)
 	}
-	// line 19, offset 84 in script/edit.html.twig
+	// line 29, offset 84 in script/edit.html.twig
 	fmt.Fprint(output, `">
 	</div>
 </div>
-<br>
 <div class="row">
-	<div class="col-md-4">
-		<button class="form-control btn btn-primary">Save</button>
+	<div class="col-md-offset-8 col-md-4">
+		<button class="form-control btn btn-primary">Save Changes</button>
 	</div>
 </div>
 </form>
 `)
 }
 func blockScriptEditHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 31, offset 34 in script/edit.html.twig
+	// line 40, offset 34 in script/edit.html.twig
 	fmt.Fprint(output, `
 `)
 	// line 1, offset 0 in script/_javascripts.html.twig
-	fmt.Fprint(output, `<script src="//cdn.jsdelivr.net/ace/1.1.7/min/ace.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/ext-searchbox.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/ext-spellcheck.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/ext-static_highlight.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/mode-javascript.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/theme-textmate.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/worker-javascript.js"></script>
+	fmt.Fprint(output, `<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ace.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ext-searchbox.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ext-spellcheck.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ext-static_highlight.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ext-language_tools.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ext-error_marker.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ext-whitespace.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/keybinding-vim.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/mode-javascript.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/theme-twilight.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/worker-javascript.js"></script>
 <script type="text/javascript">
-$(function() {
-	var modeMap = {
-		"Javascript": "ace/mode/javascript",
-	};	
-	var $bodyField = $('#script_body');
-	var $typeField = $('#script_type');
-	var editor = ace.edit("editor");
-    editor.setTheme("ace/theme/textmate");
-	editor.setValue($bodyField.val());
-	editor.getSession().on('change', function() {
-		$bodyField.val(editor.getValue());
-	});
-	editor.resize();
-	
-	$typeField.on('change', function() {
-		editor.getSession().setMode(modeMap[$typeField.val()]);
-	}).change();
-})
+  $(function () {
+    const $bodyField = $('#script_body');
+
+    const editor = ace.edit('editor');
+    const whitespace = ace.require('ace/ext/whitespace');
+    editor.commands.addCommands(whitespace.commands);
+
+    editor.setOptions({
+      enableBasicAutocompletion: true,
+      enableLiveAutocompletion: true,
+      enableSnippets: false
+    });
+    editor.setKeyboardHandler('vim');
+    editor.setTheme('ace/theme/twilight');
+    editor.setValue($bodyField.val());
+    editor.getSession().setMode('ace/mode/javascript');
+    editor.getSession().on('change', function () {
+      $bodyField.val(editor.getValue());
+    });
+    editor.resize();
+  });
 </script>
 `)
-	// line 32, offset 45 in script/edit.html.twig
+	// line 41, offset 45 in script/edit.html.twig
 	fmt.Fprint(output, `
 `)
 }
@@ -123,11 +138,11 @@ func TemplateScriptEditHtmlTwig(env *stick.Env, output io.Writer, ctx map[string
 <html>
 <head>
   <title>squIRCy</title>
-  <script src="//cdn.jsdelivr.net/jquery/2.1.1/jquery.min.js"></script>
-  <script src="//cdn.jsdelivr.net/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-  <script src="//cdn.jsdelivr.net/momentjs/2.8.1/moment.min.js"></script>
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap/3.2.0/css/bootstrap.min.css">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/fontawesome/4.2.0/css/font-awesome.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/cyborg/bootstrap.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 
@@ -144,10 +159,10 @@ func TemplateScriptEditHtmlTwig(env *stick.Env, output io.Writer, ctx map[string
 		</div>
 	</div>
 
-	<nav id="main-nav" class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 	  	<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand" href="https://github.com/veonik/squircy2">squIRCy2</a>
+				<a class="navbar-brand" href="https://squircy.com" target="_blank">squIRCy</a>
         	</div>
 			<ul class="nav navbar-nav">
 				<li><a href="/">Dashboard</a></li>
@@ -249,11 +264,11 @@ $(function() {
 	fmt.Fprint(output, `
 
 `)
-	// line 29, offset 14 in script/edit.html.twig
+	// line 38, offset 14 in script/edit.html.twig
 	fmt.Fprint(output, `
 
 `)
-	// line 33, offset 14 in script/edit.html.twig
+	// line 42, offset 14 in script/edit.html.twig
 	fmt.Fprint(output, `
 `)
 }

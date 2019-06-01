@@ -4,22 +4,25 @@
 package repl
 
 import (
-	"fmt"
-	"io"
-
 	"github.com/tyler-sommer/stick"
+	"io"
+	"fmt"
 )
 
 func blockReplIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 3, offset 19 in repl/index.html.twig
 	fmt.Fprint(output, `
 <div class="row">
-	<div class="col-md-8" style="height: 300px">
-		<h4>REPL</h4>
-		<select class="form-control" id="script_type" name="scriptType">
-			<option>Javascript</option>
-		</select>
-		<br>
+	<div class="col-sm-6">
+		<h4>JavaScript REPL</h4>
+	</div>
+	<div class="col-sm-6">
+		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/js-api.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
+	</div>
+</div>
+<form method="post" action="/repl/execute">
+<div class="row">
+	<div class="col-md-8" style="height: 600px">
   		<div id="editor" style="width: 100%; height: 100%"></div>
         <div style="display: none">
             <textarea id="code-body"></textarea>
@@ -29,71 +32,80 @@ func blockReplIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[str
 	</div>
 	<div class="col-md-4">
 		<h5>Output</h5>
-		<pre id="output">
+		<pre id="output" class="history" style="height: 200px">
 		</pre>
 		<h5>Events</h5>
 		<pre id="event-log" class="history"></pre>
 	</div>
 </div>
+</form>
 `)
 }
 func blockReplIndexHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 28, offset 34 in repl/index.html.twig
+	// line 33, offset 34 in repl/index.html.twig
 	fmt.Fprint(output, `
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/ace.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/ext-searchbox.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/ext-spellcheck.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/ext-static_highlight.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/mode-javascript.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/theme-textmate.js"></script>
-<script src="//cdn.jsdelivr.net/ace/1.1.7/min/worker-javascript.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ace.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ext-searchbox.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ext-spellcheck.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ext-static_highlight.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ext-language_tools.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ext-error_marker.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ext-whitespace.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/keybinding-vim.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/mode-javascript.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/theme-twilight.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/worker-javascript.js"></script>
 <script type="text/javascript">
-$(function() {
-	var modeMap = {
-		"Javascript": "ace/mode/javascript",
-	};
-	var $typeField = $('#script_type');
-	var $bodyField = $('#code-body');
-	var editor = ace.edit("editor");
-    editor.setTheme("ace/theme/textmate");
-	editor.resize();
-	editor.setValue($bodyField.val());
-	editor.getSession().on('change', function() {
-		$bodyField.val(editor.getValue());
-	});
-	
-	$typeField.on('change', function() {
-		editor.getSession().setMode(modeMap[$typeField.val()]);
-	}).change();
-	
-	var $execute  = $('#execute');
-	var $output   = $('#output');
-	var $eventLog = $('#event-log');
+	$(function () {
+		const $bodyField = $('#code-body');
 
-	var es = window.squIRCyEvents;
+		const editor = ace.edit('editor');
+		const whitespace = ace.require('ace/ext/whitespace');
+		editor.commands.addCommands(whitespace.commands);
 
-	es.addEventListener("irc.WILDCARD", function(e) {
-		var data = JSON.parse(e.data);
-		$eventLog.append("[" + data.Code + "] " + data.Nick + "->" + data.Target + ": " + data.Message + "\n");
-		$eventLog[0].scrollTop = $eventLog[0].scrollHeight;
-	});
-	
-	$execute.on('click', function(e) {
-		e.preventDefault();
-		
-		$.ajax({
-			url: $execute.attr('href'),
-			type: 'post',
-			data: {
-				script: editor.getValue(),
-				scriptType: $typeField.val()
-			},
-			success: function(response) {
-				$output.html(JSON.stringify(response, null, '  '))
-			}
+		editor.setOptions({
+			enableBasicAutocompletion: true,
+			enableLiveAutocompletion: true,
+			enableSnippets: false
+		});
+		editor.setKeyboardHandler('vim');
+		editor.setTheme('ace/theme/twilight');
+		editor.setValue($bodyField.val());
+		editor.getSession().setMode('ace/mode/javascript');
+		editor.getSession().on('change', function () {
+			$bodyField.val(editor.getValue());
+		});
+		editor.resize();
+
+
+		var $execute = $('#execute');
+		var $output = $('#output');
+		var $eventLog = $('#event-log');
+
+		var es = window.squIRCyEvents;
+
+		es.addEventListener("irc.WILDCARD", function (e) {
+			var data = JSON.parse(e.data);
+			$eventLog.append("[" + data.Code + "] " + data.Nick + "->" + data.Target + ": " + data.Message + "\n");
+			$eventLog[0].scrollTop = $eventLog[0].scrollHeight;
+		});
+
+		$execute.on('click', function (e) {
+			e.preventDefault();
+
+			$.ajax({
+				url: $execute.attr('href'),
+				type: 'post',
+				data: {
+					script: editor.getValue(),
+					scriptType: 'Javascript'
+				},
+				success: function (response) {
+					$output.html(JSON.stringify(response, null, '  '))
+				}
+			});
 		});
 	});
-});
 </script>
 `)
 }
@@ -104,11 +116,11 @@ func TemplateReplIndexHtmlTwig(env *stick.Env, output io.Writer, ctx map[string]
 <html>
 <head>
   <title>squIRCy</title>
-  <script src="//cdn.jsdelivr.net/jquery/2.1.1/jquery.min.js"></script>
-  <script src="//cdn.jsdelivr.net/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-  <script src="//cdn.jsdelivr.net/momentjs/2.8.1/moment.min.js"></script>
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap/3.2.0/css/bootstrap.min.css">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/fontawesome/4.2.0/css/font-awesome.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/cyborg/bootstrap.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 
@@ -125,10 +137,10 @@ func TemplateReplIndexHtmlTwig(env *stick.Env, output io.Writer, ctx map[string]
 		</div>
 	</div>
 
-	<nav id="main-nav" class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 	  	<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand" href="https://github.com/veonik/squircy2">squIRCy2</a>
+				<a class="navbar-brand" href="https://squircy.com" target="_blank">squIRCy</a>
         	</div>
 			<ul class="nav navbar-nav">
 				<li><a href="/">Dashboard</a></li>
@@ -230,11 +242,11 @@ $(function() {
 	fmt.Fprint(output, `
 
 `)
-	// line 26, offset 14 in repl/index.html.twig
+	// line 31, offset 14 in repl/index.html.twig
 	fmt.Fprint(output, `
 
 `)
-	// line 84, offset 14 in repl/index.html.twig
+	// line 97, offset 14 in repl/index.html.twig
 	fmt.Fprint(output, `
 `)
 }

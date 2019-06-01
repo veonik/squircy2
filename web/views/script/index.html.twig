@@ -1,31 +1,56 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
-<h4>Scripts</h4>
+<div class="row">
+	<div class="col-sm-6">
+		<h4>Script Management</h4>
+	</div>
+	<div class="col-sm-6">
+		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/resources/js-api.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
+	</div>
+</div>
+{% if (scripts|length) > 0 %}
 <table class="table table-bordered table-striped">
 	<tr>
-		<th>Title</th>
+		<th style="width: 175px">Title</th>
 		<th>Body</th>
-		<th><a href="/script/new" class="btn btn-primary btn-sm">New Script</a></th>
+		<th style="width: 250px"><a href="/script/new" class="btn btn-primary"><i class="fa fa-plus"></i> New Script</a></th>
 	</tr>
 	{% for el in scripts %}
 	<tr>
 		<td>{{ el.Title }}</td>
 		<td class="code-preview">{{ el.Body }}</td>
 		<td>
-			<div class="btn-group">
-				<a href="/script/{{ el.ID }}/edit" class="btn btn-sm btn-default">Edit</a>
-				<a href="/script/{{ el.ID }}/remove" class="remove btn btn-sm btn-warning">Remove</a>
+			<a href="/script/{{ el.ID }}/edit" class="btn btn-default"><i class="fa fa-edit"></i> Edit</a>
+			<div class="btn-group pull-right">
+				{% if el.Enabled %}
+					<a href="/script/{{ el.ID }}/toggle" class="toggle btn btn-warning">Disable</a>
+				{% else %}
+					<a href="/script/{{ el.ID }}/toggle" class="toggle btn btn-success">Enable</a>
+				{% endif %}
+				<a href="/script/{{ el.ID }}/remove" class="remove btn btn-danger">Remove</a>
 			</div>
-			{% if el.Enabled %}
-				<a href="/script/{{ el.ID }}/toggle" class="toggle btn btn-sm btn-default">Disable</a>
-			{% else %}
-				<a href="/script/{{ el.ID }}/toggle" class="toggle btn btn-sm btn-success">Enable</a>
-			{% endif %}
+
 		</td>
 	</tr>
 	{% endfor %}
 </table>
+{% else %}
+<div class="panel panel-primary">
+	<div class="panel-heading"><i class="fa fa-info-circle"></i> No scripts created, yet.</div>
+	<div class="panel-body">
+		<p class="lead">Scripts are the building blocks used to personalize and enhance your bot.</p>
+		<p>Written in JavaScript, scripts use the bot's special API to make interesting things happen.</p>
+		<p>Refer to the <a href="https://squircy.com/resources/js-api.html">JavaScript API Reference</a> on the squIRCy2 website for the comprehensive list of available APIs.</p>
+		<p>
+			Looking for ideas? Check out the <a href="https://squircy.com/resources/examples.html" target="_blank">Example Scripts section</a> on the squIRCy2 website!
+		</p>
+	</div>
+	<div class="panel-footer">
+		<a href="/script/new" class="btn btn-primary"><i class="fa fa-plus"></i> Create New Script</a>
+	</div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block additional_javascripts %}

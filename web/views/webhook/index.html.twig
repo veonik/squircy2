@@ -1,35 +1,64 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
-<h4>Webhooks</h4>
+<div class="row">
+	<div class="col-sm-6">
+		<h4>Webhook Management</h4>
+	</div>
+	<div class="col-sm-6">
+		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/resources/webhooks.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
+	</div>
+</div>
+{% if (webhooks|length) > 0 %}
 <table class="table table-bordered table-striped">
 	<tr>
 	    <th>Title</th>
-		<th>Url</th>
+		<th>URL</th>
 		<th>Key</th>
 		<th>Header</th>
-		<th><a href="/webhook/new" class="btn btn-primary btn-sm">New Webhook</a></th>
+		<th><a href="/webhook/new" class="btn btn-primary"><i class="fa fa-plus"></i> New Webhook</a></th>
 	</tr>
 	{% for el in webhooks %}
 	<tr>
 	    <td>{{ el.Title }}</td>
-		<td>/webhooks/{{ el.ID }}</td>
+		<td><a href="/webhooks/{{ el.ID }}">/webhooks/{{ el.ID }}</a></td>
 		<td>{{ el.Key }}</td>
 		<td>{{ el.SignatureHeader }}</td>
 		<td>
-			<div class="btn-group">
-				<a href="/webhook/{{ el.ID }}/edit" class="btn btn-sm btn-default">Edit</a>
-				<a href="/webhook/{{ el.ID }}/remove" class="remove btn btn-sm btn-warning">Remove</a>
+			<a href="/webhook/{{ el.ID }}/edit" class="btn btn-default"><i class="fa fa-edit"></i> Edit</a>
+			<div class="btn-group pull-right">
+				{% if el.Enabled %}
+					<a href="/webhook/{{ el.ID }}/toggle" class="toggle btn btn-warning">Disable</a>
+				{% else %}
+					<a href="/webhook/{{ el.ID }}/toggle" class="toggle btn btn-success">Enable</a>
+				{% endif %}
+				<a href="/webhook/{{ el.ID }}/remove" class="remove btn btn-danger">Remove</a>
 			</div>
-			{% if el.Enabled %}
-				<a href="/webhook/{{ el.ID }}/toggle" class="toggle btn btn-sm btn-default">Disable</a>
-			{% else %}
-				<a href="/webhook/{{ el.ID }}/toggle" class="toggle btn btn-sm btn-success">Enable</a>
-			{% endif %}
 		</td>
 	</tr>
 	{% endfor %}
 </table>
+{% else %}
+<div class="panel panel-primary">
+	<div class="panel-heading"><i class="fa fa-info-circle"></i> No webhooks created, yet.</div>
+	<div class="panel-body">
+		<p class="lead">Use webhooks to integrate squIRCy with GitHub, Slack, or anything really!</p>
+		<p>
+			Webhooks are unique links that trigger an event within the bot when they are loaded. Scripts may bind to these
+			webhook events and when a given webhook is invoked, any bound event listeners for that webhook will also be invoked.
+		</p>
+		<p>
+			Anything capable of sending an HTTP request when something interesting happens can be made to support this type of integration.
+		</p>
+		<p>
+			Check out the <a href="https://squircy.com/resources/webhooks.html" target="_blank">Webhooks documentation page</a> on the squIRCy2 website for a full overview.
+		</p>
+	</div>
+	<div class="panel-footer">
+		<a href="/webhook/new" class="btn btn-primary btn"><i class="fa fa-plus"></i> Create New Webhook</a>
+	</div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block additional_javascripts %}

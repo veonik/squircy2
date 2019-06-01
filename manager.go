@@ -2,7 +2,7 @@ package squircy2 // import "github.com/veonik/squircy2"
 
 //go:generate go-bindata -prefix "./web" -pkg generated -tags "!debug" -modtime 0 -o "./web/generated/bindata.go" ./web/public/...
 //go:generate stickgen -path "./web/views" -out web/generated index.html.twig
-//go:generate stickgen -path "./web/views" -out web/generated **/[a-z]*.twig
+//go:generate stickgen -path "./web/views" -out web/generated **/[_a-z]*.twig
 
 import (
 	"encoding/json"

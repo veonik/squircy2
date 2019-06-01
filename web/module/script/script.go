@@ -14,7 +14,7 @@ import (
 )
 
 func init() {
-	web.Register(NewWithInjector)
+	web.MustRegister(NewWithInjector)
 }
 
 type module struct {

@@ -1,217 +1,195 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
-<h4>Settings</h4>
+<div class="row">
+	<div class="col-sm-6">
+		<h4>Modify Settings</h4>
+	</div>
+	<div class="col-sm-6">
+		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
+	</div>
+</div>
 <form method="post" action="/manage/update">
 <div class="row">
-	<div class="col-sm-12">
-		<h2>IRC</h2>
-	</div>
-</div>
-<div class="row">
-	<div class="col-md-4 form-group">
-		<label for="network">Network</label>
-  		<input class="form-control" name="network" id="network" placeholder="irc.freenode.net:6667" value="{{ config.Network }}">
-		<div class="checkbox">
-			<label for="tls">
-				<input type="checkbox" name="tls" id="tls" value="on" {% if config.TLS %}checked {% endif %}> Use TLS
-			</label>
-		</div>
-		<div class="checkbox">
-			<label for="auto_connect">
-				<input type="checkbox" name="auto_connect" id="auto_connect" value="on" {% if config.AutoConnect %}checked {% endif %}> Connect to IRC when squIRCy2 starts
-			</label>
+	<div class="col-md-4">
+		<h5>IRC</h5>
+		<div class="form-group">
+			<label for="network">Network</label>
+			<input class="form-control" name="network" id="network" placeholder="irc.freenode.net:6667" value="{{ config.Network }}">
+			<div class="checkbox">
+				<label for="tls">
+					<input type="checkbox" name="tls" id="tls" value="on" {% if config.TLS %}checked {% endif %}> Use TLS
+				</label>
+			</div>
+			<div class="checkbox">
+				<label for="auto_connect">
+					<input type="checkbox" name="auto_connect" id="auto_connect" value="on" {% if config.AutoConnect %}checked {% endif %}> Connect to IRC when squIRCy2 starts
+				</label>
+			</div>
 		</div>
 	</div>
-</div>
-<div class="row">
-	<div class="col-md-4 form-group">
-		<label for="nick">Bot Nickname</label>
-  		<input class="form-control" name="nick" id="nick" placeholder="mrsquishy" value="{{ config.Nick }}">
-	</div>
-	<div class="col-md-4 form-group">
-		<label for="username">Bot Username</label>
-  		<input class="form-control" name="username" id="username" placeholder="mrjones" value="{{ config.Username }}">
+	<div class="col-md-6 col-md-offset-2">
+		{% include 'manage/_save_button.html.twig' %}
 	</div>
 </div>
 <div class="row">
-	<div class="col-md-4 form-group">
-		<label for="owner_nick">Owner Nickname</label>
-  		<input class="form-control" name="owner_nick" id="owner_nick" placeholder="" value="{{ config.OwnerNick }}">
+	<div class="col-md-4">
+		<div class="form-group">
+			<label for="nick">Bot Nickname</label>
+			<input class="form-control" name="nick" id="nick" placeholder="mrsquishy" value="{{ config.Nick }}">
+		</div>
+		<div class="form-group">
+			<label for="username">Bot Username</label>
+			<input class="form-control" name="username" id="username" placeholder="mrjones" value="{{ config.Username }}">
+		</div>
+		<div class="form-group">
+			<label for="owner_nick">Owner Nickname</label>
+			<input class="form-control" name="owner_nick" id="owner_nick" placeholder="" value="{{ config.OwnerNick }}">
+		</div>
+		<div class="form-group">
+			<label for="owner_host">Owner Hostname</label>
+			<input class="form-control" name="owner_host" id="owner_host" placeholder="" value="{{ config.OwnerHost }}">
+		</div>
 	</div>
-	<div class="col-md-4 form-group">
-		<label for="owner_host">Owner Hostname</label>
-  		<input class="form-control" name="owner_host" id="owner_host" placeholder="" value="{{ config.OwnerHost }}">
-	</div>
-</div>
-	<div class="row">
-		<div class="col-md-4 form-group">
+	<div class="col-md-4 col-md-offset-1">
+		<div class="form-group">
 			<div class="checkbox">
 				<label for="enable_sasl">
 					<input type="checkbox" name="enable_sasl" id="enable_sasl" value="on" {% if config.SASL %}checked {% endif %}> Enable SASL Authentication
 				</label>
 			</div>
 		</div>
-	</div>
-	<div class="row">
-		<div class="col-md-4 form-group">
+		<div class="form-group">
 			<label for="sasl_nickname">SASL Username</label>
 			<input class="form-control" name="sasl_username" id="sasl_username" placeholder="" value="{{ config.SASLUsername }}">
 		</div>
-		<div class="col-md-4 form-group">
+		<div class="form-group">
 			<label for="sasl_password">SASL Password</label>
 			<input class="form-control" type="password" name="sasl_password" id="sasl_password" value="{{ config.SASLPassword }}">
 		</div>
-	</div>
-<div class="row">
-	<div class="col-sm-12">
-		<h2>Script Management</h2>
+
 	</div>
 </div>
-<div class="row">
-	<div class="col-md-4 form-group">
-		<div class="checkbox">
-			<label for="scripts_as_files">
-				<input type="checkbox" name="scripts_as_files" id="scripts_as_files" value="on" {% if config.ScriptsAsFiles %}checked {% endif %}> Store Scripts on the Filesystem
-			</label>
-		</div>
-	</div>
-</div>
-<div class="row">
-	<div class="col-md-4 form-group">
-		<label for="scripts_path">Scripts Storage Path</label>
-		<input class="form-control" name="scripts_path" id="scripts_path" placeholder="{{ config.RootPath }}/scripts/" value="{{ config.ScriptsPath }}">
-	</div>
-	<div class="col-md-4 form-group">
-		<label>Script Utilities</label><br>
-		<div class="btn-group">
-			<a id="export-scripts" class="btn btn-warning">Export to Filesystem</a>
-			<a id="import-scripts" class="btn btn-danger">Import from Filesystem</a>
-		</div>
-	</div>
-</div>
-<div class="row">
-	<div class="col-md-4 form-group">
-		<div class="checkbox">
-			<label for="enable_file_api">
-				<input type="checkbox" name="enable_file_api" id="enable_file_api" value="on" {% if config.EnableFileAPI %}checked {% endif %}> Enable Filesystem API in Scripts
-			</label>
-		</div>
-	</div>
-</div>
-<div class="row">
-	<div class="col-md-4 form-group">
-		<label for="file_api_root">File API Root Path</label>
-		<input class="form-control" name="file_api_root" id="file_api_root" placeholder="{{ config.RootPath }}/storage/" value="{{ config.FileAPIRoot }}">
-	</div>
-</div>
-<div class="row">
-	<div class="col-sm-12">
-		<h2>Web Server</h2>
-	</div>
-</div>
-<div class="row">
-	<div class="col-md-4 form-group">
-		<div class="checkbox">
-			<label for="web_interface">
-				<input type="checkbox" name="web_interface" id="web_interface" value="on" {% if config.WebInterface %}checked {% endif %}> Enable Web Interface
-			</label>
-		</div>
-		<label for="http_host_port">HTTP Listen Host and Port</label>
-		<input class="form-control" name="http_host_port" id="http_host_port" placeholder=":3000" value="{{ config.HTTPHostPort }}">
-	</div>
-</div>
-<div class="row">
-	<div class="col-sm-12">
-		<h3>HTTP(S) Authentication</h3>
-	</div>
-</div>
-<div class="row">
-	<div class="col-sm-12">
-		<div class="checkbox">
-			<label for="http_auth">
-				<input type="checkbox" name="http_auth" id="http_auth" value="on" {% if config.HTTPAuth %}checked {% endif %}> Enable HTTP BasicAuth
-			</label>
-		</div>
-	</div>
-</div>
-<div class="row">
-	<div class="col-md-4 form-group">
-		<label for="auth_username">Username</label>
-		<input class="form-control" name="auth_username" id="auth_username" placeholder="Username" value="{{ config.AuthUsername }}">
-	</div>
-	<div class="col-md-4 form-group">
-		<label for="auth_password">Password</label>
-		<input class="form-control" name="auth_password" id="auth_password" placeholder="Password" value="{{ config.AuthPassword }}">
-	</div>
-</div>
-<div class="row">
-	<div class="col-sm-12">
-		<h3>HTTPS</h3>
-	</div>
-</div>
-<div class="row">
-	<div class="col-sm-12">
-		<div class="checkbox">
-			<label for="https">
-				<input type="checkbox" name="https" id="https" value="on" {% if config.HTTPS %}checked {% endif %}> Enable HTTPS
-			</label>
-		</div>
-		<div class="checkbox">
-			<label for="require_https">
-				<input type="checkbox" name="require_https" id="require_https" value="on" {% if config.RequireHTTPS %}checked {% endif %}> Require HTTPS
-			</label>
-		</div>
-	</div>
-</div>
-<div class="row">
-	<div class="col-md-4 form-group">
-		<label for="ssl_host_port">SSL Listen Host and Port</label>
-		<input class="form-control" name="ssl_host_port" id="ssl_host_port" placeholder=":3443" value="{{ config.SSLHostPort }}">
-	</div>
-</div>
-<div class="row">
-	<div class="col-md-4 form-group">
-		<label for="ssl_cert_file">SSL Certificate File</label>
-		<input class="form-control" name="ssl_cert_file" id="ssl_cert_file" placeholder="/path/to/cert.pem" value="{{ config.SSLCertFile }}">
-	</div>
-	<div class="col-md-4 form-group">
-		<label for="ssl_cert_key">SSL Certificate Key File</label>
-		<input class="form-control" name="ssl_cert_key" id="ssl_cert_key" placeholder="/path/to/key.pem" value="{{ config.SSLCertKey }}">
-	</div>
-</div>
-<div class="row">
-	<div class="col-sm-12">
-		<h3>Plugins</h3>
-	</div>
-</div>
-<div class="row">
-	<div class="col-md-4 form-group">
-		<label for="plugins_enabled">Enabled Plugins</label>
-		<input class="form-control" name="plugins_enabled" id="plugins_enabled" placeholder="plugin1,plugin2" value="{{ format_plugin_names(config.PluginsEnabled) }}">
-		<p>Comma separated list without the .so extension</p>
-	</div>
-	<div class="col-md-4 form-group">
-		<label for="plugins_path">Plugin Root Path</label>
-		<input class="form-control" name="plugins_path" id="plugins_path" placeholder="/path/to/squircy/plugins" value="{{ config.PluginsPath }}">
-	</div>
-</div>
-<div class="row">
-	<div class="col-md-6 form-group">
-		<div class="alert alert-warning">
-			<div class="row">
-				<div class="col-md-10">
-					<h4><i class="fa fa-exclamation-triangle"></i> Notice</h4>
-					<p>squIRCy2 may need to be restarted for changes to take effect.</p>
+
+	<div class="row">
+		<div class="col-md-4">
+			<h5>Script Management</h5>
+			<div class="form-group">
+				<div class="checkbox">
+					<label for="scripts_as_files">
+						<input type="checkbox" name="scripts_as_files" id="scripts_as_files" value="on" {% if config.ScriptsAsFiles %}checked {% endif %}> Store Scripts as regular files on the Filesystem
+					</label>
 				</div>
 			</div>
-			<div class="row">
-				<div class="col-md-10">
-					<button class="btn btn-primary form-control" id="save_button">Save</button>
+			<div class="form-group">
+				<label for="scripts_path">Scripts Storage Path</label>
+				<input class="form-control" name="scripts_path" id="scripts_path" placeholder="{{ config.RootPath }}/scripts/" value="{{ config.ScriptsPath }}">
+			</div>
+			<div class="form-group">
+				<label>Script Utilities</label><br>
+				<div class="btn-group">
+					<a id="export-scripts" class="btn btn-default"><i class="fa fa-external-link"></i> Export to Filesystem</a>
+					<a id="import-scripts" class="btn btn-default btn-default-alt"><i class="fa fa-external-link fa-rotate-180"></i> Import from Filesystem</a>
 				</div>
+			</div>
+			<div class="form-group">
+				<div class="checkbox">
+					<label for="enable_file_api">
+						<input type="checkbox" name="enable_file_api" id="enable_file_api" value="on" {% if config.EnableFileAPI %}checked {% endif %}> Enable Filesystem API in Scripts <a style="font-size: 1.1em" href="https://squircy.com/resources/js-api.html#file-api" target="_blank"><i class="fa fa-question-circle"></i></a>
+					</label>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="file_api_root">File API Root Path</label>
+				<input class="form-control" name="file_api_root" id="file_api_root" placeholder="{{ config.RootPath }}/storage/" value="{{ config.FileAPIRoot }}">
+			</div>
+		</div>
+		<div class="col-md-4 col-md-offset-1">
+			<h5>Plugins</h5>
+			<div class="form-group">
+				<label for="plugins_enabled">Enabled Plugins</label>
+				<input class="form-control" name="plugins_enabled" id="plugins_enabled" placeholder="plugin1,plugin2" value="{{ config.PluginsEnabled|join(',') }}">
+				<p>Comma separated list without the .so extension</p>
+			</div>
+			<div class="form-group">
+				<label for="plugins_path">Plugin Root Path</label>
+				<input class="form-control" name="plugins_path" id="plugins_path" placeholder="/path/to/squircy/plugins" value="{{ config.PluginsPath }}">
 			</div>
 		</div>
 	</div>
+	<div class="row">
+		<div class="col-md-4">
+			<h5>Web Server</h5>
+			<div class="form-group">
+				<div class="checkbox">
+					<label for="web_interface">
+						<input type="checkbox" name="web_interface" id="web_interface" value="on" {% if config.WebInterface %}checked {% endif %}> Enable Web Interface
+					</label>
+				</div>
+				<label for="http_host_port">HTTP Listen Host and Port</label>
+				<input class="form-control" name="http_host_port" id="http_host_port" placeholder=":3000" value="{{ config.HTTPHostPort }}">
+			</div>
+			<br>
+			<h5>HTTPS</h5>
+			<div class="form-group">
+				<div class="checkbox">
+					<label for="https">
+						<input type="checkbox" name="https" id="https" value="on" {% if config.HTTPS %}checked {% endif %}> Enable HTTPS
+					</label>
+				</div>
+				<div class="checkbox">
+					<label for="require_https">
+						<input type="checkbox" name="require_https" id="require_https" value="on" {% if config.RequireHTTPS %}checked {% endif %}> Require HTTPS
+					</label>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4 col-md-offset-1">
+			<div class="form-group">
+				<h5>HTTP(S) Authentication</h5>
+				<div class="checkbox">
+					<label for="http_auth">
+						<input type="checkbox" name="http_auth" id="http_auth" value="on" {% if config.HTTPAuth %}checked {% endif %}> Enable HTTP BasicAuth
+					</label>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="auth_username">Username</label>
+				<input class="form-control" name="auth_username" id="auth_username" placeholder="Username" value="{{ config.AuthUsername }}">
+			</div>
+			<div class="form-group">
+				<label for="auth_password">Password</label>
+				<input class="form-control" name="auth_password" id="auth_password" placeholder="Password" value="{{ config.AuthPassword }}">
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-4">
+			<div class="form-group">
+				<label for="ssl_host_port">SSL Listen Host and Port</label>
+				<input class="form-control" name="ssl_host_port" id="ssl_host_port" placeholder=":3443" value="{{ config.SSLHostPort }}">
+			</div>
+			<div class="form-group">
+				<label for="ssl_cert_file">SSL Certificate File</label>
+				<input class="form-control" name="ssl_cert_file" id="ssl_cert_file" placeholder="/path/to/cert.pem" value="{{ config.SSLCertFile }}">
+			</div>
+		</div>
+	</div>
+<div class="row">
+	<div class="col-md-4">
+		<div class="row">
+			<div class="col-md-12 form-group">
+				<label for="ssl_cert_key">SSL Certificate Key File</label>
+				<input class="form-control" name="ssl_cert_key" id="ssl_cert_key" placeholder="/path/to/key.pem" value="{{ config.SSLCertKey }}">
+			</div>
+		</div>
+	</div>
+	<div class="col-md-6 col-md-offset-2">
+		{% include 'manage/_save_button.html.twig' %}
+	</div>
+</div>
+<div class="row">
+
 </div>
 </form>
 <form action="/manage/import-scripts" method="post">
@@ -224,7 +202,7 @@
 			</div>
 			<div class="modal-body">
 				<p>Continue importing scripts from filesystem?</p>
-				<div class="alert alert-warning"><strong><i class="fa fa-info-circle"></i> Note —</strong> Existing scripts will be updated.</div>
+				<div class="alert alert-info"><strong><i class="fa fa-info-circle"></i> Note —</strong> Existing scripts will be updated.</div>
 				<div class="form-group">
 					<label for="scripts_import_path">Scripts stored in squIRCy2's database will be imported from:</label>
 					<input class="form-control" name="scripts_import_path" id="scripts_import_path" value="{{ config.ScriptsPath }}">
@@ -248,7 +226,7 @@
 			</div>
 			<div class="modal-body">
 				<p>Continue exporting scripts to filesystem?</p>
-				<div class="alert alert-warning">
+				<div class="alert alert-info">
 					<p><strong><i class="fa fa-info-circle"></i> Note —</strong> Existing scripts will be updated.</p>
 				</div>
 				<div class="form-group">

@@ -19,7 +19,7 @@ import (
 )
 
 func init() {
-	web.Register(NewWithInjector)
+	web.MustRegister(NewWithInjector)
 }
 
 type module struct {
@@ -104,9 +104,9 @@ func (m *module) createWebhookAction(r render.Render, request *http.Request) {
 func (m *module) editWebhookAction(s *web.StickHandler, params martini.Params) {
 	id, _ := strconv.ParseInt(params["id"], 0, 64)
 
-	webhook := m.repo.Fetch(int(id))
+	wh := m.repo.Fetch(int(id))
 
-	s.HTML(200, "webhook/edit.html.twig", map[string]stick.Value{"webhook": webhook})
+	s.HTML(200, "webhook/edit.html.twig", map[string]stick.Value{"webhook": wh})
 }
 
 func (m *module) updateWebhookAction(r render.Render, params martini.Params, request *http.Request) {
@@ -156,6 +156,10 @@ func (m *module) webhookReceiveAction(r render.Render, request *http.Request, pa
 	h := m.repo.Fetch(webhookId)
 	if h == nil {
 		r.JSON(404, "Webhook not found")
+		return
+	}
+	if !h.Enabled {
+		r.JSON(400, "Webhook is disabled")
 		return
 	}
 	// Get signature

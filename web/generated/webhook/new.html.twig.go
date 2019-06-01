@@ -4,32 +4,57 @@
 package webhook
 
 import (
-	"fmt"
-	"io"
-
 	"github.com/tyler-sommer/stick"
+	"io"
+	"fmt"
 )
 
 func blockWebhookNewHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 3, offset 19 in webhook/new.html.twig
 	fmt.Fprint(output, `
+<div class="row">
+	<div class="col-sm-6">
+		<h4>New Webhook</h4>
+	</div>
+	<div class="col-sm-6">
+		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/resources/webhooks.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
+	</div>
+</div>
 <form method="post" action="/webhook/create">
 <div class="row">
-	<div class="col-md-4 form-group">
-	    <label for="title">Title</label>
-		<input class="form-control" name="title" placeholder="Title">
+	<div class="col-md-7">
+		<div class="row">
+			<div class="col-md-5 form-group">
+				<label for="hook-title">Title</label>
+				<input class="form-control" id="hook-title" name="title" required placeholder="A Descriptive Title">
+			</div>
+			<div class="col-md-4 form-group">
+				<label for="signature">Signature Header</label>
+				<input class="form-control" id="signature" name="signature" required placeholder="Header name containing payload signature" value="X-Signature">
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-5">
+				<button class="form-control btn btn-primary">Create</button>
+			</div>
+		</div>
 	</div>
-	<div class="col-md-3 form-group">
-	    <label for="signature">Signature Header</label>
-		<input class="form-control" name="signature" placeholder="SignatureHeader" value="X-Signature">
+	<div class="col-md-5">
+		`)
+	// line 1, offset 0 in webhook/_more_info.html.twig
+	fmt.Fprint(output, `<div class="panel panel-primary">
+    <div class="panel-heading"><i class="fa fa-question-circle"></i> More Info</div>
+    <div class="panel-body">
+        <p>Each incoming webhook request must contain a valid signature in the signature header defined here.</p>
+        <p>A key will be automatically generated when the webhook is created, and the key is used to derive a signature unique to the payload body.</p>
+        <p>A <a href="https://squircy.com/resources/webhooks.html" target="_blank">reference Webhook sender implementation</a> is available on the squIRCy website.</p>
+    </div>
+</div>`)
+	// line 32, offset 46 in webhook/new.html.twig
+	fmt.Fprint(output, `
 	</div>
 </div>
-<br>
-<div class="row">
-	<div class="col-md-4">
-		<button class="form-control btn btn-primary">Save</button>
-	</div>
-</div>
+
 </form>
 `)
 }
@@ -45,11 +70,11 @@ func TemplateWebhookNewHtmlTwig(env *stick.Env, output io.Writer, ctx map[string
 <html>
 <head>
   <title>squIRCy</title>
-  <script src="//cdn.jsdelivr.net/jquery/2.1.1/jquery.min.js"></script>
-  <script src="//cdn.jsdelivr.net/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-  <script src="//cdn.jsdelivr.net/momentjs/2.8.1/moment.min.js"></script>
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap/3.2.0/css/bootstrap.min.css">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/fontawesome/4.2.0/css/font-awesome.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/cyborg/bootstrap.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 
@@ -66,10 +91,10 @@ func TemplateWebhookNewHtmlTwig(env *stick.Env, output io.Writer, ctx map[string
 		</div>
 	</div>
 
-	<nav id="main-nav" class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 	  	<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand" href="https://github.com/veonik/squircy2">squIRCy2</a>
+				<a class="navbar-brand" href="https://squircy.com" target="_blank">squIRCy</a>
         	</div>
 			<ul class="nav navbar-nav">
 				<li><a href="/">Dashboard</a></li>
@@ -171,7 +196,7 @@ $(function() {
 	fmt.Fprint(output, `
 
 `)
-	// line 22, offset 14 in webhook/new.html.twig
+	// line 37, offset 14 in webhook/new.html.twig
 	fmt.Fprint(output, `
 `)
 }

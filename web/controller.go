@@ -60,6 +60,44 @@ func newStickHandler() martini.Handler {
 		}
 		return html.EscapeString(stick.CoerceString(args[0]))
 	}
+	env.Filters["default"] = func(ctx stick.Context, val stick.Value, args ...stick.Value) stick.Value {
+		res := stick.CoerceString(val)
+		if len(res) == 0 && len(args) > 0 {
+			res = stick.CoerceString(args[0])
+		}
+		return res
+	}
+	env.Filters["join"] = func(ctx stick.Context, val stick.Value, args ...stick.Value) stick.Value {
+		if len(args) == 0 {
+			return nil
+		}
+		if !stick.IsIterable(val) {
+			return nil
+		}
+		sep := []byte(stick.CoerceString(args[0]))
+		var res []byte
+		_, err := stick.Iterate(val, func(k, v stick.Value, l stick.Loop) (brk bool, err error) {
+			if len(res) > 0 {
+				res = append(append(res, sep...), stick.CoerceString(v)...)
+			} else {
+				res = append(res, stick.CoerceString(v)...)
+			}
+			return false, nil
+		})
+		if err != nil {
+			// ?
+		}
+		return string(res)
+	}
+	env.Filters["length"] = func(ctx stick.Context, val stick.Value, args ...stick.Value) stick.Value {
+		if stick.IsIterable(val) {
+			l, _ := stick.Iterate(val, func(k, v stick.Value, l stick.Loop) (brk bool, err error) {
+				return
+			})
+			return l
+		}
+		return len(stick.CoerceString(val))
+	}
 	genv := &generatedEnv{env, templateMapping}
 	return func(res http.ResponseWriter, req *http.Request, c martini.Context) {
 		c.Map(&StickHandler{genv, res})

@@ -1,22 +1,67 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
-<form method="post" action="/webhook/{{ webhook.ID }}/update">
 <div class="row">
-	<div class="col-md-4 form-group">
-	    <label for="title">Title</label>
-		<input class="form-control" id="title" name="title" placeholder="Title" value="{{ webhook.Title }}">
+	<div class="col-sm-6">
+		<h4>Modify Webhook</h4>
 	</div>
-	<div class="col-md-3 form-group">
-    	<label for="signature">Signature Header</label>
-		<input class="form-control" id="signature" name="signature" placeholder="Signature Header" value="{{ webhook.SignatureHeader }}">
+	<div class="col-sm-6">
+		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/resources/webhooks.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
 	</div>
 </div>
-<br>
+<form method="post" action="/webhook/{{ webhook.ID }}/update">
 <div class="row">
-	<div class="col-md-4">
-		<button class="form-control btn btn-primary">Save</button>
+	<div class="col-md-7">
+		<div class="row">
+			<div class="col-md-5 form-group">
+				<label for="hook-title">Title</label>
+				<input class="form-control" id="hook-title" name="title" required placeholder="A Descriptive Title" value="{{ webhook.Title }}">
+			</div>
+			<div class="col-md-4 form-group">
+				<label for="signature">Signature Header</label>
+				<input class="form-control" id="signature" name="signature" required placeholder="Header name containing payload signature" value="{{ webhook.SignatureHeader }}">
+			</div>
+		</div>
+		<div class="row" id="webhook_key_container">
+			<div class="col-md-8 form-group">
+				<label class="control-label" for="webhook_key">Key</label>
+				<div class="input-group">
+					<input class="form-control" id="webhook_key" name="key" readonly aria-readonly="true" placeholder="Header name containing payload signature" value="{{ webhook.Key }}">
+					<a class="input-group-addon" href="javascript:;" id="webhook_key_copy"><i class="fa fa-copy"></i> Copy</a>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-5">
+				<button class="form-control btn btn-primary">Save Changes</button>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-5">
+		{% include 'webhook/_more_info.html.twig' %}
 	</div>
 </div>
 </form>
+{% endblock %}
+
+{% block additional_javascripts %}
+<script type="text/javascript">
+	$(function() {
+		const $keyInput = $(document.getElementById('webhook_key'));
+		const $keyContainer = $(document.getElementById('webhook_key_container'));
+		const $copyKey = $(document.getElementById('webhook_key_copy'));
+		const originalCopyKeyContents = $copyKey.html();
+
+		$keyContainer.on('click', function(e) {
+			e.preventDefault();
+			$keyInput.select();
+			document.execCommand('copy');
+			$copyKey.html('Copied');
+			$keyContainer.once('mouseover', function() {
+				$copyKey.html(originalCopyKeyContents)
+			})
+		});
+
+	});
+</script>
 {% endblock %}

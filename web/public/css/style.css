@@ -1,4 +1,5 @@
 body {
+	color: #eee;
 	padding-top: 70px;
 }
 
@@ -6,14 +7,36 @@ body {
 	vertical-align: middle;
 }
 
+#main-container > .row .row {
+	margin-bottom: 10px;
+}
+
+.btn.btn-default-alt {
+	background-color: #646464;
+	border-color: #424242;
+}
+
+.btn.btn-default-alt:hover {
+	color: #ffffff;
+	background-color: #282828;
+	border-color: #232323;
+}
+
+form input[readonly].form-control {
+	color: #888888;
+	background-color: #ffffff;
+	background-image: none;
+	border: 1px solid #282828;
+}
+
 .code-preview {
-	font-family: Menlo,Monaco,Consolas,monospace;
+	font-family: Inconsolata-g,Menlo,Monaco,Consolas,monospace;
 	max-width: 300px; 
 	text-overflow: ellipsis; 
 	white-space: nowrap; 
 	overflow: hidden; 
 	font-size: 13px;
-	color: #333;
+	color: #eee;
 }
 
 #editor {
@@ -21,7 +44,14 @@ body {
 	border-radius: 4px;
 }
 
-pre.history {
+pre.history, textarea.code {
     word-wrap: normal;
-    max-height: 200px;
+    height: 300px;
+	color: #eee;
+	background-color: #222;
+}
+
+.panel-heading i.fa {
+	font-size: 1.2em;
+	margin-right: 8px;
 }

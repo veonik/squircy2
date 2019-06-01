@@ -4,14 +4,26 @@
 package webhook
 
 import (
-	"fmt"
-	"io"
-
 	"github.com/tyler-sommer/stick"
+	"io"
+	"fmt"
 )
 
+func blockWebhookIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
+	// line 3, offset 19 in webhook/index.html.twig
+	fmt.Fprint(output, `
+<div class="row">
+	<div class="col-sm-6">
+		<h4>Webhook Management</h4>
+	</div>
+	<div class="col-sm-6">
+		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/resources/webhooks.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
+	</div>
+</div>
+`)
+}
 func blockWebhookIndexHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 35, offset 34 in webhook/index.html.twig
+	// line 64, offset 34 in webhook/index.html.twig
 	fmt.Fprint(output, `
 <script type="text/javascript">
 $(function() {
@@ -46,133 +58,6 @@ $(function() {
 </script>
 `)
 }
-func blockWebhookIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 3, offset 19 in webhook/index.html.twig
-	fmt.Fprint(output, `
-<h4>Webhooks</h4>
-<table class="table table-bordered table-striped">
-	<tr>
-	    <th>Title</th>
-		<th>Url</th>
-		<th>Key</th>
-		<th>Header</th>
-		<th><a href="/webhook/new" class="btn btn-primary btn-sm">New Webhook</a></th>
-	</tr>
-	`)
-	// line 13, offset 4 in webhook/index.html.twig
-	stick.Iterate(ctx["webhooks"], func(_, el stick.Value, loop stick.Loop) (brk bool, err error) {
-		// line 13, offset 25 in webhook/index.html.twig
-		fmt.Fprint(output, `
-	<tr>
-	    <td>`)
-		// line 15, offset 9 in webhook/index.html.twig
-		{
-			val, err := stick.GetAttr(el, "Title")
-			if err == nil {
-				fmt.Fprint(output, val)
-			}
-		}
-		// line 15, offset 23 in webhook/index.html.twig
-		fmt.Fprint(output, `</td>
-		<td>/webhooks/`)
-		// line 16, offset 16 in webhook/index.html.twig
-		{
-			val, err := stick.GetAttr(el, "ID")
-			if err == nil {
-				fmt.Fprint(output, val)
-			}
-		}
-		// line 16, offset 27 in webhook/index.html.twig
-		fmt.Fprint(output, `</td>
-		<td>`)
-		// line 17, offset 6 in webhook/index.html.twig
-		{
-			val, err := stick.GetAttr(el, "Key")
-			if err == nil {
-				fmt.Fprint(output, val)
-			}
-		}
-		// line 17, offset 18 in webhook/index.html.twig
-		fmt.Fprint(output, `</td>
-		<td>`)
-		// line 18, offset 6 in webhook/index.html.twig
-		{
-			val, err := stick.GetAttr(el, "SignatureHeader")
-			if err == nil {
-				fmt.Fprint(output, val)
-			}
-		}
-		// line 18, offset 30 in webhook/index.html.twig
-		fmt.Fprint(output, `</td>
-		<td>
-			<div class="btn-group">
-				<a href="/webhook/`)
-		// line 21, offset 22 in webhook/index.html.twig
-		{
-			val, err := stick.GetAttr(el, "ID")
-			if err == nil {
-				fmt.Fprint(output, val)
-			}
-		}
-		// line 21, offset 33 in webhook/index.html.twig
-		fmt.Fprint(output, `/edit" class="btn btn-sm btn-default">Edit</a>
-				<a href="/webhook/`)
-		// line 22, offset 22 in webhook/index.html.twig
-		{
-			val, err := stick.GetAttr(el, "ID")
-			if err == nil {
-				fmt.Fprint(output, val)
-			}
-		}
-		// line 22, offset 33 in webhook/index.html.twig
-		fmt.Fprint(output, `/remove" class="remove btn btn-sm btn-warning">Remove</a>
-			</div>
-			`)
-		// line 24, offset 6 in webhook/index.html.twig
-		{
-			val, err := stick.GetAttr(el, "Enabled")
-			if err == nil && stick.CoerceBool(val) {
-				// line 24, offset 22 in webhook/index.html.twig
-				fmt.Fprint(output, `
-				<a href="/webhook/`)
-				// line 25, offset 22 in webhook/index.html.twig
-				{
-					val, err := stick.GetAttr(el, "ID")
-					if err == nil {
-						fmt.Fprint(output, val)
-					}
-				}
-				// line 25, offset 33 in webhook/index.html.twig
-				fmt.Fprint(output, `/toggle" class="toggle btn btn-sm btn-default">Disable</a>
-			`)
-			} else {
-				// line 26, offset 13 in webhook/index.html.twig
-				fmt.Fprint(output, `
-				<a href="/webhook/`)
-				// line 27, offset 22 in webhook/index.html.twig
-				{
-					val, err := stick.GetAttr(el, "ID")
-					if err == nil {
-						fmt.Fprint(output, val)
-					}
-				}
-				// line 27, offset 33 in webhook/index.html.twig
-				fmt.Fprint(output, `/toggle" class="toggle btn btn-sm btn-success">Enable</a>
-			`)
-			}
-		}
-		// line 28, offset 14 in webhook/index.html.twig
-		fmt.Fprint(output, `
-		</td>
-	</tr>
-	`)
-		return false, nil
-	})
-	// line 31, offset 13 in webhook/index.html.twig
-	fmt.Fprint(output, `
-</table>
-`)
-}
 
 func TemplateWebhookIndexHtmlTwig(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 1, offset 0 in layout.html.twig
@@ -180,11 +65,11 @@ func TemplateWebhookIndexHtmlTwig(env *stick.Env, output io.Writer, ctx map[stri
 <html>
 <head>
   <title>squIRCy</title>
-  <script src="//cdn.jsdelivr.net/jquery/2.1.1/jquery.min.js"></script>
-  <script src="//cdn.jsdelivr.net/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-  <script src="//cdn.jsdelivr.net/momentjs/2.8.1/moment.min.js"></script>
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap/3.2.0/css/bootstrap.min.css">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/fontawesome/4.2.0/css/font-awesome.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/cyborg/bootstrap.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 
@@ -201,10 +86,10 @@ func TemplateWebhookIndexHtmlTwig(env *stick.Env, output io.Writer, ctx map[stri
 		</div>
 	</div>
 
-	<nav id="main-nav" class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 	  	<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand" href="https://github.com/veonik/squircy2">squIRCy2</a>
+				<a class="navbar-brand" href="https://squircy.com" target="_blank">squIRCy</a>
         	</div>
 			<ul class="nav navbar-nav">
 				<li><a href="/">Dashboard</a></li>
@@ -306,11 +191,11 @@ $(function() {
 	fmt.Fprint(output, `
 
 `)
-	// line 33, offset 14 in webhook/index.html.twig
+	// line 62, offset 14 in webhook/index.html.twig
 	fmt.Fprint(output, `
 
 `)
-	// line 67, offset 14 in webhook/index.html.twig
+	// line 96, offset 14 in webhook/index.html.twig
 	fmt.Fprint(output, `
 `)
 }

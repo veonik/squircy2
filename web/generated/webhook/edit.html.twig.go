@@ -4,66 +4,127 @@
 package webhook
 
 import (
-	"fmt"
-	"io"
-
 	"github.com/tyler-sommer/stick"
+	"io"
+	"fmt"
 )
 
 func blockWebhookEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 3, offset 19 in webhook/edit.html.twig
 	fmt.Fprint(output, `
+<div class="row">
+	<div class="col-sm-6">
+		<h4>Modify Webhook</h4>
+	</div>
+	<div class="col-sm-6">
+		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/resources/webhooks.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
+	</div>
+</div>
 <form method="post" action="/webhook/`)
-	// line 4, offset 37 in webhook/edit.html.twig
+	// line 12, offset 37 in webhook/edit.html.twig
 	{
 		val, err := stick.GetAttr(ctx["webhook"], "ID")
 		if err == nil {
 			fmt.Fprint(output, val)
 		}
 	}
-	// line 4, offset 53 in webhook/edit.html.twig
+	// line 12, offset 53 in webhook/edit.html.twig
 	fmt.Fprint(output, `/update">
 <div class="row">
-	<div class="col-md-4 form-group">
-	    <label for="title">Title</label>
-		<input class="form-control" id="title" name="title" placeholder="Title" value="`)
-	// line 8, offset 81 in webhook/edit.html.twig
+	<div class="col-md-7">
+		<div class="row">
+			<div class="col-md-5 form-group">
+				<label for="hook-title">Title</label>
+				<input class="form-control" id="hook-title" name="title" required placeholder="A Descriptive Title" value="`)
+	// line 18, offset 111 in webhook/edit.html.twig
 	{
 		val, err := stick.GetAttr(ctx["webhook"], "Title")
 		if err == nil {
 			fmt.Fprint(output, val)
 		}
 	}
-	// line 8, offset 100 in webhook/edit.html.twig
+	// line 18, offset 130 in webhook/edit.html.twig
 	fmt.Fprint(output, `">
-	</div>
-	<div class="col-md-3 form-group">
-    	<label for="signature">Signature Header</label>
-		<input class="form-control" id="signature" name="signature" placeholder="Signature Header" value="`)
-	// line 12, offset 100 in webhook/edit.html.twig
+			</div>
+			<div class="col-md-4 form-group">
+				<label for="signature">Signature Header</label>
+				<input class="form-control" id="signature" name="signature" required placeholder="Header name containing payload signature" value="`)
+	// line 22, offset 135 in webhook/edit.html.twig
 	{
 		val, err := stick.GetAttr(ctx["webhook"], "SignatureHeader")
 		if err == nil {
 			fmt.Fprint(output, val)
 		}
 	}
-	// line 12, offset 129 in webhook/edit.html.twig
+	// line 22, offset 164 in webhook/edit.html.twig
 	fmt.Fprint(output, `">
+			</div>
+		</div>
+		<div class="row" id="webhook_key_container">
+			<div class="col-md-8 form-group">
+				<label class="control-label" for="webhook_key">Key</label>
+				<div class="input-group">
+					<input class="form-control" id="webhook_key" name="key" readonly aria-readonly="true" placeholder="Header name containing payload signature" value="`)
+	// line 29, offset 153 in webhook/edit.html.twig
+	{
+		val, err := stick.GetAttr(ctx["webhook"], "Key")
+		if err == nil {
+			fmt.Fprint(output, val)
+		}
+	}
+	// line 29, offset 170 in webhook/edit.html.twig
+	fmt.Fprint(output, `">
+					<a class="input-group-addon" href="javascript:;" id="webhook_key_copy"><i class="fa fa-copy"></i> Copy</a>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-5">
+				<button class="form-control btn btn-primary">Save Changes</button>
+			</div>
+		</div>
 	</div>
-</div>
-<br>
-<div class="row">
-	<div class="col-md-4">
-		<button class="form-control btn btn-primary">Save</button>
+	<div class="col-md-5">
+		`)
+	// line 1, offset 0 in webhook/_more_info.html.twig
+	fmt.Fprint(output, `<div class="panel panel-primary">
+    <div class="panel-heading"><i class="fa fa-question-circle"></i> More Info</div>
+    <div class="panel-body">
+        <p>Each incoming webhook request must contain a valid signature in the signature header defined here.</p>
+        <p>A key will be automatically generated when the webhook is created, and the key is used to derive a signature unique to the payload body.</p>
+        <p>A <a href="https://squircy.com/resources/webhooks.html" target="_blank">reference Webhook sender implementation</a> is available on the squIRCy website.</p>
+    </div>
+</div>`)
+	// line 41, offset 46 in webhook/edit.html.twig
+	fmt.Fprint(output, `
 	</div>
 </div>
 </form>
 `)
 }
 func blockWebhookEditHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 46, offset 38 in webhook/edit.html.twig
+	// line 47, offset 34 in webhook/edit.html.twig
 	fmt.Fprint(output, `
-    `)
+<script type="text/javascript">
+	$(function() {
+		const $keyInput = $(document.getElementById('webhook_key'));
+		const $keyContainer = $(document.getElementById('webhook_key_container'));
+		const $copyKey = $(document.getElementById('webhook_key_copy'));
+		const originalCopyKeyContents = $copyKey.html();
+
+		$keyContainer.on('click', function(e) {
+			e.preventDefault();
+			$keyInput.select();
+			document.execCommand('copy');
+			$copyKey.html('Copied');
+			$keyContainer.once('mouseover', function() {
+				$copyKey.html(originalCopyKeyContents)
+			})
+		});
+
+	});
+</script>
+`)
 }
 
 func TemplateWebhookEditHtmlTwig(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
@@ -72,11 +133,11 @@ func TemplateWebhookEditHtmlTwig(env *stick.Env, output io.Writer, ctx map[strin
 <html>
 <head>
   <title>squIRCy</title>
-  <script src="//cdn.jsdelivr.net/jquery/2.1.1/jquery.min.js"></script>
-  <script src="//cdn.jsdelivr.net/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-  <script src="//cdn.jsdelivr.net/momentjs/2.8.1/moment.min.js"></script>
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap/3.2.0/css/bootstrap.min.css">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/fontawesome/4.2.0/css/font-awesome.min.css">
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/cyborg/bootstrap.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 
@@ -93,10 +154,10 @@ func TemplateWebhookEditHtmlTwig(env *stick.Env, output io.Writer, ctx map[strin
 		</div>
 	</div>
 
-	<nav id="main-nav" class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<nav id="main-nav" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 	  	<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand" href="https://github.com/veonik/squircy2">squIRCy2</a>
+				<a class="navbar-brand" href="https://squircy.com" target="_blank">squIRCy</a>
         	</div>
 			<ul class="nav navbar-nav">
 				<li><a href="/">Dashboard</a></li>
@@ -195,6 +256,10 @@ $(function() {
 </html>
 `)
 	// line 1, offset 32 in webhook/edit.html.twig
+	fmt.Fprint(output, `
+
+`)
+	// line 45, offset 14 in webhook/edit.html.twig
 	fmt.Fprint(output, `
 
 `)
