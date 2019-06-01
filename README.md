@@ -25,7 +25,7 @@ After squIRCy2 is installed, you can run it immediately with `squircy2`. On firs
 squircy2
 ```
 
-> For information on modifying and customizing squIRcy2, see [Contributing](customizing.md).
+> For information on modifying and customizing squIRcy2, see [Contributing](docs/customizing.md).
 
 
 Usage
@@ -92,13 +92,3 @@ Check the [Example Scripts section](docs/examples.md) for ideas for squIRCy2 scr
 ### Webhooks
 
 See the [dedicated section on Webhooks](docs/webhooks.md).
-
-
-Additional Info
----------------
-
-squIRCy2 leverages [go-irc-event](https://github.com/thoj/go-ircevent) for IRC interaction. 
-It makes use of [martini](https://github.com/go-martini/martini) for serving web requests and 
-dependency injection. [Tiedot](https://github.com/HouzuoGuo/tiedot) is used as the storage engine. 
-squIRCy2 embeds the [otto JavaScript VM](https://github.com/robertkrimen/otto) for scripting and it uses
-[the stick templating engine](https://github.com/tyler-sommer/stick) for rendering HTML templates.
