@@ -4,10 +4,9 @@
 package script
 
 import (
-	"fmt"
-	"io"
-
 	"github.com/tyler-sommer/stick"
+	"io"
+	"fmt"
 )
 
 func blockScriptEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
@@ -18,7 +17,7 @@ func blockScriptEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 		<h4>Modify Script</h4>
 	</div>
 	<div class="col-sm-6">
-		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/resources/js-api.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
+		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/js-api.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
 	</div>
 </div>
 <form method="post" class="form form-horizontal" action="/script/`)
@@ -49,7 +48,7 @@ func blockScriptEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 			<option`)
 	// line 19, offset 13 in script/edit.html.twig
 	{
-		val, _ := stick.GetAttr(ctx["script"], "Type")
+		val, _  := stick.GetAttr(ctx["script"], "Type")
 		if stick.CoerceBool(stick.Equal(val, "Javascript")) {
 			// line 19, offset 46 in script/edit.html.twig
 			fmt.Fprint(output, ` selected`)
@@ -70,9 +69,10 @@ func blockScriptEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 	// line 29, offset 59 in script/edit.html.twig
 	{
 		val, _ := stick.GetAttr(ctx["script"], "Body")
+
 		var fnval stick.Value = ""
-		if fn, ok := env.Functions["escape"]; ok {
-			fnval = fn(nil, val)
+		if fn, ok := env.Filters["escape"]; ok {
+			fnval = fn(nil, val, )
 		}
 		fmt.Fprint(output, fnval)
 	}

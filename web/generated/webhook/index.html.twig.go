@@ -5,9 +5,8 @@ package webhook
 
 import (
 	"fmt"
-	"io"
-
 	"github.com/tyler-sommer/stick"
+	"io"
 )
 
 func blockWebhookIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
@@ -18,16 +17,16 @@ func blockWebhookIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[
 		<h4>Webhook Management</h4>
 	</div>
 	<div class="col-sm-6">
-		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/resources/webhooks.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
+		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/webhooks.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
 	</div>
 </div>
 `)
 	// line 12, offset 3 in webhook/index.html.twig
 	{
-
+		
 		var fnval stick.Value = ""
 		if fn, ok := env.Filters["length"]; ok {
-			fnval = fn(nil, ctx["webhooks"])
+			fnval = fn(nil, ctx["webhooks"], )
 		}
 		if stick.CoerceBool(stick.CoerceNumber(fnval) > stick.CoerceNumber(0)) {
 			// line 12, offset 30 in webhook/index.html.twig
@@ -178,7 +177,7 @@ func blockWebhookIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[
 			Anything capable of sending an HTTP request when something interesting happens can be made to support this type of integration.
 		</p>
 		<p>
-			Check out the <a href="https://squircy.com/resources/webhooks.html" target="_blank">Webhooks documentation page</a> on the squIRCy2 website for a full overview.
+			Check out the <a href="https://squircy.com/webhooks.html" target="_blank">Webhooks documentation page</a> on the squIRCy2 website for a full overview.
 		</p>
 	</div>
 	<div class="panel-footer">

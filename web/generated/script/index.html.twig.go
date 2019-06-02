@@ -4,48 +4,11 @@
 package script
 
 import (
-	"fmt"
-	"io"
-
 	"github.com/tyler-sommer/stick"
+	"io"
+	"fmt"
 )
 
-func blockScriptIndexHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 56, offset 34 in script/index.html.twig
-	fmt.Fprint(output, `
-<script type="text/javascript">
-$(function() {
-	$('.remove').on('click', function(e) {
-		e.preventDefault();
-		
-		if (confirm('Are you sure you want to delete this script?')) {
-			var url = $(this).attr('href');
-			$.ajax({
-				url: url,
-				type: 'post',
-				success: function() {
-					window.location.reload();
-				}
-			});
-		}
-	});
-
-	$('.toggle').on('click', function(e) {
-		e.preventDefault();
-
-		var url = $(this).attr('href');
-		$.ajax({
-			url: url,
-			type: 'post',
-			success: function() {
-				window.location.reload();
-			}
-		});
-	});
-});
-</script>
-`)
-}
 func blockScriptIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 3, offset 19 in script/index.html.twig
 	fmt.Fprint(output, `
@@ -54,16 +17,16 @@ func blockScriptIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[s
 		<h4>Script Management</h4>
 	</div>
 	<div class="col-sm-6">
-		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/resources/js-api.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
+		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/js-api.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
 	</div>
 </div>
 `)
 	// line 12, offset 3 in script/index.html.twig
 	{
-
+		
 		var fnval stick.Value = ""
 		if fn, ok := env.Filters["length"]; ok {
-			fnval = fn(nil, ctx["scripts"])
+			fnval = fn(nil, ctx["scripts"], )
 		}
 		if stick.CoerceBool(stick.Equal(fnval, 0)) {
 			// line 12, offset 30 in script/index.html.twig
@@ -73,9 +36,9 @@ func blockScriptIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[s
 	<div class="panel-body">
 		<p class="lead">Scripts are the building blocks used to personalize and enhance your bot.</p>
 		<p>Written in JavaScript, scripts use the bot's special API to make interesting things happen.</p>
-		<p>Refer to the <a href="https://squircy.com/resources/js-api.html">JavaScript API Reference</a> on the squIRCy2 website for the comprehensive list of available APIs.</p>
+		<p>Refer to the <a href="https://squircy.com/js-api.html">JavaScript API Reference</a> on the squIRCy2 website for the comprehensive list of available APIs.</p>
 		<p>
-			Looking for ideas? Check out the <a href="https://squircy.com/resources/examples.html" target="_blank">Example Scripts section</a> on the squIRCy2 website!
+			Looking for ideas? Check out the <a href="https://squircy.com/examples.html" target="_blank">Example Scripts section</a> on the squIRCy2 website!
 		</p>
 	</div>
 	<div class="panel-footer">
@@ -191,6 +154,42 @@ func blockScriptIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[s
 	}
 	// line 53, offset 11 in script/index.html.twig
 	fmt.Fprint(output, `
+`)
+}
+func blockScriptIndexHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
+	// line 56, offset 34 in script/index.html.twig
+	fmt.Fprint(output, `
+<script type="text/javascript">
+$(function() {
+	$('.remove').on('click', function(e) {
+		e.preventDefault();
+		
+		if (confirm('Are you sure you want to delete this script?')) {
+			var url = $(this).attr('href');
+			$.ajax({
+				url: url,
+				type: 'post',
+				success: function() {
+					window.location.reload();
+				}
+			});
+		}
+	});
+
+	$('.toggle').on('click', function(e) {
+		e.preventDefault();
+
+		var url = $(this).attr('href');
+		$.ajax({
+			url: url,
+			type: 'post',
+			success: function() {
+				window.location.reload();
+			}
+		});
+	});
+});
+</script>
 `)
 }
 

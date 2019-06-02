@@ -4,10 +4,9 @@
 package manage
 
 import (
-	"fmt"
-	"io"
-
 	"github.com/tyler-sommer/stick"
+	"io"
+	"fmt"
 )
 
 func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
@@ -249,7 +248,7 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 		}
 	}
 	// line 98, offset 132 in manage/edit.html.twig
-	fmt.Fprint(output, `> Enable Filesystem API in Scripts <a style="font-size: 1.1em" href="https://squircy.com/resources/js-api.html#file-api" target="_blank"><i class="fa fa-question-circle"></i></a>
+	fmt.Fprint(output, `> Enable Filesystem API in Scripts <a style="font-size: 1.1em" href="https://squircy.com/js-api.html#file-api" target="_blank"><i class="fa fa-question-circle"></i></a>
 					</label>
 				</div>
 			</div>
@@ -287,7 +286,7 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 
 		var fnval stick.Value = ""
 		if fn, ok := env.Filters["join"]; ok {
-			fnval = fn(nil, val, ",")
+			fnval = fn(nil, val, ",", )
 		}
 		fmt.Fprint(output, fnval)
 	}

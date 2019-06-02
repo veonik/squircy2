@@ -4,9 +4,8 @@
 package generated
 
 import (
-	"fmt"
 	"io"
-
+	"fmt"
 	"github.com/tyler-sommer/stick"
 )
 

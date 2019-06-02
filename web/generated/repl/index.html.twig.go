@@ -5,9 +5,8 @@ package repl
 
 import (
 	"fmt"
-	"io"
-
 	"github.com/tyler-sommer/stick"
+	"io"
 )
 
 func blockReplIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {

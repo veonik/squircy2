@@ -4,10 +4,9 @@
 package webhook
 
 import (
-	"fmt"
-	"io"
-
 	"github.com/tyler-sommer/stick"
+	"io"
+	"fmt"
 )
 
 func blockWebhookNewHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
@@ -18,7 +17,7 @@ func blockWebhookNewHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 		<h4>New Webhook</h4>
 	</div>
 	<div class="col-sm-6">
-		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/resources/webhooks.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
+		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/webhooks.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
 	</div>
 </div>
 <form method="post" action="/webhook/create">
@@ -48,7 +47,7 @@ func blockWebhookNewHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
     <div class="panel-body">
         <p>Each incoming webhook request must contain a valid signature in the signature header defined here.</p>
         <p>A key will be automatically generated when the webhook is created, and the key is used to derive a signature unique to the payload body.</p>
-        <p>A <a href="https://squircy.com/resources/webhooks.html" target="_blank">reference Webhook sender implementation</a> is available on the squIRCy website.</p>
+        <p>A <a href="https://squircy.com/webhooks.html" target="_blank">reference Webhook sender implementation</a> is available on the squIRCy website.</p>
     </div>
 </div>`)
 	// line 32, offset 46 in webhook/new.html.twig

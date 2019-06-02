@@ -4,9 +4,8 @@
 package script
 
 import (
-	"fmt"
 	"io"
-
+	"fmt"
 	"github.com/tyler-sommer/stick"
 )
 
@@ -18,7 +17,7 @@ func blockScriptNewHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[str
 		<h4>New Script</h4>
 	</div>
 	<div class="col-sm-6">
-		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/resources/js-api.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
+		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/js-api.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
 	</div>
 </div>
 <form method="post" class="form form-horizontal" action="/script/create">
