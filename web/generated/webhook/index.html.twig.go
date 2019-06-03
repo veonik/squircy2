@@ -5,8 +5,9 @@ package webhook
 
 import (
 	"fmt"
-	"github.com/tyler-sommer/stick"
 	"io"
+
+	"github.com/tyler-sommer/stick"
 )
 
 func blockWebhookIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
@@ -23,10 +24,10 @@ func blockWebhookIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[
 `)
 	// line 12, offset 3 in webhook/index.html.twig
 	{
-		
+
 		var fnval stick.Value = ""
 		if fn, ok := env.Filters["length"]; ok {
-			fnval = fn(nil, ctx["webhooks"], )
+			fnval = fn(nil, ctx["webhooks"])
 		}
 		if stick.CoerceBool(stick.CoerceNumber(fnval) > stick.CoerceNumber(0)) {
 			// line 12, offset 30 in webhook/index.html.twig

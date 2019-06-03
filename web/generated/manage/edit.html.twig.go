@@ -4,9 +4,10 @@
 package manage
 
 import (
-	"github.com/tyler-sommer/stick"
-	"io"
 	"fmt"
+	"io"
+
+	"github.com/tyler-sommer/stick"
 )
 
 func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
@@ -286,7 +287,7 @@ func blockManageEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[st
 
 		var fnval stick.Value = ""
 		if fn, ok := env.Filters["join"]; ok {
-			fnval = fn(nil, val, ",", )
+			fnval = fn(nil, val, ",")
 		}
 		fmt.Fprint(output, fnval)
 	}

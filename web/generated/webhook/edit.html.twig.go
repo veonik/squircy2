@@ -4,11 +4,36 @@
 package webhook
 
 import (
-	"github.com/tyler-sommer/stick"
-	"io"
 	"fmt"
+	"io"
+
+	"github.com/tyler-sommer/stick"
 )
 
+func blockWebhookEditHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
+	// line 47, offset 34 in webhook/edit.html.twig
+	fmt.Fprint(output, `
+<script type="text/javascript">
+	$(function() {
+		const $keyInput = $(document.getElementById('webhook_key'));
+		const $keyContainer = $(document.getElementById('webhook_key_container'));
+		const $copyKey = $(document.getElementById('webhook_key_copy'));
+		const originalCopyKeyContents = $copyKey.html();
+
+		$keyContainer.on('click', function(e) {
+			e.preventDefault();
+			$keyInput.select();
+			document.execCommand('copy');
+			$copyKey.html('Copied');
+			$keyContainer.once('mouseover', function() {
+				$copyKey.html(originalCopyKeyContents)
+			})
+		});
+
+	});
+</script>
+`)
+}
 func blockWebhookEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 3, offset 19 in webhook/edit.html.twig
 	fmt.Fprint(output, `
@@ -100,30 +125,6 @@ func blockWebhookEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[s
 	</div>
 </div>
 </form>
-`)
-}
-func blockWebhookEditHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 47, offset 34 in webhook/edit.html.twig
-	fmt.Fprint(output, `
-<script type="text/javascript">
-	$(function() {
-		const $keyInput = $(document.getElementById('webhook_key'));
-		const $keyContainer = $(document.getElementById('webhook_key_container'));
-		const $copyKey = $(document.getElementById('webhook_key_copy'));
-		const originalCopyKeyContents = $copyKey.html();
-
-		$keyContainer.on('click', function(e) {
-			e.preventDefault();
-			$keyInput.select();
-			document.execCommand('copy');
-			$copyKey.html('Copied');
-			$keyContainer.once('mouseover', function() {
-				$copyKey.html(originalCopyKeyContents)
-			})
-		});
-
-	});
-</script>
 `)
 }
 

@@ -5,42 +5,11 @@ package repl
 
 import (
 	"fmt"
-	"github.com/tyler-sommer/stick"
 	"io"
+
+	"github.com/tyler-sommer/stick"
 )
 
-func blockReplIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 3, offset 19 in repl/index.html.twig
-	fmt.Fprint(output, `
-<div class="row">
-	<div class="col-sm-6">
-		<h4>JavaScript REPL</h4>
-	</div>
-	<div class="col-sm-6">
-		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/js-api.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
-	</div>
-</div>
-<form method="post" action="/repl/execute">
-<div class="row">
-	<div class="col-md-8" style="height: 600px">
-  		<div id="editor" style="width: 100%; height: 100%"></div>
-        <div style="display: none">
-            <textarea id="code-body"></textarea>
-        </div>
-		<br>
-		<a class="form-control btn btn-primary" id="execute" href="/repl/execute">Execute</a>
-	</div>
-	<div class="col-md-4">
-		<h5>Output</h5>
-		<pre id="output" class="history" style="height: 200px">
-		</pre>
-		<h5>Events</h5>
-		<pre id="event-log" class="history"></pre>
-	</div>
-</div>
-</form>
-`)
-}
 func blockReplIndexHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 33, offset 34 in repl/index.html.twig
 	fmt.Fprint(output, `
@@ -107,6 +76,38 @@ func blockReplIndexHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Write
 		});
 	});
 </script>
+`)
+}
+func blockReplIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
+	// line 3, offset 19 in repl/index.html.twig
+	fmt.Fprint(output, `
+<div class="row">
+	<div class="col-sm-6">
+		<h4>JavaScript REPL</h4>
+	</div>
+	<div class="col-sm-6">
+		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/js-api.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
+	</div>
+</div>
+<form method="post" action="/repl/execute">
+<div class="row">
+	<div class="col-md-8" style="height: 600px">
+  		<div id="editor" style="width: 100%; height: 100%"></div>
+        <div style="display: none">
+            <textarea id="code-body"></textarea>
+        </div>
+		<br>
+		<a class="form-control btn btn-primary" id="execute" href="/repl/execute">Execute</a>
+	</div>
+	<div class="col-md-4">
+		<h5>Output</h5>
+		<pre id="output" class="history" style="height: 200px">
+		</pre>
+		<h5>Events</h5>
+		<pre id="event-log" class="history"></pre>
+	</div>
+</div>
+</form>
 `)
 }
 

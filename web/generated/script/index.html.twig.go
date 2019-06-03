@@ -4,9 +4,10 @@
 package script
 
 import (
-	"github.com/tyler-sommer/stick"
-	"io"
 	"fmt"
+	"io"
+
+	"github.com/tyler-sommer/stick"
 )
 
 func blockScriptIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
@@ -23,10 +24,10 @@ func blockScriptIndexHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[s
 `)
 	// line 12, offset 3 in script/index.html.twig
 	{
-		
+
 		var fnval stick.Value = ""
 		if fn, ok := env.Filters["length"]; ok {
-			fnval = fn(nil, ctx["scripts"], )
+			fnval = fn(nil, ctx["scripts"])
 		}
 		if stick.CoerceBool(stick.Equal(fnval, 0)) {
 			// line 12, offset 30 in script/index.html.twig

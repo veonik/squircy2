@@ -4,90 +4,12 @@
 package script
 
 import (
-	"github.com/tyler-sommer/stick"
-	"io"
 	"fmt"
+	"io"
+
+	"github.com/tyler-sommer/stick"
 )
 
-func blockScriptEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
-	// line 3, offset 19 in script/edit.html.twig
-	fmt.Fprint(output, `
-<div class="row">
-	<div class="col-sm-6">
-		<h4>Modify Script</h4>
-	</div>
-	<div class="col-sm-6">
-		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/js-api.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
-	</div>
-</div>
-<form method="post" class="form form-horizontal" action="/script/`)
-	// line 12, offset 65 in script/edit.html.twig
-	{
-		val, err := stick.GetAttr(ctx["script"], "ID")
-		if err == nil {
-			fmt.Fprint(output, val)
-		}
-	}
-	// line 12, offset 80 in script/edit.html.twig
-	fmt.Fprint(output, `/update">
-<div class="row">
-	<div class="col-md-4">
-  		<input class="form-control" name="title" placeholder="Title" value="`)
-	// line 15, offset 72 in script/edit.html.twig
-	{
-		val, err := stick.GetAttr(ctx["script"], "Title")
-		if err == nil {
-			fmt.Fprint(output, val)
-		}
-	}
-	// line 15, offset 90 in script/edit.html.twig
-	fmt.Fprint(output, `">
-	</div>
-	<div class="col-md-4">
-  		<select style="visibility: hidden" class="form-control" id="script_type" name="type">
-			<option`)
-	// line 19, offset 13 in script/edit.html.twig
-	{
-		val, _  := stick.GetAttr(ctx["script"], "Type")
-		if stick.CoerceBool(stick.Equal(val, "Javascript")) {
-			// line 19, offset 46 in script/edit.html.twig
-			fmt.Fprint(output, ` selected`)
-		}
-	}
-	// line 19, offset 66 in script/edit.html.twig
-	fmt.Fprint(output, `>Javascript</option>
-		</select>
-	</div>
-	<div class="col-md-4">
-		<button class="form-control btn btn-primary">Save Changes</button>
-	</div>
-</div>
-<div class="row">
-	<div class="col-md-12" style="height: 700px">
-  		<div id="editor" style="width: 100%; height: 100%"></div>
-		<input type="hidden" name="body" id="script_body" value="`)
-	// line 29, offset 59 in script/edit.html.twig
-	{
-		val, _ := stick.GetAttr(ctx["script"], "Body")
-
-		var fnval stick.Value = ""
-		if fn, ok := env.Filters["escape"]; ok {
-			fnval = fn(nil, val, )
-		}
-		fmt.Fprint(output, fnval)
-	}
-	// line 29, offset 84 in script/edit.html.twig
-	fmt.Fprint(output, `">
-	</div>
-</div>
-<div class="row">
-	<div class="col-md-offset-8 col-md-4">
-		<button class="form-control btn btn-primary">Save Changes</button>
-	</div>
-</div>
-</form>
-`)
-}
 func blockScriptEditHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
 	// line 40, offset 34 in script/edit.html.twig
 	fmt.Fprint(output, `
@@ -130,6 +52,85 @@ func blockScriptEditHtmlTwigAdditionalJavascripts(env *stick.Env, output io.Writ
 `)
 	// line 41, offset 45 in script/edit.html.twig
 	fmt.Fprint(output, `
+`)
+}
+func blockScriptEditHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
+	// line 3, offset 19 in script/edit.html.twig
+	fmt.Fprint(output, `
+<div class="row">
+	<div class="col-sm-6">
+		<h4>Modify Script</h4>
+	</div>
+	<div class="col-sm-6">
+		<a class="btn btn-default btn-sm pull-right" href="https://squircy.com/js-api.html" target="_blank">Documentation <i class="fa fa-external-link"></i></a>
+	</div>
+</div>
+<form method="post" class="form form-horizontal" action="/script/`)
+	// line 12, offset 65 in script/edit.html.twig
+	{
+		val, err := stick.GetAttr(ctx["script"], "ID")
+		if err == nil {
+			fmt.Fprint(output, val)
+		}
+	}
+	// line 12, offset 80 in script/edit.html.twig
+	fmt.Fprint(output, `/update">
+<div class="row">
+	<div class="col-md-4">
+  		<input class="form-control" name="title" placeholder="Title" value="`)
+	// line 15, offset 72 in script/edit.html.twig
+	{
+		val, err := stick.GetAttr(ctx["script"], "Title")
+		if err == nil {
+			fmt.Fprint(output, val)
+		}
+	}
+	// line 15, offset 90 in script/edit.html.twig
+	fmt.Fprint(output, `">
+	</div>
+	<div class="col-md-4">
+  		<select style="visibility: hidden" class="form-control" id="script_type" name="type">
+			<option`)
+	// line 19, offset 13 in script/edit.html.twig
+	{
+		val, _ := stick.GetAttr(ctx["script"], "Type")
+		if stick.CoerceBool(stick.Equal(val, "Javascript")) {
+			// line 19, offset 46 in script/edit.html.twig
+			fmt.Fprint(output, ` selected`)
+		}
+	}
+	// line 19, offset 66 in script/edit.html.twig
+	fmt.Fprint(output, `>Javascript</option>
+		</select>
+	</div>
+	<div class="col-md-4">
+		<button class="form-control btn btn-primary">Save Changes</button>
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-12" style="height: 700px">
+  		<div id="editor" style="width: 100%; height: 100%"></div>
+		<input type="hidden" name="body" id="script_body" value="`)
+	// line 29, offset 59 in script/edit.html.twig
+	{
+		val, _ := stick.GetAttr(ctx["script"], "Body")
+
+		var fnval stick.Value = ""
+		if fn, ok := env.Functions["escape"]; ok {
+			fnval = fn(nil, val)
+		}
+		fmt.Fprint(output, fnval)
+	}
+	// line 29, offset 84 in script/edit.html.twig
+	fmt.Fprint(output, `">
+	</div>
+</div>
+<div class="row">
+	<div class="col-md-offset-8 col-md-4">
+		<button class="form-control btn btn-primary">Save Changes</button>
+	</div>
+</div>
+</form>
 `)
 }
 

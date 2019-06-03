@@ -4,9 +4,10 @@
 package webhook
 
 import (
-	"github.com/tyler-sommer/stick"
-	"io"
 	"fmt"
+	"io"
+
+	"github.com/tyler-sommer/stick"
 )
 
 func blockWebhookNewHtmlTwigContent(env *stick.Env, output io.Writer, ctx map[string]stick.Value) {
